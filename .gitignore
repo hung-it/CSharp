@@ -1,0 +1,33 @@
+# Build outputs
+**/bin/
+**/obj/
+
+# User/IDE files
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Test/coverage artifacts
+**/TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+# Logs
+*.log
+
+# Runtime database files
+**/Data/*.db
+**/Data/*.db-*
+
+# Temporary local scripts for API smoke/audit
+smoke-api.ps1
+api-json-audit.ps1
+api-state-check.ps1
+
+# OS files
+.DS_Store
+Thumbs.db
