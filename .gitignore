@@ -5,6 +5,11 @@
 # User/IDE files
 .vs/
 .vscode/
+node_modules/
+**/node_modules/
+.env
+.env.*
+!.env.example
 *.user
 *.suo
 *.userosscache
@@ -23,11 +28,8 @@
 **/Data/*.db
 **/Data/*.db-*
 
-# Temporary local scripts for API smoke/audit
-smoke-api.ps1
-api-json-audit.ps1
-api-state-check.ps1
-
 # OS files
 .DS_Store
 Thumbs.db
+
+.fake

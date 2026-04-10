@@ -1,7 +1,9 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-Push-Location 'D:\C#'
+$repoRoot = Resolve-Path (Join-Path $PSScriptRoot '..')
+
+Push-Location $repoRoot
 try {
     dotnet build VinhKhanhAudioGuide.Backend
     dotnet test VinhKhanhAudioGuide.Backend.Tests --logger "console;verbosity=minimal"

@@ -18,7 +18,7 @@ public static class BackendServiceCollectionExtensions
             services.Configure(configure);
         }
 
-        services.AddDbContext<AudioGuideDbContext>((serviceProvider, options) =>
+        void ConfigureDbContext(IServiceProvider serviceProvider, DbContextOptionsBuilder options)
         {
             var backendOptions = serviceProvider.GetRequiredService<IOptions<BackendOptions>>().Value;
             if (string.IsNullOrWhiteSpace(backendOptions.DatabasePath))
@@ -27,7 +27,12 @@ public static class BackendServiceCollectionExtensions
             }
 
             options.UseSqlite($"Data Source={backendOptions.DatabasePath}");
-        });
+        }
+
+        // Keep scoped DbContext for existing server-side services.
+        services.AddDbContext<AudioGuideDbContext>(ConfigureDbContext);
+        // Also expose factory for MAUI/mobile flows where per-operation context is safer.
+        services.AddDbContextFactory<AudioGuideDbContext>(ConfigureDbContext, ServiceLifetime.Scoped);
 
         services.AddScoped<IDataSeeder, DataSeeder>();
         services.AddScoped<IDatabaseInitializer, DatabaseInitializer>();

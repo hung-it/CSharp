@@ -1,7 +1,7 @@
 # VinhKhanhAudioGuide API Contract (v1)
 
 Base URL (local dev):
-- http://localhost:5099 (hoac port do dotnet run cap)
+- http://localhost:5140 (theo launchSettings hien tai)
 
 OpenAPI:
 - GET /openapi/v1.json
@@ -16,7 +16,7 @@ OpenAPI:
   "service": "VinhKhanhAudioGuide.Api",
   "utc": "2026-04-02T10:00:00Z"
 }
-```
+```::
 
 ## 2. Users
 
@@ -42,6 +42,30 @@ OpenAPI:
 ### Get user by id
 - GET /api/v1/users/{userId}
 
+### Search/List users (admin)
+- GET /api/v1/users?search=USER_WEB&limit=20
+
+### Seed demo users (admin)
+- POST /api/v1/users/demo-seed
+- Response 200:
+```json
+{
+  "createdCount": 4,
+  "users": [
+    {
+      "id": "guid",
+      "externalRef": "DEMO_ADMIN_01",
+      "preferredLanguage": "vi",
+      "createdAtUtc": "2026-04-02T10:00:00Z"
+    }
+  ]
+}
+```
+
+## 2.1 Feature Segments
+
+- GET /api/v1/feature-segments
+
 ## 3. Subscription
 
 ### Activate subscription
@@ -63,6 +87,31 @@ OpenAPI:
 - GET /api/v1/subscriptions/users/{userId}/access/{segmentCode}
 - Example segmentCode: basic.poi, premium.segment.analytics
 
+### List subscriptions (admin)
+- GET /api/v1/subscriptions?isActive=true&limit=50
+
+### Create subscription (admin CRUD)
+- POST /api/v1/subscriptions
+- Request:
+```json
+{
+  "userId": "guid",
+  "planTier": "10",
+  "amountUsd": 10,
+  "isActive": true,
+  "expiresAtUtc": null
+}
+```
+
+### Get subscription by id
+- GET /api/v1/subscriptions/{subscriptionId}
+
+### Update subscription (admin CRUD)
+- PATCH /api/v1/subscriptions/{subscriptionId}
+
+### Delete subscription (admin CRUD)
+- DELETE /api/v1/subscriptions/{subscriptionId}
+
 ## 4. POI & Audio
 
 ### Get POIs
@@ -83,16 +132,37 @@ OpenAPI:
   "longitude": 106.6,
   "triggerRadiusMeters": 30,
   "description": "Mo ta",
-  "district": "Khanh Hoi"
+  "district": "Khanh Hoi",
+  "priority": 3,
+  "imageUrl": "https://...",
+  "mapLink": "https://maps.google.com/?q=10.7,106.6"
 }
 ```
 
 ### Update POI
 - PATCH /api/v1/pois/{poiId}
+- Co the cap nhat: code, name, description, latitude, longitude, triggerRadiusMeters, district, priority, imageUrl, mapLink.
 
 ### Audio
 - GET /api/v1/pois/{poiId}/audios
 - POST /api/v1/pois/{poiId}/audios
+- PATCH /api/v1/pois/{poiId}/audios/{audioId}
+- DELETE /api/v1/pois/{poiId}/audios/{audioId}
+
+### Upload audio file
+- POST /api/v1/uploads/audio
+- Content-Type: multipart/form-data
+- Form field: `file`
+- Response 200:
+```json
+{
+  "fileName": "20260410123000-abc123.mp3",
+  "filePath": "http://localhost:5140/media/audio/20260410123000-abc123.mp3",
+  "relativePath": "/media/audio/20260410123000-abc123.mp3",
+  "size": 123456,
+  "contentType": "audio/mpeg"
+}
+```
 
 ## 5. Tours
 
@@ -129,6 +199,9 @@ OpenAPI:
 ### Get user sessions
 - GET /api/v1/sessions/users/{userId}?startDate=...&endDate=...
 
+### Query sessions (admin)
+- GET /api/v1/sessions?userId={guid}&poiId={guid}&startDate=...&endDate=...&limit=200
+
 ## 7. QR Playback
 
 ### Start by QR payload
@@ -146,6 +219,7 @@ OpenAPI:
 
 - GET /api/v1/analytics/top?limit=5
 - GET /api/v1/analytics/pois
+- GET /api/v1/analytics/usage?days=7
 - GET /api/v1/analytics/heatmap?startDate=2026-04-01T00:00:00Z&endDate=2026-04-02T00:00:00Z&precision=3
 
 ## 9. Geofence
@@ -177,6 +251,8 @@ OpenAPI:
 
 - PUT /api/v1/translations
 - GET /api/v1/translations/{contentKey}?languageCode=en&fallbackLanguageCode=vi
+- GET /api/v1/translations/{contentKey}/all
+- DELETE /api/v1/translations/{contentKey}/{languageCode}
 
 ## 13. Anonymous Route Tracking
 

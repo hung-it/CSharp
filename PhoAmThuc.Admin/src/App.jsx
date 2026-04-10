@@ -1,17 +1,27 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Layout from './components/Layout';
-import PoiList from './pages/PoiList';
+import Layout from './components/Layout.jsx';
+import PoiList from './pages/PoiList.jsx';
+import DashboardPage from './pages/DashboardPage.jsx';
+import AudioManager from './pages/AudioManager.jsx';
+import TranslationManager from './pages/TranslationManager.jsx';
+import TourManager from './pages/TourManager.jsx';
+import UsageHistoryPage from './pages/UsageHistoryPage.jsx';
+import SubscriptionManager from './pages/SubscriptionManager.jsx';
+import QrManager from './pages/QrManager.jsx';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path='/' element={<Layout />}>
-          <Route index element={<div className='p-4 bg-white rounded shadow text-xl text-gray-500 flex justify-center items-center h-64'>Dashboard - Thống kê Analytics (Coming soon)</div>} />
+          <Route index element={<DashboardPage />} />
           <Route path='pois' element={<PoiList />} />
-          <Route path='audio' element={<div className='p-4 bg-white rounded shadow text-gray-500'>Quản lý Audio/Dịch (Coming soon)</div>} />
-          <Route path='qr' element={<div className='p-4 bg-white rounded shadow text-gray-500'>Tạo QR Code (Coming soon)</div>} />
-          <Route path='settings' element={<div className='p-4 bg-white rounded shadow text-gray-500'>Cài đặt (Coming soon)</div>} />
+          <Route path='audio' element={<AudioManager />} />
+          <Route path='translations' element={<TranslationManager />} />
+          <Route path='tours' element={<TourManager />} />
+          <Route path='usage-history' element={<UsageHistoryPage />} />
+          <Route path='subscriptions' element={<SubscriptionManager />} />
+          <Route path='qr-manager' element={<QrManager />} />
           <Route path='*' element={<Navigate to='/' replace />} />
         </Route>
       </Routes>

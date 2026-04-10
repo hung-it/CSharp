@@ -32,6 +32,9 @@ public sealed class AudioGuideDbContext(DbContextOptions<AudioGuideDbContext> op
         {
             entity.Property(x => x.AmountUsd).HasPrecision(10, 2);
             entity.HasIndex(x => new { x.UserId, x.IsActive });
+            entity.HasIndex(x => x.UserId)
+                .HasFilter("\"IsActive\" = 1")
+                .IsUnique();
         });
 
         modelBuilder.Entity<FeatureSegment>(entity =>
@@ -51,6 +54,8 @@ public sealed class AudioGuideDbContext(DbContextOptions<AudioGuideDbContext> op
             entity.Property(x => x.Code).HasMaxLength(100);
             entity.Property(x => x.Name).HasMaxLength(200);
             entity.Property(x => x.District).HasMaxLength(100);
+            entity.Property(x => x.ImageUrl).HasMaxLength(500);
+            entity.Property(x => x.MapLink).HasMaxLength(500);
             entity.HasIndex(x => x.Code).IsUnique();
         });
 
@@ -58,7 +63,7 @@ public sealed class AudioGuideDbContext(DbContextOptions<AudioGuideDbContext> op
         {
             entity.Property(x => x.LanguageCode).HasMaxLength(10);
             entity.Property(x => x.FilePath).HasMaxLength(400);
-            entity.HasIndex(x => new { x.PoiId, x.LanguageCode });
+            entity.HasIndex(x => new { x.PoiId, x.LanguageCode }).IsUnique();
         });
 
         modelBuilder.Entity<ContentTranslation>(entity =>

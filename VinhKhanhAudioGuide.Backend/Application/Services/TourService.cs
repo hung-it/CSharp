@@ -69,6 +69,23 @@ public sealed class TourService(AudioGuideDbContext dbContext) : ITourService
         return tour;
     }
 
+    public async Task DeleteTourAsync(Guid tourId, CancellationToken cancellationToken = default)
+    {
+        var tour = await _dbContext.Tours.FindAsync(new object[] { tourId }, cancellationToken: cancellationToken);
+        if (tour is null)
+        {
+            return;
+        }
+
+        var stops = await _dbContext.TourStops
+            .Where(x => x.TourId == tourId)
+            .ToListAsync(cancellationToken);
+
+        _dbContext.TourStops.RemoveRange(stops);
+        _dbContext.Tours.Remove(tour);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
     public async Task<IEnumerable<TourStop>> GetTourStopsAsync(Guid tourId, CancellationToken cancellationToken = default)
     {
         return await _dbContext.TourStops
@@ -123,6 +140,41 @@ public sealed class TourService(AudioGuideDbContext dbContext) : ITourService
 
         _dbContext.TourStops.Remove(stop);
         await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<TourStop> UpdateStopAsync(
+        Guid tourStopId,
+        Guid poiId,
+        int sequence,
+        string? nextStopHint = null,
+        CancellationToken cancellationToken = default)
+    {
+        var stop = await _dbContext.TourStops.FindAsync(new object[] { tourStopId }, cancellationToken: cancellationToken);
+        if (stop is null)
+        {
+            throw new KeyNotFoundException($"Tour stop with ID {tourStopId} not found.");
+        }
+
+        var poiExists = await _dbContext.Pois.AnyAsync(x => x.Id == poiId, cancellationToken);
+        if (!poiExists)
+        {
+            throw new KeyNotFoundException($"POI with ID {poiId} not found.");
+        }
+
+        var conflict = await _dbContext.TourStops
+            .AnyAsync(x => x.TourId == stop.TourId && x.Sequence == sequence && x.Id != stop.Id, cancellationToken);
+
+        if (conflict)
+        {
+            throw new InvalidOperationException($"Tour already has a stop at sequence {sequence}.");
+        }
+
+        stop.PoiId = poiId;
+        stop.Sequence = sequence;
+        stop.NextStopHint = nextStopHint;
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        return stop;
     }
 
     public async Task ReorderStopsAsync(Guid tourId, List<Guid> tourStopIdsInOrder, CancellationToken cancellationToken = default)

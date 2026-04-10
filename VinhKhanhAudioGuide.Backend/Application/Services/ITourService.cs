@@ -30,6 +30,11 @@ public interface ITourService
     Task<Tour> UpdateTourAsync(Guid tourId, string? name = null, string? description = null, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Delete tour and all its stops.
+    /// </summary>
+    Task DeleteTourAsync(Guid tourId, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Get tour stops ordered by sequence.
     /// </summary>
     Task<IEnumerable<TourStop>> GetTourStopsAsync(Guid tourId, CancellationToken cancellationToken = default);
@@ -43,6 +48,11 @@ public interface ITourService
     /// Remove a stop from tour.
     /// </summary>
     Task RemoveStopAsync(Guid tourStopId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Update stop metadata.
+    /// </summary>
+    Task<TourStop> UpdateStopAsync(Guid tourStopId, Guid poiId, int sequence, string? nextStopHint = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Reorder stops (shift sequences).

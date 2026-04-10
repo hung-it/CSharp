@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using VinhKhanhAudioGuide.Backend.Domain.Entities;
 using VinhKhanhAudioGuide.Backend.Persistence;
 
 namespace VinhKhanhAudioGuide.Backend.Infrastructure;
@@ -17,23 +16,59 @@ internal sealed class DatabaseInitializer(
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
         await _dbContext.Database.EnsureCreatedAsync(cancellationToken);
+        await ApplySchemaMigrationsAsync(cancellationToken);
 
-        if (await _dbContext.FeatureSegments.AnyAsync(cancellationToken))
+        await _dataSeeder.SeedAsync(cancellationToken);
+        _logger.LogInformation("Ensured seed data is up to date (idempotent).");
+    }
+
+    private async Task ApplySchemaMigrationsAsync(CancellationToken cancellationToken)
+    {
+        if (!_dbContext.Database.IsSqlite())
         {
-            _logger.LogInformation("Database already seeded, skipping initialization.");
             return;
         }
 
-        _dbContext.FeatureSegments.AddRange(
-            new FeatureSegment { Code = "basic.poi", Name = "Basic POI" },
-            new FeatureSegment { Code = "premium.segment.tour", Name = "Premium Tour Segment" },
-            new FeatureSegment { Code = "premium.segment.audio", Name = "Premium Audio Segment" },
-            new FeatureSegment { Code = "premium.segment.analytics", Name = "Premium Analytics Segment" });
+        await EnsurePoiColumnAsync("Priority", "INTEGER NOT NULL DEFAULT 0", cancellationToken);
+        await EnsurePoiColumnAsync("ImageUrl", "TEXT NULL", cancellationToken);
+        await EnsurePoiColumnAsync("MapLink", "TEXT NULL", cancellationToken);
+    }
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
-        _logger.LogInformation("Seeded default feature segments.");
+    private async Task EnsurePoiColumnAsync(string columnName, string columnDefinition, CancellationToken cancellationToken)
+    {
+        if (await PoiColumnExistsAsync(columnName, cancellationToken))
+        {
+            return;
+        }
 
-        await _dataSeeder.SeedAsync(cancellationToken);
-        _logger.LogInformation("Seeded sample data (POI, Tours, Users).");
+        await _dbContext.Database.ExecuteSqlRawAsync(
+            $"ALTER TABLE \"Pois\" ADD COLUMN \"{columnName}\" {columnDefinition};",
+            cancellationToken);
+
+        _logger.LogInformation("Applied schema migration: added Pois.{ColumnName}", columnName);
+    }
+
+    private async Task<bool> PoiColumnExistsAsync(string columnName, CancellationToken cancellationToken)
+    {
+        await using var connection = _dbContext.Database.GetDbConnection();
+        if (connection.State != System.Data.ConnectionState.Open)
+        {
+            await connection.OpenAsync(cancellationToken);
+        }
+
+        await using var command = connection.CreateCommand();
+        command.CommandText = "PRAGMA table_info('Pois');";
+
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            var existing = reader.GetString(1);
+            if (string.Equals(existing, columnName, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

@@ -1,14 +1,17 @@
 import React from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
-import { MapPin, BarChart3, Settings, Music, QrCode } from 'lucide-react';
+import { MapPin, BarChart3, Music, Languages, Route, History, WalletCards, QrCode } from 'lucide-react';
 
 export default function Layout() {
   const menuItems = [
     { name: 'Tổng quan (Dashboard)', icon: <BarChart3 size={20} />, path: '/' },
     { name: 'Quản lý POI', icon: <MapPin size={20} />, path: '/pois' },
-    { name: 'Quản lý Audio/Dịch', icon: <Music size={20} />, path: '/audio' },
-    { name: 'Trình tạo QR Code', icon: <QrCode size={20} />, path: '/qr' },
-    { name: 'Cài đặt', icon: <Settings size={20} />, path: '/settings' },
+    { name: 'Quản lý Audio', icon: <Music size={20} />, path: '/audio' },
+    { name: 'Quản lý Bản Dịch', icon: <Languages size={20} />, path: '/translations' },
+    { name: 'Quản lý Tour', icon: <Route size={20} />, path: '/tours' },
+    { name: 'QR Manager', icon: <QrCode size={20} />, path: '/qr-manager' },
+    { name: 'Lịch sử sử dụng', icon: <History size={20} />, path: '/usage-history' },
+    { name: 'Subscription 1/10 USD', icon: <WalletCards size={20} />, path: '/subscriptions' },
   ];
 
   return (

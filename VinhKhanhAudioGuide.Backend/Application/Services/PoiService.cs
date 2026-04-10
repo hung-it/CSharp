@@ -39,7 +39,18 @@ public sealed class PoiService(AudioGuideDbContext dbContext) : IPoiService
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<Poi> CreatePoiAsync(string code, string name, double latitude, double longitude, double triggerRadiusMeters = 30, string? description = null, string? district = null, CancellationToken cancellationToken = default)
+    public async Task<Poi> CreatePoiAsync(
+        string code,
+        string name,
+        double latitude,
+        double longitude,
+        double triggerRadiusMeters = 30,
+        string? description = null,
+        string? district = null,
+        int priority = 0,
+        string? imageUrl = null,
+        string? mapLink = null,
+        CancellationToken cancellationToken = default)
     {
         var existingPoi = await GetPoiByCodeAsync(code, cancellationToken);
         if (existingPoi is not null)
@@ -55,7 +66,10 @@ public sealed class PoiService(AudioGuideDbContext dbContext) : IPoiService
             Latitude = latitude,
             Longitude = longitude,
             TriggerRadiusMeters = triggerRadiusMeters,
-            District = district
+            District = district,
+            Priority = priority,
+            ImageUrl = imageUrl,
+            MapLink = mapLink
         };
 
         _dbContext.Pois.Add(poi);
@@ -63,7 +77,19 @@ public sealed class PoiService(AudioGuideDbContext dbContext) : IPoiService
         return poi;
     }
 
-    public async Task<Poi> UpdatePoiAsync(Guid poiId, string? name = null, string? description = null, double? triggerRadiusMeters = null, CancellationToken cancellationToken = default)
+    public async Task<Poi> UpdatePoiAsync(
+        Guid poiId,
+        string? code = null,
+        string? name = null,
+        string? description = null,
+        double? latitude = null,
+        double? longitude = null,
+        double? triggerRadiusMeters = null,
+        string? district = null,
+        int? priority = null,
+        string? imageUrl = null,
+        string? mapLink = null,
+        CancellationToken cancellationToken = default)
     {
         var poi = await _dbContext.Pois.FindAsync(new object[] { poiId }, cancellationToken: cancellationToken);
         if (poi is null)
@@ -71,15 +97,71 @@ public sealed class PoiService(AudioGuideDbContext dbContext) : IPoiService
             throw new KeyNotFoundException($"POI with ID {poiId} not found.");
         }
 
+        if (!string.IsNullOrWhiteSpace(code) && !string.Equals(poi.Code, code, StringComparison.OrdinalIgnoreCase))
+        {
+            var codeExists = await _dbContext.Pois.AnyAsync(x => x.Code == code && x.Id != poiId, cancellationToken);
+            if (codeExists)
+            {
+                throw new InvalidOperationException($"POI with code '{code}' already exists.");
+            }
+
+            poi.Code = code;
+        }
+
         if (name is not null)
             poi.Name = name;
         if (description is not null)
             poi.Description = description;
+        if (latitude.HasValue)
+            poi.Latitude = latitude.Value;
+        if (longitude.HasValue)
+            poi.Longitude = longitude.Value;
         if (triggerRadiusMeters.HasValue)
             poi.TriggerRadiusMeters = triggerRadiusMeters.Value;
+        if (district is not null)
+            poi.District = district;
+        if (priority.HasValue)
+            poi.Priority = priority.Value;
+        if (imageUrl is not null)
+            poi.ImageUrl = imageUrl;
+        if (mapLink is not null)
+            poi.MapLink = mapLink;
 
         await _dbContext.SaveChangesAsync(cancellationToken);
         return poi;
+    }
+
+    public async Task DeletePoiAsync(Guid poiId, CancellationToken cancellationToken = default)
+    {
+        var poi = await _dbContext.Pois.FindAsync(new object[] { poiId }, cancellationToken: cancellationToken);
+        if (poi is null)
+        {
+            return;
+        }
+
+        var hasSessions = await _dbContext.ListeningSessions
+            .AnyAsync(x => x.PoiId == poiId, cancellationToken);
+
+        if (hasSessions)
+        {
+            throw new InvalidOperationException("Không thể xóa POI đã phát sinh lịch sử nghe.");
+        }
+
+        var hasTourStops = await _dbContext.TourStops
+            .AnyAsync(x => x.PoiId == poiId, cancellationToken);
+
+        if (hasTourStops)
+        {
+            throw new InvalidOperationException("Không thể xóa POI đang được dùng trong tour.");
+        }
+
+        var audios = await _dbContext.AudioAssets
+            .Where(x => x.PoiId == poiId)
+            .ToListAsync(cancellationToken);
+
+        _dbContext.AudioAssets.RemoveRange(audios);
+        _dbContext.Pois.Remove(poi);
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
     public async Task AssignAudioAsync(Guid poiId, string languageCode, string filePath, int durationSeconds, bool isTextToSpeech = false, CancellationToken cancellationToken = default)
@@ -126,5 +208,60 @@ public sealed class PoiService(AudioGuideDbContext dbContext) : IPoiService
     {
         return await _dbContext.AudioAssets
             .FirstOrDefaultAsync(a => a.PoiId == poiId && a.LanguageCode == languageCode, cancellationToken);
+    }
+
+    public async Task<AudioAsset> UpdateAudioAsync(
+        Guid poiId,
+        Guid audioId,
+        string languageCode,
+        string filePath,
+        int durationSeconds,
+        bool isTextToSpeech = false,
+        CancellationToken cancellationToken = default)
+    {
+        var poiExists = await _dbContext.Pois.AnyAsync(x => x.Id == poiId, cancellationToken);
+        if (!poiExists)
+        {
+            throw new KeyNotFoundException($"POI with ID {poiId} not found.");
+        }
+
+        var audio = await _dbContext.AudioAssets
+            .FirstOrDefaultAsync(x => x.Id == audioId && x.PoiId == poiId, cancellationToken);
+
+        if (audio is null)
+        {
+            throw new KeyNotFoundException($"Audio asset with ID {audioId} not found in POI {poiId}.");
+        }
+
+        var languageConflict = await _dbContext.AudioAssets.AnyAsync(
+            x => x.PoiId == poiId && x.LanguageCode == languageCode && x.Id != audioId,
+            cancellationToken);
+
+        if (languageConflict)
+        {
+            throw new InvalidOperationException($"POI {poiId} already has audio for language '{languageCode}'.");
+        }
+
+        audio.LanguageCode = languageCode;
+        audio.FilePath = filePath;
+        audio.DurationSeconds = durationSeconds;
+        audio.IsTextToSpeech = isTextToSpeech;
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        return audio;
+    }
+
+    public async Task DeleteAudioAsync(Guid poiId, Guid audioId, CancellationToken cancellationToken = default)
+    {
+        var audio = await _dbContext.AudioAssets
+            .FirstOrDefaultAsync(x => x.Id == audioId && x.PoiId == poiId, cancellationToken);
+
+        if (audio is null)
+        {
+            return;
+        }
+
+        _dbContext.AudioAssets.Remove(audio);
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 }

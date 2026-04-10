@@ -120,7 +120,28 @@ public sealed class SubscriptionServiceTests
     }
 
     [Fact]
-    public async Task HasAccessToSegmentAsync_DeniesBasicSegmentsForPremiumTierWithoutEntitlement()
+    public async Task HasAccessToSegmentAsync_AllowsBasicSegmentsForPremiumTier()
+    {
+        var dbContext = CreateDbContext();
+        var userId = Guid.NewGuid();
+        var subscription = new Subscription
+        {
+            UserId = userId,
+            PlanTier = PlanTier.PremiumSegmented,
+            AmountUsd = 10m,
+            IsActive = true
+        };
+        dbContext.Subscriptions.Add(subscription);
+        await dbContext.SaveChangesAsync();
+
+        var service = new SubscriptionService(dbContext);
+        var result = await service.HasAccessToSegmentAsync(userId, "basic.poi");
+
+        Assert.True(result);
+    }
+
+    [Fact]
+    public async Task HasAccessToSegmentAsync_DeniesPremiumSegmentsForPremiumTierWithoutEntitlement()
     {
         var dbContext = CreateDbContext();
         var userId = Guid.NewGuid();

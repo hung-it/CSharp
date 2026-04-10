@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using VinhKhanhAudioGuide.Backend.Domain.Entities;
 using VinhKhanhAudioGuide.Backend.Domain.Enums;
 using VinhKhanhAudioGuide.Backend.Domain.Exceptions;
@@ -48,6 +49,11 @@ public sealed class SubscriptionService(AudioGuideDbContext dbContext) : ISubscr
 
         if (subscription.PlanTier == PlanTier.PremiumSegmented)
         {
+            if (featureSegmentCode.StartsWith("basic.", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
             var entitlement = await _dbContext.UserEntitlements
                 .Include(e => e.FeatureSegment)
                 .Where(e => e.UserId == userId && e.FeatureSegment!.Code == featureSegmentCode && e.RevokedAtUtc == null)
@@ -61,43 +67,74 @@ public sealed class SubscriptionService(AudioGuideDbContext dbContext) : ISubscr
 
     public async Task<Subscription> ActivateSubscriptionAsync(Guid userId, PlanTier tier, decimal amountUsd, CancellationToken cancellationToken = default)
     {
-        var existingSubscription = await _dbContext.Subscriptions
-            .Where(s => s.UserId == userId && s.IsActive)
-            .FirstOrDefaultAsync(cancellationToken);
-
-        if (existingSubscription is not null)
+        IDbContextTransaction? transaction = null;
+        if (_dbContext.Database.IsRelational())
         {
-            existingSubscription.IsActive = false;
+            transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
         }
 
-        var newSubscription = new Subscription
+        try
         {
-            UserId = userId,
-            PlanTier = tier,
-            AmountUsd = amountUsd,
-            IsActive = true,
-            ActivatedAtUtc = DateTime.UtcNow
-        };
+            var existingSubscription = await _dbContext.Subscriptions
+                .Where(s => s.UserId == userId && s.IsActive)
+                .FirstOrDefaultAsync(cancellationToken);
 
-        _dbContext.Subscriptions.Add(newSubscription);
+            if (existingSubscription is not null)
+            {
+                existingSubscription.IsActive = false;
+            }
 
-        if (tier == PlanTier.PremiumSegmented)
-        {
-            var allSegments = await _dbContext.FeatureSegments.ToListAsync(cancellationToken);
-            var premiumSegments = allSegments.Where(s => s.Code.StartsWith("premium.")).ToList();
-
-            var newEntitlements = premiumSegments.Select(segment => new UserEntitlement
+            var newSubscription = new Subscription
             {
                 UserId = userId,
-                FeatureSegmentId = segment.Id,
-                GrantedAtUtc = DateTime.UtcNow
-            });
+                PlanTier = tier,
+                AmountUsd = amountUsd,
+                IsActive = true,
+                ActivatedAtUtc = DateTime.UtcNow
+            };
 
-            _dbContext.UserEntitlements.AddRange(newEntitlements);
+            _dbContext.Subscriptions.Add(newSubscription);
+
+            if (tier == PlanTier.PremiumSegmented)
+            {
+                var allSegments = await _dbContext.FeatureSegments.ToListAsync(cancellationToken);
+                var premiumSegments = allSegments.Where(s => s.Code.StartsWith("premium.")).ToList();
+
+                var newEntitlements = premiumSegments.Select(segment => new UserEntitlement
+                {
+                    UserId = userId,
+                    FeatureSegmentId = segment.Id,
+                    GrantedAtUtc = DateTime.UtcNow
+                });
+
+                _dbContext.UserEntitlements.AddRange(newEntitlements);
+            }
+
+            await _dbContext.SaveChangesAsync(cancellationToken);
+
+            if (transaction is not null)
+            {
+                await transaction.CommitAsync(cancellationToken);
+            }
+
+            return newSubscription;
         }
+        catch (DbUpdateException ex)
+        {
+            if (transaction is not null)
+            {
+                await transaction.RollbackAsync(CancellationToken.None);
+            }
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
-        return newSubscription;
+            throw new SubscriptionException("Subscription activation conflicted with another operation. Please retry.", ex);
+        }
+        finally
+        {
+            if (transaction is not null)
+            {
+                await transaction.DisposeAsync();
+            }
+        }
     }
 
     public async Task GrantSegmentAccessAsync(Guid userId, string featureSegmentCode, CancellationToken cancellationToken = default)

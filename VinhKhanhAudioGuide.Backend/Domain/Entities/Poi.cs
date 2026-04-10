@@ -9,7 +9,10 @@ public sealed class Poi
     public double Latitude { get; set; }
     public double Longitude { get; set; }
     public double TriggerRadiusMeters { get; set; } = 30;
+    public int Priority { get; set; } = 0;
     public string? District { get; set; }
+    public string? ImageUrl { get; set; }
+    public string? MapLink { get; set; }
 
     public ICollection<AudioAsset> AudioAssets { get; set; } = new List<AudioAsset>();
     public ICollection<TourStop> TourStops { get; set; } = new List<TourStop>();

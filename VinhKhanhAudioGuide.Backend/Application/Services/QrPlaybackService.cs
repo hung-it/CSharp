@@ -44,6 +44,8 @@ public sealed class QrPlaybackService(
             throw new KeyNotFoundException($"No audio asset found for POI '{poi.Code}'.");
         }
 
+        EnsureLocalAudioFileIfApplicable(asset.FilePath);
+
         return new QrPlaybackContent(
             poi.Id,
             poi.Code,
@@ -90,5 +92,46 @@ public sealed class QrPlaybackService(
         }
 
         return payload;
+    }
+
+    private static void EnsureLocalAudioFileIfApplicable(string filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath))
+        {
+            throw new FileNotFoundException("Audio path is empty.");
+        }
+
+        if (Uri.TryCreate(filePath, UriKind.Absolute, out var uri))
+        {
+            if (string.Equals(uri.Scheme, Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            if (uri.IsFile)
+            {
+                var localPath = uri.LocalPath;
+                if (!File.Exists(localPath))
+                {
+                    throw new FileNotFoundException($"Audio file '{localPath}' not found.", localPath);
+                }
+
+                return;
+            }
+        }
+
+        if (Path.IsPathRooted(filePath))
+        {
+            if (!File.Exists(filePath))
+            {
+                throw new FileNotFoundException($"Audio file '{filePath}' not found.", filePath);
+            }
+
+            return;
+        }
+
+        // Relative paths can represent app-packaged or deferred-download assets.
+        // Validation is deferred to the mobile playback layer after resolution.
     }
 }

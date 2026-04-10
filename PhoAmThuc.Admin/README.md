@@ -1,16 +1,32 @@
-# React + Vite
+# PhoAmThuc Admin (Frontend)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Muc tieu
+Web admin quan tri noi dung POI cho he thong Audio Guide Vinh Khanh.
 
-Currently, two official plugins are available:
+## Yeu cau
+- Node.js 20+
+- Backend API dang chay o http://localhost:5140
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Cai dat
+1. Cai dependency:
+	npm install
+2. Tao file env tu mau:
+	copy .env.example .env
+3. Chay local:
+	npm run dev
 
-## React Compiler
+## Bien moi truong
+- VITE_API_BASE_URL
+  - Mac dinh: http://localhost:5140/api/v1
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Chuc nang da ket noi backend
+- Trang POI (duong dan /pois) da goi API that:
+  - GET /api/v1/pois
 
-## Expanding the ESLint configuration
+## Build production
+- npm run build
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Ghi chu
+- Neu backend dung cong khac, cap nhat VITE_API_BASE_URL trong file .env.
+- Neu Vite canh bao do duong dan co ky tu dac biet (nhu #), van co the chay binh thuong.
+	Neu gap loi resolve module, nen doi workspace sang duong dan don gian (vi du D:/Projects/).

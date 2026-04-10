@@ -27,12 +27,40 @@ public interface IPoiService
     /// <summary>
     /// Create a new POI.
     /// </summary>
-    Task<Poi> CreatePoiAsync(string code, string name, double latitude, double longitude, double triggerRadiusMeters = 30, string? description = null, string? district = null, CancellationToken cancellationToken = default);
+    Task<Poi> CreatePoiAsync(
+        string code,
+        string name,
+        double latitude,
+        double longitude,
+        double triggerRadiusMeters = 30,
+        string? description = null,
+        string? district = null,
+        int priority = 0,
+        string? imageUrl = null,
+        string? mapLink = null,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Update POI metadata.
     /// </summary>
-    Task<Poi> UpdatePoiAsync(Guid poiId, string? name = null, string? description = null, double? triggerRadiusMeters = null, CancellationToken cancellationToken = default);
+    Task<Poi> UpdatePoiAsync(
+        Guid poiId,
+        string? code = null,
+        string? name = null,
+        string? description = null,
+        double? latitude = null,
+        double? longitude = null,
+        double? triggerRadiusMeters = null,
+        string? district = null,
+        int? priority = null,
+        string? imageUrl = null,
+        string? mapLink = null,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Delete POI if it is not referenced by sessions/tours.
+    /// </summary>
+    Task DeletePoiAsync(Guid poiId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Assign audio asset to POI.
@@ -48,4 +76,21 @@ public interface IPoiService
     /// Get audio in specific language for a POI.
     /// </summary>
     Task<AudioAsset?> GetAudioByLanguageAsync(Guid poiId, string languageCode, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Update an existing audio asset of a POI.
+    /// </summary>
+    Task<AudioAsset> UpdateAudioAsync(
+        Guid poiId,
+        Guid audioId,
+        string languageCode,
+        string filePath,
+        int durationSeconds,
+        bool isTextToSpeech = false,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Delete an audio asset from a POI.
+    /// </summary>
+    Task DeleteAudioAsync(Guid poiId, Guid audioId, CancellationToken cancellationToken = default);
 }

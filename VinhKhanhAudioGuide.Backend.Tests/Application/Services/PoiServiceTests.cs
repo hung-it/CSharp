@@ -118,7 +118,11 @@ public sealed class PoiServiceTests
         var service = new PoiService(dbContext);
 
         var poi = await service.CreatePoiAsync("POI001", "Địa điểm 1", 10.0, 20.0, 30);
-        var updated = await service.UpdatePoiAsync(poi.Id, "Địa điểm mới", "Mô tả mới", 50);
+        var updated = await service.UpdatePoiAsync(
+            poi.Id,
+            name: "Địa điểm mới",
+            description: "Mô tả mới",
+            triggerRadiusMeters: 50);
 
         Assert.Equal("Địa điểm mới", updated.Name);
         Assert.Equal("Mô tả mới", updated.Description);
@@ -132,7 +136,7 @@ public sealed class PoiServiceTests
         var service = new PoiService(dbContext);
 
         await Assert.ThrowsAsync<KeyNotFoundException>(() => 
-            service.UpdatePoiAsync(Guid.NewGuid(), "Mới"));
+            service.UpdatePoiAsync(Guid.NewGuid(), name: "Mới"));
     }
 
     [Fact]

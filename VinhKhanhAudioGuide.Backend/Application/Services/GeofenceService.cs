@@ -9,6 +9,7 @@ public sealed class GeofenceService(IServiceScopeFactory scopeFactory) : IGeofen
     private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
     private readonly Dictionary<Guid, UserGeofenceState> _states = [];
     private readonly object _stateLock = new();
+    private static readonly TimeSpan StateTtl = TimeSpan.FromHours(6);
 
     public async Task<IReadOnlyList<GeofenceEvent>> EvaluateLocationAsync(
         Guid userId,
@@ -17,6 +18,8 @@ public sealed class GeofenceService(IServiceScopeFactory scopeFactory) : IGeofen
         double nearFactor = 1.5,
         CancellationToken cancellationToken = default)
     {
+        TrimExpiredStates();
+
         if (nearFactor < 1)
         {
             throw new ArgumentOutOfRangeException(nameof(nearFactor), "nearFactor must be >= 1.");
@@ -37,6 +40,8 @@ public sealed class GeofenceService(IServiceScopeFactory scopeFactory) : IGeofen
 
         lock (state.SyncRoot)
         {
+            state.LastSeenUtc = DateTime.UtcNow;
+
             foreach (var poi in pois)
             {
                 var distanceMeters = DistanceInMeters(latitude, longitude, poi.Latitude, poi.Longitude);
@@ -111,12 +116,34 @@ public sealed class GeofenceService(IServiceScopeFactory scopeFactory) : IGeofen
         {
             if (_states.TryGetValue(userId, out var state))
             {
+                state.LastSeenUtc = DateTime.UtcNow;
                 return state;
             }
 
-            state = new UserGeofenceState();
+            state = new UserGeofenceState
+            {
+                LastSeenUtc = DateTime.UtcNow
+            };
             _states[userId] = state;
             return state;
+        }
+    }
+
+    private void TrimExpiredStates()
+    {
+        var threshold = DateTime.UtcNow - StateTtl;
+
+        lock (_stateLock)
+        {
+            var expiredUserIds = _states
+                .Where(x => x.Value.LastSeenUtc < threshold)
+                .Select(x => x.Key)
+                .ToList();
+
+            foreach (var userId in expiredUserIds)
+            {
+                _states.Remove(userId);
+            }
         }
     }
 
@@ -141,6 +168,7 @@ public sealed class GeofenceService(IServiceScopeFactory scopeFactory) : IGeofen
 
     private sealed class UserGeofenceState
     {
+        public DateTime LastSeenUtc { get; set; }
         public HashSet<Guid> InsidePoiIds { get; } = [];
         public HashSet<Guid> NearbyPoiIds { get; } = [];
         public object SyncRoot { get; } = new();
