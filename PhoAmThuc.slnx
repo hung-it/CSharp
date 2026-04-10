@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="PhoAmThuc.Core/PhoAmThuc.Core.csproj" />
+  <Project Path="PhoAmThuc.Infrastructure/PhoAmThuc.Infrastructure.csproj" />
+  <Project Path="PhoAmThuc.Web/PhoAmThuc.Web.csproj" />
+</Solution>
