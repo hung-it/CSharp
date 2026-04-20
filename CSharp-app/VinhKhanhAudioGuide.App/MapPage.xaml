@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:maps="clr-namespace:Microsoft.Maui.Controls.Maps;assembly=Microsoft.Maui.Controls.Maps"
+             x:Class="VinhKhanhAudioGuide.App.MapPage"
+             BackgroundColor="{StaticResource Pink50}">
+
+    <VerticalStackLayout Spacing="0">
+        <!-- Header -->
+        <Label Text="Bản Đồ POI" FontSize="20" FontAttributes="Bold" TextColor="{StaticResource Pink900}" 
+               Padding="20,15,20,10" HorizontalOptions="Center" />
+
+        <!-- Map -->
+        <maps:Map x:Name="map" 
+                  HorizontalOptions="FillAndExpand" 
+                  VerticalOptions="FillAndExpand"
+                  IsZoomEnabled="True"
+                  IsScrollEnabled="True" />
+
+        <!-- POI List Below Map -->
+        <Frame BackgroundColor="White" CornerRadius="10" Padding="15" Margin="15,10,15,15">
+            <VerticalStackLayout Spacing="10">
+                <Label Text="Danh Sách POI Gần" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource Pink900}" />
+                <CollectionView x:Name="NearbyPoisCollectionView" MaximumHeightRequest="150">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <VerticalStackLayout Padding="10" Spacing="5">
+                                <Label Text="{Binding Name}" FontSize="14" TextColor="{StaticResource Pink800}" FontAttributes="Bold" />
+                                <Label Text="{Binding Description}" FontSize="12" TextColor="{StaticResource Pink600}" />
+                            </VerticalStackLayout>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+        </Frame>
+    </VerticalStackLayout>
+
+</ContentPage>

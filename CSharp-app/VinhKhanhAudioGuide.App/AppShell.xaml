@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="VinhKhanhAudioGuide.App.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:VinhKhanhAudioGuide.App"
+    Title="VinhKhanhAudioGuide.App">
+
+    <Shell.Resources>
+        <ShellContent x:Name="AudioRoute"
+                      Route="audio"
+                      ContentTemplate="{DataTemplate local:AudioPlayerPage}"
+                      IsVisible="False" />
+        <ShellContent x:Name="PoiDetailRoute"
+                      Route="poiDetail"
+                      ContentTemplate="{DataTemplate local:PoiDetailPage}"
+                      IsVisible="False" />
+        <ShellContent x:Name="QrScanRoute"
+                      Route="qrScan"
+                      ContentTemplate="{DataTemplate local:QrScanPage}"
+                      IsVisible="False" />
+        <ShellContent x:Name="TourDetailRoute"
+                      Route="tourDetail"
+                      ContentTemplate="{DataTemplate local:TourDetailPage}"
+                      IsVisible="False" />
+    </Shell.Resources>
+
+    <TabBar>
+        <Tab Title="Dashboard" Icon="home.png">
+            <ShellContent ContentTemplate="{DataTemplate local:MainPage}" />
+        </Tab>
+        <Tab Title="Bản Đồ" Icon="map.png">
+            <ShellContent ContentTemplate="{DataTemplate local:MapPage}" />
+        </Tab>
+        <Tab Title="POI" Icon="list.png">
+            <ShellContent ContentTemplate="{DataTemplate local:PoiListPage}" />
+        </Tab>
+        <Tab Title="Tour" Icon="tour.png">
+            <ShellContent ContentTemplate="{DataTemplate local:TourManagerPage}" />
+        </Tab>
+    </TabBar>
+
+</Shell>

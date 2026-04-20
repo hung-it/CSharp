@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="VinhKhanhAudioGuide.App.MainPage"
+             BackgroundColor="{StaticResource Pink50}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="16">
+
+            <!-- Header -->
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Text="Dashboard" FontSize="24" FontAttributes="Bold"
+                       TextColor="{StaticResource Pink900}" VerticalOptions="Center" />
+                <Button Grid.Column="1" Text="↻" FontSize="18"
+                        BackgroundColor="Transparent" TextColor="{StaticResource Pink500}"
+                        WidthRequest="44" HeightRequest="44"
+                        Clicked="OnRefreshClicked" />
+            </Grid>
+
+            <!-- Stats row -->
+            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
+                <Frame Grid.Column="0" BackgroundColor="{StaticResource Pink100}"
+                       CornerRadius="12" Padding="12" HasShadow="False">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="📍" FontSize="22" HorizontalOptions="Center" />
+                        <Label x:Name="PoiCountLabel" Text="—" FontSize="26"
+                               FontAttributes="Bold" TextColor="{StaticResource Pink600}"
+                               HorizontalOptions="Center" />
+                        <Label Text="POI" FontSize="11" TextColor="{StaticResource Pink400}"
+                               HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                </Frame>
+
+                <Frame Grid.Column="1" BackgroundColor="{StaticResource Pink100}"
+                       CornerRadius="12" Padding="12" HasShadow="False">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="✈️" FontSize="22" HorizontalOptions="Center" />
+                        <Label x:Name="TourCountLabel" Text="—" FontSize="26"
+                               FontAttributes="Bold" TextColor="{StaticResource Pink600}"
+                               HorizontalOptions="Center" />
+                        <Label Text="Tour" FontSize="11" TextColor="{StaticResource Pink400}"
+                               HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                </Frame>
+
+                <Frame Grid.Column="2" BackgroundColor="{StaticResource Pink100}"
+                       CornerRadius="12" Padding="12" HasShadow="False">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="🎧" FontSize="22" HorizontalOptions="Center" />
+                        <Label x:Name="ListenCountLabel" Text="—" FontSize="26"
+                               FontAttributes="Bold" TextColor="{StaticResource Pink600}"
+                               HorizontalOptions="Center" />
+                        <Label Text="Lượt nghe" FontSize="11" TextColor="{StaticResource Pink400}"
+                               HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                </Frame>
+            </Grid>
+
+            <!-- Quét QR -->
+            <Button Text="📷  Quét QR Code"
+                    BackgroundColor="{StaticResource Pink500}"
+                    TextColor="White" FontSize="16" FontAttributes="Bold"
+                    CornerRadius="12" HeightRequest="54"
+                    Clicked="OnScanQRClicked" />
+
+            <!-- Top POI -->
+            <Frame BackgroundColor="White" CornerRadius="12" Padding="16" HasShadow="False">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="🏆 Top POI được nghe nhiều nhất"
+                           FontSize="14" FontAttributes="Bold"
+                           TextColor="{StaticResource Pink800}" />
+                    <CollectionView x:Name="TopPoisCollectionView">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid ColumnDefinitions="Auto,*,Auto" Padding="0,6" ColumnSpacing="10">
+                                    <Label Grid.Column="0"
+                                           Text="{Binding Rank}" FontSize="16" FontAttributes="Bold"
+                                           TextColor="{StaticResource Pink400}"
+                                           VerticalOptions="Center" WidthRequest="24" />
+                                    <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                        <Label Text="{Binding PoiName}" FontSize="13"
+                                               FontAttributes="Bold" TextColor="{StaticResource Pink800}" />
+                                        <Label Text="{Binding District}" FontSize="11"
+                                               TextColor="{StaticResource Pink400}" />
+                                    </VerticalStackLayout>
+                                    <Label Grid.Column="2"
+                                           Text="{Binding ListenCount, StringFormat='{0} lượt'}"
+                                           FontSize="12" TextColor="{StaticResource Pink500}"
+                                           VerticalOptions="Center" />
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                    <Label x:Name="TopPoisEmptyLabel" Text="Chưa có lượt nghe nào"
+                           FontSize="13" TextColor="{StaticResource Pink300}"
+                           HorizontalOptions="Center" IsVisible="False" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Thống kê 7 ngày -->
+            <Frame BackgroundColor="White" CornerRadius="12" Padding="16" HasShadow="False">
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="📊 Thống kê 7 ngày gần nhất"
+                           FontSize="14" FontAttributes="Bold"
+                           TextColor="{StaticResource Pink800}" />
+                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="8">
+                        <VerticalStackLayout Grid.Column="0" Grid.Row="0">
+                            <Label Text="Tổng lượt nghe" FontSize="11" TextColor="{StaticResource Pink400}" />
+                            <Label x:Name="WeekListenLabel" Text="—" FontSize="20"
+                                   FontAttributes="Bold" TextColor="{StaticResource Pink600}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Grid.Row="0">
+                            <Label Text="Vùng hoạt động" FontSize="11" TextColor="{StaticResource Pink400}" />
+                            <Label x:Name="WeekActiveCellsLabel" Text="—" FontSize="20"
+                                   FontAttributes="Bold" TextColor="{StaticResource Pink600}" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

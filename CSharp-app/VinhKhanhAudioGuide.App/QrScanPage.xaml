@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:zxing="clr-namespace:ZXing.Net.Maui.Controls;assembly=ZXing.Net.Maui.Controls"
+             x:Class="VinhKhanhAudioGuide.App.QrScanPage"
+             BackgroundColor="Black"
+             Title="Quét QR Code">
+
+    <Grid>
+        <!-- Camera view chiếm toàn màn hình -->
+        <zxing:CameraBarcodeReaderView
+            x:Name="BarcodeReader"
+            BarcodesDetected="OnBarcodesDetected"
+            HorizontalOptions="Fill"
+            VerticalOptions="Fill" />
+
+        <!-- Overlay khung ngắm -->
+        <Grid HorizontalOptions="Fill" VerticalOptions="Fill">
+
+            <!-- 4 góc khung ngắm -->
+            <BoxView Color="#EC4899" WidthRequest="40" HeightRequest="4"
+                     HorizontalOptions="Center" VerticalOptions="Center"
+                     TranslationX="-78" TranslationY="-78" />
+            <BoxView Color="#EC4899" WidthRequest="4" HeightRequest="40"
+                     HorizontalOptions="Center" VerticalOptions="Center"
+                     TranslationX="-78" TranslationY="-60" />
+
+            <BoxView Color="#EC4899" WidthRequest="40" HeightRequest="4"
+                     HorizontalOptions="Center" VerticalOptions="Center"
+                     TranslationX="78" TranslationY="-78" />
+            <BoxView Color="#EC4899" WidthRequest="4" HeightRequest="40"
+                     HorizontalOptions="Center" VerticalOptions="Center"
+                     TranslationX="78" TranslationY="-60" />
+
+            <BoxView Color="#EC4899" WidthRequest="40" HeightRequest="4"
+                     HorizontalOptions="Center" VerticalOptions="Center"
+                     TranslationX="-78" TranslationY="78" />
+            <BoxView Color="#EC4899" WidthRequest="4" HeightRequest="40"
+                     HorizontalOptions="Center" VerticalOptions="Center"
+                     TranslationX="-78" TranslationY="60" />
+
+            <BoxView Color="#EC4899" WidthRequest="40" HeightRequest="4"
+                     HorizontalOptions="Center" VerticalOptions="Center"
+                     TranslationX="78" TranslationY="78" />
+            <BoxView Color="#EC4899" WidthRequest="4" HeightRequest="40"
+                     HorizontalOptions="Center" VerticalOptions="Center"
+                     TranslationX="78" TranslationY="60" />
+
+            <!-- Hướng dẫn -->
+            <Label Text="Hướng camera vào mã QR tại điểm tham quan"
+                   TextColor="White" FontSize="14" HorizontalTextAlignment="Center"
+                   HorizontalOptions="Center" VerticalOptions="End"
+                   Margin="20,0,20,60"
+                   BackgroundColor="#80000000" Padding="12,8" />
+
+            <!-- Nút đóng -->
+            <Button Text="✕ Đóng"
+                    BackgroundColor="#80000000"
+                    TextColor="White"
+                    CornerRadius="20"
+                    WidthRequest="100" HeightRequest="40"
+                    HorizontalOptions="End" VerticalOptions="Start"
+                    Margin="0,50,16,0"
+                    Clicked="OnCloseClicked" />
+        </Grid>
+    </Grid>
+
+</ContentPage>

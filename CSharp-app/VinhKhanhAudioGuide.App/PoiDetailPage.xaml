@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="VinhKhanhAudioGuide.App.PoiDetailPage"
+             BackgroundColor="{StaticResource Pink50}"
+             Title="{Binding Name}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="16">
+
+            <!-- Ảnh POI -->
+            <Frame CornerRadius="14" Padding="0" IsClippedToBounds="True"
+                   HeightRequest="200" BackgroundColor="{StaticResource Pink200}">
+                <Image x:Name="PoiImage" Aspect="AspectFill"
+                       BackgroundColor="{StaticResource Pink200}">
+                    <Image.Source>
+                        <FontImageSource Glyph="📍" Size="80" Color="#EC4899" />
+                    </Image.Source>
+                </Image>
+            </Frame>
+
+            <!-- Tên + Khu vực -->
+            <VerticalStackLayout Spacing="4">
+                <Label x:Name="NameLabel" FontSize="24" FontAttributes="Bold"
+                       TextColor="{StaticResource Pink900}" />
+                <HorizontalStackLayout Spacing="8">
+                    <Label Text="📍" FontSize="14" />
+                    <Label x:Name="DistrictLabel" FontSize="14"
+                           TextColor="{StaticResource Pink600}" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+
+            <!-- Mô tả -->
+            <Frame BackgroundColor="White" CornerRadius="12" Padding="16">
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="Giới thiệu" FontSize="15" FontAttributes="Bold"
+                           TextColor="{StaticResource Pink800}" />
+                    <Label x:Name="DescLabel" FontSize="14"
+                           TextColor="{StaticResource Pink700}" LineBreakMode="WordWrap" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Tọa độ -->
+            <Frame BackgroundColor="White" CornerRadius="12" Padding="16">
+                <HorizontalStackLayout Spacing="12">
+                    <Label Text="🗺️" FontSize="20" VerticalOptions="Center" />
+                    <VerticalStackLayout Spacing="2">
+                        <Label x:Name="CoordLabel" FontSize="13"
+                               TextColor="{StaticResource Pink600}" />
+                        <Label x:Name="CodeLabel" FontSize="12"
+                               TextColor="{StaticResource Pink400}" />
+                    </VerticalStackLayout>
+                </HorizontalStackLayout>
+            </Frame>
+
+            <!-- Nút Nghe Audio -->
+            <Button x:Name="ListenButton"
+                    Text="🎧 Nghe Audio Guide"
+                    BackgroundColor="{StaticResource Pink500}"
+                    TextColor="White"
+                    FontSize="16" FontAttributes="Bold"
+                    CornerRadius="12"
+                    HeightRequest="54"
+                    Clicked="OnListenClicked" />
+
+            <!-- Nút Xem trên Google Maps -->
+            <Button x:Name="MapLinkButton"
+                    Text="🗺️ Xem trên Google Maps"
+                    BackgroundColor="White"
+                    TextColor="{StaticResource Pink600}"
+                    BorderColor="{StaticResource Pink300}"
+                    BorderWidth="1.5"
+                    FontSize="14"
+                    CornerRadius="12"
+                    HeightRequest="48"
+                    Clicked="OnMapLinkClicked" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

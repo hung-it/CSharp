@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PRD - PhoAmThuc (Vinh Khanh Audio Guide)</title>
+    <style>
+        :root {
+            --primary: #0f4c5c;
+            --primary-light: #2c7a8c;
+            --primary-dark: #083845;
+            --accent: #c17c3a;
+            --accent-light: #d99a5a;
+            --bg: #f3f7f8;
+            --surface: #ffffff;
+            --text: #1f2933;
+            --text-secondary: #52606d;
+            --border: #dce5e8;
+            --success: #2f855a;
+            --warning: #b7791f;
+            --info: #2b6cb0;
+            --soft-primary: #e6f1f3;
+            --soft-accent: #fff6ed;
+            --code-bg: #102a43;
+            --code-text: #f0f4f8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", "Noto Sans", Arial, sans-serif;
+            background: radial-gradient(circle at 20% 0%, #f8fbfc, var(--bg) 45%);
+            color: var(--text);
+            line-height: 1.6;
+            scroll-behavior: smooth;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: linear-gradient(90deg, var(--primary-dark), var(--primary));
+            color: #fff;
+            height: 58px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.2rem;
+            box-shadow: 0 6px 18px rgba(8, 56, 69, 0.25);
+        }
+
+        .logo {
+            font-weight: 700;
+            letter-spacing: 0.2px;
+            font-size: 1rem;
+            white-space: nowrap;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .nav-links a {
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            font-size: 0.78rem;
+            padding: 0.3rem 0.6rem;
+            border-radius: 999px;
+            transition: all 0.2s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            background: rgba(255, 255, 255, 0.18);
+            color: #fff;
+        }
+
+        .hero {
+            margin-top: 58px;
+            background: linear-gradient(130deg, var(--primary-dark), var(--primary), var(--primary-light));
+            color: #fff;
+            padding: 4rem 1.5rem 3rem;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 2.15rem;
+            letter-spacing: -0.7px;
+            margin-bottom: 0.65rem;
+        }
+
+        .hero .subtitle {
+            max-width: 900px;
+            margin: 0 auto 1.2rem;
+            opacity: 0.95;
+            font-size: 1.02rem;
+        }
+
+        .badges {
+            display: flex;
+            justify-content: center;
+            gap: 0.55rem;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            padding: 0.28rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.76rem;
+            backdrop-filter: blur(3px);
+        }
+
+        section {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 2.4rem 1.4rem;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 1.1rem;
+        }
+
+        .icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+            background: var(--soft-primary);
+            color: var(--primary);
+        }
+
+        .section-num {
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.7rem;
+            color: var(--primary-light);
+            font-weight: 700;
+        }
+
+        .section-header h2 {
+            font-size: 1.5rem;
+            line-height: 1.25;
+        }
+
+        .lead {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            font-size: 0.96rem;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.9rem;
+            margin-top: 0.6rem;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            text-align: center;
+            padding: 1rem 0.7rem;
+            box-shadow: 0 3px 10px rgba(15, 76, 92, 0.06);
+        }
+
+        .stat-card .value {
+            font-weight: 800;
+            font-size: 1.6rem;
+            color: var(--primary);
+        }
+
+        .stat-card .label {
+            margin-top: 0.2rem;
+            font-size: 0.77rem;
+            color: var(--text-secondary);
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.15rem 1.2rem;
+            box-shadow: 0 4px 14px rgba(15, 76, 92, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(15, 76, 92, 0.12);
+        }
+
+        .card h3 {
+            font-size: 1.02rem;
+            margin-bottom: 0.4rem;
+            color: var(--primary-dark);
+        }
+
+        .card p,
+        .card li {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .card ul,
+        .card ol {
+            margin-top: 0.35rem;
+            padding-left: 1.1rem;
+        }
+
+        .card li {
+            margin-bottom: 0.2rem;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-top: 0.85rem;
+            background: #fff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.86rem;
+        }
+
+        th {
+            background: var(--primary);
+            color: #fff;
+            text-align: left;
+            padding: 0.62rem 0.72rem;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 0.56rem 0.72rem;
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
+        }
+
+        tr:hover td {
+            background: #f6fbfc;
+        }
+
+        .flow {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.4rem;
+            margin-top: 0.8rem;
+        }
+
+        .flow-step {
+            background: var(--primary);
+            color: #fff;
+            padding: 0.35rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .flow-step.alt {
+            background: var(--accent);
+        }
+
+        .flow-step.success {
+            background: var(--success);
+        }
+
+        .flow-arrow {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .timeline {
+            position: relative;
+            margin-top: 0.8rem;
+            padding-left: 1.8rem;
+        }
+
+        .timeline::before {
+            content: "";
+            position: absolute;
+            left: 7px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--primary-light);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .timeline-item::before {
+            content: "";
+            position: absolute;
+            left: -1.8rem;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--primary);
+            box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(15, 76, 92, 0.2);
+        }
+
+        .timeline-item h4 {
+            color: var(--primary-dark);
+            font-size: 0.95rem;
+            margin-bottom: 0.22rem;
+        }
+
+        .timeline-item p {
+            color: var(--text-secondary);
+            font-size: 0.87rem;
+        }
+
+        .highlight {
+            margin-top: 0.9rem;
+            border-left: 4px solid var(--accent);
+            background: var(--soft-accent);
+            padding: 0.85rem 1rem;
+            border-radius: 0 8px 8px 0;
+            color: #5a4029;
+            font-size: 0.9rem;
+        }
+
+        .highlight.info {
+            border-color: var(--info);
+            background: #e7f0fb;
+            color: #1d3f67;
+        }
+
+        .highlight.success {
+            border-color: var(--success);
+            background: #e9f7ef;
+            color: #1f5137;
+        }
+
+        code {
+            font-family: "Cascadia Code", Consolas, monospace;
+            background: #e7edf0;
+            color: #0d3c49;
+            padding: 0.12rem 0.35rem;
+            border-radius: 4px;
+            font-size: 0.85em;
+        }
+
+        .code-block {
+            background: var(--code-bg);
+            color: var(--code-text);
+            border-radius: 10px;
+            padding: 1rem 1.2rem;
+            font-family: "Cascadia Code", Consolas, monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            line-height: 1.65;
+            margin-top: 0.7rem;
+        }
+
+        .check-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 0.8rem;
+            margin-top: 0.8rem;
+        }
+
+        .check-item {
+            background: #fff;
+            border: 1px dashed #c8d9df;
+            border-radius: 10px;
+            padding: 0.8rem 0.95rem;
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+        }
+
+        .check-item strong {
+            color: var(--primary-dark);
+            display: block;
+            margin-bottom: 0.22rem;
+        }
+
+        footer {
+            margin-top: 1.5rem;
+            background: var(--code-bg);
+            color: rgba(240, 244, 248, 0.85);
+            text-align: center;
+            padding: 1.8rem 1rem 2rem;
+            font-size: 0.84rem;
+        }
+
+        footer strong {
+            color: #fff;
+        }
+
+        @media (max-width: 860px) {
+            .hero h1 {
+                font-size: 1.6rem;
+            }
+
+            .hero .subtitle {
+                font-size: 0.94rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            section {
+                padding: 2rem 1rem;
+            }
+
+            .stats-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <div class="logo">PhoAmThuc • PRD Presentation</div>
+        <ul class="nav-links">
+            <li><a href="#overview">Tổng quan</a></li>
+            <li><a href="#scope">Phạm vi</a></li>
+            <li><a href="#requirements">Yêu cầu</a></li>
+            <li><a href="#flows">Luồng chính</a></li>
+            <li><a href="#timeline">Lộ trình</a></li>
+            <li><a href="#acceptance">Nghiệm thu</a></li>
+            <li><a href="#risks">Rủi ro</a></li>
+        </ul>
+    </nav>
+
+    <header class="hero">
+        <h1>PRD - PhoAmThuc (Vinh Khanh Audio Guide)</h1>
+        <p class="subtitle">Tài liệu Product Requirements cho đồ án: hệ thống quản trị nội dung audio guide ẩm thực với
+            backend API, dashboard admin và các luồng analytics vận hành.</p>
+        <div class="badges">
+            <span class="badge">ASP.NET Core Minimal API</span>
+            <span class="badge">EF Core + SQLite</span>
+            <span class="badge">React + Vite Admin</span>
+            <span class="badge">POI / Audio / Tour</span>
+            <span class="badge">Session + Analytics</span>
+            <span class="badge">QR + Geofence + Route</span>
+        </div>
+    </header>
+
+    <section id="overview">
+        <div class="section-header">
+            <div class="icon">🎯</div>
+            <div>
+                <div class="section-num">Section 01</div>
+                <h2>Tổng quan sản phẩm</h2>
+            </div>
+        </div>
+        <p class="lead">Sản phẩm giải quyết bài toán quản trị và phân phối nội dung audio theo điểm đến (POI), đồng thời
+            cung cấp dữ liệu đo lường để tối ưu trải nghiệm tham quan ẩm thực.</p>
+
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="value">13+</div>
+                <div class="label">Nhóm API chính</div>
+            </div>
+            <div class="stat-card">
+                <div class="value">8</div>
+                <div class="label">Màn hình Admin</div>
+            </div>
+            <div class="stat-card">
+                <div class="value">23</div>
+                <div class="label">Functional Requirements</div>
+            </div>
+            <div class="stat-card">
+                <div class="value">9</div>
+                <div class="label">Non-functional Requirements</div>
+            </div>
+            <div class="stat-card">
+                <div class="value">3</div>
+                <div class="label">Milestone triển khai</div>
+            </div>
+            <div class="stat-card">
+                <div class="value">Local</div>
+                <div class="label">Môi trường mục tiêu</div>
+            </div>
+        </div>
+
+        <div class="card-grid" style="margin-top:1rem;">
+            <article class="card">
+                <h3>Bài toán</h3>
+                <p>Thông tin ẩm thực phân tán, khó cập nhật, không đo được mức độ sử dụng nội dung theo điểm tham quan.</p>
+            </article>
+            <article class="card">
+                <h3>Tầm nhìn</h3>
+                <p>Xây dựng nền tảng audio guide có thể quản trị tập trung, phát nội dung linh hoạt qua QR/GPS và có dữ
+                    liệu analytics để vận hành.</p>
+            </article>
+            <article class="card">
+                <h3>Đối tượng</h3>
+                <ul>
+                    <li>Admin vận hành nội dung.</li>
+                    <li>Người dùng cuối (qua mobile app tích hợp API).</li>
+                </ul>
+            </article>
+        </div>
+    </section>
+
+    <section id="scope">
+        <div class="section-header">
+            <div class="icon">📦</div>
+            <div>
+                <div class="section-num">Section 02</div>
+                <h2>Phạm vi sản phẩm (In Scope / Out of Scope)</h2>
+            </div>
+        </div>
+
+        <div class="card-grid">
+            <article class="card">
+                <h3>In Scope (MVP hiện tại)</h3>
+                <ul>
+                    <li>CRUD POI (priority, imageUrl, mapLink).</li>
+                    <li>CRUD audio theo POI + upload multipart.</li>
+                    <li>Tour và reorder điểm dừng.</li>
+                    <li>Translation đa ngôn ngữ + fallback.</li>
+                    <li>Resolve user, activate subscription, segment access.</li>
+                    <li>Session tracking + analytics top/usage/heatmap.</li>
+                    <li>QR playback và anonymous route tracking.</li>
+                    <li>Dashboard bản đồ cho admin.</li>
+                </ul>
+            </article>
+            <article class="card">
+                <h3>Out of Scope (đợt đồ án này)</h3>
+                <ul>
+                    <li>Thanh toán thật (payment gateway).</li>
+                    <li>AuthN/AuthZ production-grade hoàn chỉnh.</li>
+                    <li>ShopManager module.</li>
+                    <li>SQL Server large-data mode.</li>
+                    <li>Kiến trúc multi-tenant nâng cao.</li>
+                </ul>
+            </article>
+            <article class="card">
+                <h3>Tech Stack chính</h3>
+                <ul>
+                    <li>Backend: .NET 10, ASP.NET Core, EF Core 10, SQLite.</li>
+                    <li>Frontend: React 19, Vite 5, React Router.</li>
+                    <li>Map & QR: Leaflet, react-leaflet, qrcode.react.</li>
+                    <li>Test: xUnit + EF InMemory/SQLite.</li>
+                </ul>
+            </article>
+        </div>
+
+        <div class="highlight info">
+            <strong>Ghi chú phạm vi:</strong> Repo hiện tại tập trung backend và web admin; mobile app MAUI được xem là
+            client tiêu thụ API ở ngoài phạm vi codebase này.
+        </div>
+    </section>
+
+    <section id="requirements">
+        <div class="section-header">
+            <div class="icon">📋</div>
+            <div>
+                <div class="section-num">Section 03</div>
+                <h2>Yêu cầu sản phẩm</h2>
+            </div>
+        </div>
+
+        <h3 style="margin-bottom:0.5rem;">Functional Requirements (FR)</h3>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mã</th>
+                        <th>Nhóm</th>
+                        <th>Yêu cầu</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>FR-01..03</td>
+                        <td>User & Access</td>
+                        <td>Resolve user theo externalRef, activate subscription, kiểm tra access theo segment.</td>
+                    </tr>
+                    <tr>
+                        <td>FR-04..07</td>
+                        <td>POI</td>
+                        <td>CRUD POI, code unique, có metadata mở rộng (district, priority, imageUrl, mapLink).</td>
+                    </tr>
+                    <tr>
+                        <td>FR-08..10</td>
+                        <td>Audio</td>
+                        <td>CRUD audio theo POI, upload multipart, trả filePath/relativePath cho frontend.</td>
+                    </tr>
+                    <tr>
+                        <td>FR-11..13</td>
+                        <td>Tour</td>
+                        <td>CRUD tour, thêm stop, reorder theo sequence.</td>
+                    </tr>
+                    <tr>
+                        <td>FR-14..17</td>
+                        <td>Session & Analytics</td>
+                        <td>Ghi nhận start/end session, usage theo ngày, top POI, heatmap theo thời gian.</td>
+                    </tr>
+                    <tr>
+                        <td>FR-18..20</td>
+                        <td>QR & Route</td>
+                        <td>Xử lý payload QR, ghi route theo anonymousRef, trả route để render polyline.</td>
+                    </tr>
+                    <tr>
+                        <td>FR-21..23</td>
+                        <td>Translation & Sync</td>
+                        <td>CRUD translation, fallback language, snapshot sync nội dung.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 style="margin:1.1rem 0 0.5rem;">Non-functional Requirements (NFR)</h3>
+        <div class="card-grid">
+            <article class="card">
+                <h3>Hiệu năng</h3>
+                <ul>
+                    <li>Endpoint đọc phổ biến < 500ms (local demo).</li>
+                    <li>Dashboard tải tổng quan < 2 giây với dữ liệu demo.</li>
+                </ul>
+            </article>
+            <article class="card">
+                <h3>Độ tin cậy</h3>
+                <ul>
+                    <li>Có health endpoint để smoke test.</li>
+                    <li>Seed idempotent, restart không nhân bản dữ liệu.</li>
+                </ul>
+            </article>
+            <article class="card">
+                <h3>Bảo trì & bảo mật</h3>
+                <ul>
+                    <li>Logic nghiệp vụ tập trung ở service layer.</li>
+                    <li>Validate input và giới hạn loại file upload hợp lệ.</li>
+                    <li>Có lộ trình bổ sung auth production.</li>
+                </ul>
+            </article>
+        </div>
+    </section>
+
+    <section id="flows">
+        <div class="section-header">
+            <div class="icon">🔄</div>
+            <div>
+                <div class="section-num">Section 04</div>
+                <h2>Luồng nghiệp vụ chính (End-to-End)</h2>
+            </div>
+        </div>
+
+        <div class="card-grid">
+            <article class="card">
+                <h3>Luồng người dùng nghe nội dung</h3>
+                <div class="flow">
+                    <span class="flow-step">/users/resolve</span>
+                    <span class="flow-arrow">→</span>
+                    <span class="flow-step alt">/subscriptions/access</span>
+                    <span class="flow-arrow">→</span>
+                    <span class="flow-step">/pois + /audios</span>
+                    <span class="flow-arrow">→</span>
+                    <span class="flow-step success">/sessions/start-end</span>
+                </div>
+                <p style="margin-top:0.6rem;">Dữ liệu session sau khi kết thúc sẽ được tổng hợp lên analytics để phục vụ
+                    dashboard admin.</p>
+            </article>
+            <article class="card">
+                <h3>Luồng QR playback</h3>
+                <ol>
+                    <li>Admin tạo QR payload theo chuẩn <code>QR:POI_CODE</code>.</li>
+                    <li>App quét QR và gọi <code>POST /api/v1/qr/start</code>.</li>
+                    <li>Backend parse payload, xác định POI, chuẩn bị dữ liệu phát.</li>
+                </ol>
+            </article>
+            <article class="card">
+                <h3>Luồng admin vận hành nội dung</h3>
+                <ol>
+                    <li>Tạo/cập nhật POI.</li>
+                    <li>Upload audio và gán ngôn ngữ.</li>
+                    <li>Tạo tour và sắp xếp stop.</li>
+                    <li>Cập nhật translation.</li>
+                    <li>Quan sát dashboard để tối ưu.</li>
+                </ol>
+            </article>
+        </div>
+
+        <h3 style="margin:1.1rem 0 0.5rem;">Use Cases trọng tâm</h3>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Use Case</th>
+                        <th>Tác nhân</th>
+                        <th>Kết quả mong đợi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>UC-01 Quản trị POI</td>
+                        <td>Admin</td>
+                        <td>POI hiển thị đúng trên danh sách và dashboard.</td>
+                    </tr>
+                    <tr>
+                        <td>UC-02 Upload/Gán audio</td>
+                        <td>Admin</td>
+                        <td>Audio truy cập được qua media URL và liên kết đúng POI.</td>
+                    </tr>
+                    <tr>
+                        <td>UC-03 Tạo tour/reorder</td>
+                        <td>Admin</td>
+                        <td>Thứ tự tour stop phản ánh chính xác trên API.</td>
+                    </tr>
+                    <tr>
+                        <td>UC-04 Session start/end</td>
+                        <td>Mobile app</td>
+                        <td>Có dữ liệu đo lường dùng cho analytics.</td>
+                    </tr>
+                    <tr>
+                        <td>UC-05 QR start</td>
+                        <td>Mobile app</td>
+                        <td>Điều hướng đúng POI theo payload.</td>
+                    </tr>
+                    <tr>
+                        <td>UC-06 Dashboard analytics</td>
+                        <td>Admin</td>
+                        <td>Hiển thị top/usage/heatmap/route phục vụ vận hành.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section id="timeline">
+        <div class="section-header">
+            <div class="icon">🗺️</div>
+            <div>
+                <div class="section-num">Section 05</div>
+                <h2>Kế hoạch triển khai và roadmap</h2>
+            </div>
+        </div>
+
+        <div class="timeline">
+            <div class="timeline-item">
+                <h4>Milestone 1 - Core API</h4>
+                <p>Hoàn thiện users, subscriptions, POI, audio, tours và cơ chế init/seed database.</p>
+            </div>
+            <div class="timeline-item">
+                <h4>Milestone 2 - Tracking & Dashboard</h4>
+                <p>Hoàn thiện sessions, analytics, anonymous routes và dashboard quản trị trực quan.</p>
+            </div>
+            <div class="timeline-item">
+                <h4>Milestone 3 - Vận hành nội dung</h4>
+                <p>Bổ sung translation, content sync, QR manager, rà soát test/build và tài liệu demo bảo vệ.</p>
+            </div>
+        </div>
+
+        <div class="check-list">
+            <div class="check-item">
+                <strong>Mở rộng sau đồ án</strong>
+                Auth đầy đủ (JWT + role/permission), object storage cho media.
+            </div>
+            <div class="check-item">
+                <strong>Nâng cấp dữ liệu</strong>
+                Chuyển chiến lược migration versioned thay cho patch runtime.
+            </div>
+            <div class="check-item">
+                <strong>Quan sát hệ thống</strong>
+                Bổ sung tracing, metrics, centralized logging.
+            </div>
+            <div class="check-item">
+                <strong>Business nâng cao</strong>
+                Tích hợp payment gateway thật cho subscription.
+            </div>
+        </div>
+    </section>
+
+    <section id="acceptance">
+        <div class="section-header">
+            <div class="icon">✅</div>
+            <div>
+                <div class="section-num">Section 06</div>
+                <h2>Tiêu chí nghiệm thu</h2>
+            </div>
+        </div>
+
+        <div class="card-grid">
+            <article class="card">
+                <h3>Nghiệm thu chức năng</h3>
+                <ul>
+                    <li>CRUD POI/audio hoạt động đúng.</li>
+                    <li>Upload audio trả URL hợp lệ và truy cập được.</li>
+                    <li>Tour reorder phản ánh đúng sequence.</li>
+                    <li>Session start/end ghi nhận dữ liệu chính xác.</li>
+                    <li>Dashboard hiển thị top/usage/heatmap/route.</li>
+                </ul>
+            </article>
+            <article class="card">
+                <h3>Nghiệm thu kỹ thuật</h3>
+                <ul>
+                    <li><code>dotnet build PhoAmThuc.sln</code> thành công.</li>
+                    <li><code>dotnet test PhoAmThuc.sln</code> pass.</li>
+                    <li><code>npm run build</code> ở admin thành công.</li>
+                    <li><code>scripts/run-dev.ps1</code> mở backend + frontend ổn định.</li>
+                </ul>
+            </article>
+            <article class="card">
+                <h3>KPI demo đề xuất</h3>
+                <ul>
+                    <li>100% nhóm endpoint cốt lõi có thể demo.</li>
+                    <li>Health endpoint duy trì ổn định suốt buổi bảo vệ.</li>
+                    <li>Thời gian start local hệ thống <= 3 phút.</li>
+                    <li>Tỷ lệ test backend pass >= 90% tập test hiện có.</li>
+                </ul>
+            </article>
+        </div>
+    </section>
+
+    <section id="risks">
+        <div class="section-header">
+            <div class="icon">⚠️</div>
+            <div>
+                <div class="section-num">Section 07</div>
+                <h2>Rủi ro và phương án giảm thiểu</h2>
+            </div>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Rủi ro</th>
+                        <th>Tác động</th>
+                        <th>Giảm thiểu</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Dữ liệu demo thiếu nhất quán</td>
+                        <td>Demo sai lệch, khó thuyết phục</td>
+                        <td>Seed idempotent + script smoke test endpoint</td>
+                    </tr>
+                    <tr>
+                        <td>Lỗi upload media do cấu hình path</td>
+                        <td>Không phát được audio</td>
+                        <td>Chuẩn hóa thư mục media + trả relativePath rõ ràng</td>
+                    </tr>
+                    <tr>
+                        <td>Chưa có auth production đầy đủ</td>
+                        <td>Rủi ro khi triển khai thật</td>
+                        <td>Giới hạn phạm vi đồ án, đưa vào roadmap giai đoạn sau</td>
+                    </tr>
+                    <tr>
+                        <td>SQLite hạn chế tải lớn</td>
+                        <td>Khó scale production</td>
+                        <td>Thiết kế service/persistence tách lớp, sẵn sàng đổi provider</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="highlight success">
+            <strong>Phụ thuộc chính:</strong> .NET SDK 10+, Node.js 20+, dữ liệu seed nội bộ và môi trường local cho demo.
+        </div>
+
+        <div class="code-block">Tai lieu tham chieu nhanh
+- docs/PRD_DO_AN.md
+- README.md
+- docs/HUONG_DAN_CHAY.md
+- VinhKhanhAudioGuide.Api/API_CONTRACT.md</div>
+    </section>
+
+    <footer>
+        <p><strong>PhoAmThuc - PRD Presentation</strong></p>
+        <p>Cap nhat tu pham vi do an hien tai • San sang su dung cho bao cao va bao ve</p>
+    </footer>
+
+    <script>
+        const links = document.querySelectorAll(".nav-links a");
+        const sections = [...document.querySelectorAll("section[id]")];
+
+        window.addEventListener("scroll", () => {
+            let current = "";
+            for (const sec of sections) {
+                const offset = sec.offsetTop - 90;
+                if (window.scrollY >= offset) {
+                    current = sec.id;
+                }
+            }
+            links.forEach((a) => {
+                a.classList.toggle("active", a.getAttribute("href") === `#${current}`);
+            });
+        });
+    </script>
+</body>
+
+</html>
