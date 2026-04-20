@@ -1,0 +1,35 @@
+# Build outputs
+**/bin/
+**/obj/
+
+# User/IDE files
+.vs/
+.vscode/
+node_modules/
+**/node_modules/
+.env
+.env.*
+!.env.example
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Test/coverage artifacts
+**/TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+# Logs
+*.log
+
+# Runtime database files
+**/Data/*.db
+**/Data/*.db-*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+.fake

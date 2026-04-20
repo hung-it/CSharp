@@ -1,0 +1,123 @@
+name: CI/CD Test Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: testdb
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+        
+    - name: Restore dependencies
+      run: dotnet restore CSharp-main/VinhKhanhAudioGuide.Backend.Tests/
+      
+    - name: Build
+      run: dotnet build CSharp-main/VinhKhanhAudioGuide.Backend.Tests/ --no-restore
+      
+    - name: Run Unit Tests
+      run: dotnet test CSharp-main/VinhKhanhAudioGuide.Backend.Tests/ --no-build --verbosity normal --collect:"XPlat Code Coverage"
+      
+    - name: Run Integration Tests
+      run: dotnet test CSharp-main/VinhKhanhAudioGuide.Backend.Tests/Integration/ --no-build --verbosity normal
+      
+    - name: Run Performance Tests
+      run: dotnet test CSharp-main/VinhKhanhAudioGuide.Backend.Tests/Performance/ --no-build --verbosity normal
+      
+    - name: Run Security Tests
+      run: dotnet test CSharp-main/VinhKhanhAudioGuide.Backend.Tests/Security/ --no-build --verbosity normal
+
+  web-admin-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: CSharp-main/PhoAmThuc.Admin/package-lock.json
+        
+    - name: Install dependencies
+      run: |
+        cd CSharp-main/PhoAmThuc.Admin
+        npm ci
+        
+    - name: Run unit tests
+      run: |
+        cd CSharp-main/PhoAmThuc.Admin
+        npm run test:coverage
+        
+    - name: Install Playwright browsers
+      run: |
+        cd CSharp-main/PhoAmThuc.Admin
+        npx playwright install --with-deps
+        
+    - name: Run E2E tests
+      run: |
+        cd CSharp-main/PhoAmThuc.Admin
+        npm run test:e2e
+        
+    - name: Run accessibility tests
+      run: |
+        cd CSharp-main/PhoAmThuc.Admin
+        npm run test:accessibility
+
+  mobile-app-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+        
+    - name: Restore dependencies
+      run: dotnet restore CSharp-app/VinhKhanhAudioGuide.App/Tests/
+      
+    - name: Build
+      run: dotnet build CSharp-app/VinhKhanhAudioGuide.App/Tests/ --no-restore
+      
+    - name: Run Mobile Integration Tests
+      run: dotnet test CSharp-app/VinhKhanhAudioGuide.App/Tests/ --no-build --verbosity normal
+
+  test-report:
+    needs: [backend-tests, web-admin-tests, mobile-app-tests]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: Generate Test Report
+      run: |
+        echo "# Test Results Summary" > test-summary.md
+        echo "" >> test-summary.md
+        echo "## Backend Tests: ${{ needs.backend-tests.result }}" >> test-summary.md
+        echo "## Web Admin Tests: ${{ needs.web-admin-tests.result }}" >> test-summary.md  
+        echo "## Mobile App Tests: ${{ needs.mobile-app-tests.result }}" >> test-summary.md
