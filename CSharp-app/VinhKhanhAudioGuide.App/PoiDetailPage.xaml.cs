@@ -1,7 +1,5 @@
 namespace VinhKhanhAudioGuide.App;
 
-using System.Net.Http.Json;
-
 [QueryProperty(nameof(PoiId), "poiId")]
 [QueryProperty(nameof(PoiName), "name")]
 [QueryProperty(nameof(PoiDescription), "desc")]
@@ -92,41 +90,26 @@ public partial class PoiDetailPage : ContentPage
             CoordLabel.Text = $"{PoiLat}, {PoiLng}";
     }
 
-    private async void OnListenClicked(object sender, EventArgs e)
+    private async void OnListenClicked(object? sender, EventArgs e)
     {
         if (string.IsNullOrEmpty(_poiCode))
         {
-            await DisplayAlert("Lỗi", "Không tìm thấy mã POI", "OK");
+            await DisplayAlertAsync("Lỗi", "Không tìm thấy mã POI", "OK");
             return;
         }
 
-        // Lấy userId thực từ API thay vì hardcode
-        var userId = await ResolveUserIdAsync();
+        var userId = await AppConfig.ResolveDefaultUserIdAsync();
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            await DisplayAlertAsync("Lỗi kết nối", "Không resolve được user từ backend. Vui lòng kiểm tra backend đang chạy.", "OK");
+            return;
+        }
+
         await Shell.Current.GoToAsync(
             $"audio?qr={Uri.EscapeDataString(_poiCode)}&userId={userId}");
     }
 
-    private static async Task<string> ResolveUserIdAsync()
-    {
-        try
-        {
-            using var http = new HttpClient { BaseAddress = new Uri(AppConfig.ApiBaseUrl) };
-            var response = await http.PostAsJsonAsync("users/resolve", new
-            {
-                ExternalRef = "USER_DEMO",
-                PreferredLanguage = "vi"
-            });
-            if (response.IsSuccessStatusCode)
-            {
-                var user = await response.Content.ReadFromJsonAsync<ResolvedUserInfo>();
-                return user?.Id.ToString() ?? string.Empty;
-            }
-        }
-        catch { }
-        return string.Empty;
-    }
-
-    private async void OnMapLinkClicked(object sender, EventArgs e)
+    private async void OnMapLinkClicked(object? sender, EventArgs e)
     {
         var url = !string.IsNullOrEmpty(_mapLink)
             ? _mapLink
@@ -134,10 +117,4 @@ public partial class PoiDetailPage : ContentPage
 
         await Launcher.OpenAsync(url);
     }
-}
-
-public class ResolvedUserInfo
-{
-    public Guid Id { get; set; }
-    public string ExternalRef { get; set; } = string.Empty;
 }

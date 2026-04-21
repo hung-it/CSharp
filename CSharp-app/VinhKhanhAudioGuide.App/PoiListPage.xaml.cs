@@ -9,7 +9,7 @@ public partial class PoiListPage : ContentPage
     public PoiListPage()
     {
         InitializeComponent();
-        _httpClient = new HttpClient { BaseAddress = new Uri(AppConfig.ApiBaseUrl) };
+        _httpClient = AppConfig.CreateHttpClient();
         LoadPois();
     }
 
@@ -22,11 +22,11 @@ public partial class PoiListPage : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Lỗi", $"Không thể tải danh sách POI: {ex.Message}", "OK");
+            await DisplayAlertAsync("Lỗi", $"Không thể tải danh sách POI: {ex.Message}", "OK");
         }
     }
 
-    private async void OnPoiSelected(object sender, SelectionChangedEventArgs e)
+    private async void OnPoiSelected(object? sender, SelectionChangedEventArgs e)
     {
         if (e.CurrentSelection.FirstOrDefault() is not PoiDetail poi)
             return;

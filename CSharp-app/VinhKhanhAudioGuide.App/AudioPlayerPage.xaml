@@ -10,7 +10,7 @@
         <VerticalStackLayout Padding="24" Spacing="20">
 
             <!-- POI Info -->
-            <Frame BackgroundColor="{StaticResource Pink100}" CornerRadius="12" Padding="20">
+            <Border BackgroundColor="{StaticResource Pink100}" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="20">
                 <VerticalStackLayout Spacing="8">
                     <Label x:Name="PoiNameLabel" Text="Đang tải..." FontSize="22"
                            FontAttributes="Bold" TextColor="{StaticResource Pink900}"
@@ -18,19 +18,19 @@
                     <Label x:Name="PoiCodeLabel" Text="" FontSize="13"
                            TextColor="{StaticResource Pink500}" HorizontalOptions="Center" />
                 </VerticalStackLayout>
-            </Frame>
+            </Border>
 
             <!-- Audio Player -->
-            <Frame BackgroundColor="White" CornerRadius="12" Padding="20">
+            <Border BackgroundColor="White" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="20">
                 <VerticalStackLayout Spacing="16">
 
                     <!-- Album art placeholder -->
-                    <Frame BackgroundColor="{StaticResource Pink200}" CornerRadius="60"
-                           WidthRequest="120" HeightRequest="120"
-                           HorizontalOptions="Center" Padding="0">
+                    <Border BackgroundColor="{StaticResource Pink200}" StrokeThickness="0" StrokeShape="RoundRectangle 60"
+                            WidthRequest="120" HeightRequest="120"
+                            HorizontalOptions="Center" Padding="0">
                         <Label x:Name="PlayingIcon" Text="🎵" FontSize="48"
                                HorizontalOptions="Center" VerticalOptions="Center" />
-                    </Frame>
+                    </Border>
 
                     <!-- Status -->
                     <Label x:Name="StatusLabel" Text="Sẵn sàng phát"
@@ -69,10 +69,10 @@
                     </HorizontalStackLayout>
 
                 </VerticalStackLayout>
-            </Frame>
+            </Border>
 
             <!-- Language selector -->
-            <Frame BackgroundColor="White" CornerRadius="12" Padding="16">
+            <Border BackgroundColor="White" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="16">
                 <VerticalStackLayout Spacing="10">
                     <Label Text="Ngôn ngữ" FontSize="14" FontAttributes="Bold"
                            TextColor="{StaticResource Pink800}" />
@@ -87,7 +87,7 @@
                                 Clicked="OnLanguageEnClicked" />
                     </HorizontalStackLayout>
                 </VerticalStackLayout>
-            </Frame>
+            </Border>
 
         </VerticalStackLayout>
     </ScrollView>

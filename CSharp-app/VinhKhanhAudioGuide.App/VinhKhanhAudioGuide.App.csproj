@@ -74,4 +74,9 @@
 		<PackageReference Include="ZXing.Net.Maui.Controls" Version="0.4.0" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<Compile Remove="Tests\**\*.cs" />
+		<None Include="Tests\**\*" />
+	</ItemGroup>
+
 </Project>

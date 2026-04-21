@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BarChart3, Flame, MapPinned, Timer } from 'lucide-react';
 import { apiGet, buildQuery } from '../services/apiClient';
+import { useUser } from '../contexts/UserContext.jsx';
 import { Circle, MapContainer, Marker, Popup, Polyline, TileLayer } from 'react-leaflet';
 import L from 'leaflet';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
@@ -17,6 +18,7 @@ L.Icon.Default.mergeOptions({
 
 export default function DashboardPage() {
   const navigate = useNavigate();
+  const { currentUser } = useUser();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [topPois, setTopPois] = useState([]);
@@ -105,6 +107,33 @@ export default function DashboardPage() {
     .map((point) => [point.latitude, point.longitude])
     .filter((point) => Number.isFinite(point[0]) && Number.isFinite(point[1]));
 
+  const quickActions = [
+    { label: 'Quản lý POI', path: '/pois', roles: ['Admin', 'ShopManager'] },
+    { label: 'Quản lý Tour', path: '/tours', roles: ['Admin', 'ShopManager'] },
+    { label: 'Lịch sử sử dụng', path: '/usage-history', roles: ['Admin'] },
+    { label: 'Subscription', path: '/subscriptions', roles: ['Admin'] },
+    { label: 'QR Manager', path: '/qr-manager', roles: ['Admin', 'ShopManager'] },
+  ].filter((item) => {
+    if (!currentUser?.role) {
+      return true;
+    }
+
+    return item.roles.includes(currentUser.role);
+  });
+
+  const heatmapPoints = heatmap
+    .map((cell) => {
+      const latitude = cell.latitudeBucket ?? cell.cellLatitude;
+      const longitude = cell.longitudeBucket ?? cell.cellLongitude;
+
+      return {
+        ...cell,
+        latitude,
+        longitude,
+      };
+    })
+    .filter((cell) => Number.isFinite(cell.latitude) && Number.isFinite(cell.longitude));
+
   return (
     <div className='space-y-6 max-w-7xl mx-auto'>
       <div className='bg-white p-5 rounded-2xl shadow-sm border border-pink-100'>
@@ -115,11 +144,13 @@ export default function DashboardPage() {
           Theo dõi nhanh dữ liệu vận hành và đi tới các màn quản trị bằng một cú nhấp.
         </p>
         <div className='mt-4 flex flex-wrap gap-2'>
-          <QuickAction label='Quản lý POI' onClick={() => navigate('/pois')} />
-          <QuickAction label='Quản lý Tour' onClick={() => navigate('/tours')} />
-          <QuickAction label='Lịch sử sử dụng' onClick={() => navigate('/usage-history')} />
-          <QuickAction label='Subscription' onClick={() => navigate('/subscriptions')} />
-          <QuickAction label='QR Manager' onClick={() => navigate('/qr-manager')} />
+          {quickActions.map((action) => (
+            <QuickAction
+              key={action.path}
+              label={action.label}
+              onClick={() => navigate(action.path)}
+            />
+          ))}
         </div>
       </div>
 
@@ -192,13 +223,13 @@ export default function DashboardPage() {
             <h2 className='font-semibold text-pink-700'>Heatmap nổi bật</h2>
           </div>
           <div className='p-4 space-y-2'>
-            {heatmap.slice(0, 8).map((cell, index) => (
+            {heatmapPoints.slice(0, 8).map((cell, index) => (
               <div
-                key={`${cell.latitudeBucket}-${cell.longitudeBucket}-${index}`}
+                key={`${cell.latitude}-${cell.longitude}-${index}`}
                 className='flex items-center justify-between rounded-lg border border-pink-100 px-3 py-2'
               >
                 <span className='text-sm text-gray-700'>
-                  Lat {cell.latitudeBucket} / Lng {cell.longitudeBucket}
+                  Lat {cell.latitude} / Lng {cell.longitude}
                 </span>
                 <span className='text-xs font-semibold text-pink-700 bg-pink-100 px-2 py-1 rounded'>
                   {cell.pointCount} points
@@ -258,10 +289,10 @@ export default function DashboardPage() {
               </Marker>
             ))}
 
-            {heatmap.map((cell, index) => (
+            {heatmapPoints.map((cell, index) => (
               <Circle
-                key={`${cell.latitudeBucket}-${cell.longitudeBucket}-${index}`}
-                center={[cell.latitudeBucket, cell.longitudeBucket]}
+                key={`${cell.latitude}-${cell.longitude}-${index}`}
+                center={[cell.latitude, cell.longitude]}
                 radius={40 + cell.pointCount * 8}
                 pathOptions={{
                   color: '#f43f5e',

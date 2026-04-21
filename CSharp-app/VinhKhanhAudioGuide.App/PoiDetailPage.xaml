@@ -9,15 +9,15 @@
         <VerticalStackLayout Padding="20" Spacing="16">
 
             <!-- Ảnh POI -->
-            <Frame CornerRadius="14" Padding="0" IsClippedToBounds="True"
-                   HeightRequest="200" BackgroundColor="{StaticResource Pink200}">
+            <Border StrokeThickness="0" StrokeShape="RoundRectangle 14" Padding="0"
+                    HeightRequest="200" BackgroundColor="{StaticResource Pink200}">
                 <Image x:Name="PoiImage" Aspect="AspectFill"
                        BackgroundColor="{StaticResource Pink200}">
                     <Image.Source>
                         <FontImageSource Glyph="📍" Size="80" Color="#EC4899" />
                     </Image.Source>
                 </Image>
-            </Frame>
+            </Border>
 
             <!-- Tên + Khu vực -->
             <VerticalStackLayout Spacing="4">
@@ -31,17 +31,17 @@
             </VerticalStackLayout>
 
             <!-- Mô tả -->
-            <Frame BackgroundColor="White" CornerRadius="12" Padding="16">
+            <Border BackgroundColor="White" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="16">
                 <VerticalStackLayout Spacing="6">
                     <Label Text="Giới thiệu" FontSize="15" FontAttributes="Bold"
                            TextColor="{StaticResource Pink800}" />
                     <Label x:Name="DescLabel" FontSize="14"
                            TextColor="{StaticResource Pink700}" LineBreakMode="WordWrap" />
                 </VerticalStackLayout>
-            </Frame>
+            </Border>
 
             <!-- Tọa độ -->
-            <Frame BackgroundColor="White" CornerRadius="12" Padding="16">
+            <Border BackgroundColor="White" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="16">
                 <HorizontalStackLayout Spacing="12">
                     <Label Text="🗺️" FontSize="20" VerticalOptions="Center" />
                     <VerticalStackLayout Spacing="2">
@@ -51,7 +51,7 @@
                                TextColor="{StaticResource Pink400}" />
                     </VerticalStackLayout>
                 </HorizontalStackLayout>
-            </Frame>
+            </Border>
 
             <!-- Nút Nghe Audio -->
             <Button x:Name="ListenButton"

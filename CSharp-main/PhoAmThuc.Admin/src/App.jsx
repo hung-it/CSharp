@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { UserProvider } from './contexts/UserContext.jsx';
-import { ProtectedRoute } from './components/ProtectedRoute.jsx';
+import { AdminRoute, ProtectedRoute, ShopManagerRoute } from './components/ProtectedRoute.jsx';
 import Layout from './components/Layout.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import PoiList from './pages/PoiList.jsx';
@@ -26,14 +26,70 @@ function App() {
               </ProtectedRoute>
             }
           >
-            <Route index element={<DashboardPage />} />
-            <Route path='pois' element={<PoiList />} />
-            <Route path='audio' element={<AudioManager />} />
-            <Route path='translations' element={<TranslationManager />} />
-            <Route path='tours' element={<TourManager />} />
-            <Route path='usage-history' element={<UsageHistoryPage />} />
-            <Route path='subscriptions' element={<SubscriptionManager />} />
-            <Route path='qr-manager' element={<QrManager />} />
+            <Route
+              index
+              element={
+                <ShopManagerRoute>
+                  <DashboardPage />
+                </ShopManagerRoute>
+              }
+            />
+            <Route
+              path='pois'
+              element={
+                <ShopManagerRoute>
+                  <PoiList />
+                </ShopManagerRoute>
+              }
+            />
+            <Route
+              path='audio'
+              element={
+                <ShopManagerRoute>
+                  <AudioManager />
+                </ShopManagerRoute>
+              }
+            />
+            <Route
+              path='translations'
+              element={
+                <ShopManagerRoute>
+                  <TranslationManager />
+                </ShopManagerRoute>
+              }
+            />
+            <Route
+              path='tours'
+              element={
+                <ShopManagerRoute>
+                  <TourManager />
+                </ShopManagerRoute>
+              }
+            />
+            <Route
+              path='qr-manager'
+              element={
+                <ShopManagerRoute>
+                  <QrManager />
+                </ShopManagerRoute>
+              }
+            />
+            <Route
+              path='usage-history'
+              element={
+                <AdminRoute>
+                  <UsageHistoryPage />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path='subscriptions'
+              element={
+                <AdminRoute>
+                  <SubscriptionManager />
+                </AdminRoute>
+              }
+            />
             <Route path='*' element={<Navigate to='/' replace />} />
           </Route>
         </Routes>

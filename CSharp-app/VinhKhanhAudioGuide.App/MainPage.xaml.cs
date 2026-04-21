@@ -10,7 +10,7 @@ public partial class MainPage : ContentPage
     public MainPage()
     {
         InitializeComponent();
-        _httpClient = new HttpClient { BaseAddress = new Uri(AppConfig.ApiBaseUrl) };
+        _httpClient = AppConfig.CreateHttpClient();
         _ = InitAsync();
     }
 
@@ -23,25 +23,7 @@ public partial class MainPage : ContentPage
     // Resolve userId thật từ API thay vì hardcode
     private async Task ResolveUserAsync()
     {
-        try
-        {
-            var response = await _httpClient.PostAsJsonAsync("users/resolve", new
-            {
-                ExternalRef = "USER_DEMO",
-                PreferredLanguage = "vi"
-            });
-
-            if (response.IsSuccessStatusCode)
-            {
-                var user = await response.Content.ReadFromJsonAsync<ResolvedUser>();
-                _resolvedUserId = user?.Id.ToString() ?? string.Empty;
-            }
-        }
-        catch
-        {
-            // Fallback nếu API chưa chạy
-            _resolvedUserId = string.Empty;
-        }
+        _resolvedUserId = await AppConfig.ResolveDefaultUserIdAsync(_httpClient);
     }
 
     private async Task LoadDataAsync()
@@ -92,7 +74,7 @@ public partial class MainPage : ContentPage
         }
     }
 
-    private async void OnRefreshClicked(object sender, EventArgs e)
+    private async void OnRefreshClicked(object? sender, EventArgs e)
     {
         // Reset về —
         PoiCountLabel.Text = TourCountLabel.Text = ListenCountLabel.Text = "…";
@@ -100,16 +82,22 @@ public partial class MainPage : ContentPage
         await LoadDataAsync();
     }
 
-    private async void OnScanQRClicked(object sender, EventArgs e)
+    private async void OnScanQRClicked(object? sender, EventArgs e)
     {
         await Shell.Current.GoToAsync("qrScan");
     }
-}
 
-public class ResolvedUser
-{
-    public Guid Id { get; set; }
-    public string ExternalRef { get; set; } = string.Empty;
+    private async void OnOpenAdminWebClicked(object? sender, EventArgs e)
+    {
+        try
+        {
+            await Launcher.OpenAsync(new Uri(AppConfig.FrontendBaseUrl));
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlertAsync("Lỗi", $"Không thể mở web admin: {ex.Message}", "OK");
+        }
+    }
 }
 
 public class TopPoiItem

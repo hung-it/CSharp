@@ -9,15 +9,24 @@ export default function Layout() {
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   const menuItems = [
-    { name: 'Tổng quan (Dashboard)', icon: <BarChart3 size={20} />, path: '/' },
-    { name: 'Quản lý POI', icon: <MapPin size={20} />, path: '/pois' },
-    { name: 'Quản lý Audio', icon: <Music size={20} />, path: '/audio' },
-    { name: 'Quản lý Bản Dịch', icon: <Languages size={20} />, path: '/translations' },
-    { name: 'Quản lý Tour', icon: <Route size={20} />, path: '/tours' },
-    { name: 'QR Manager', icon: <QrCode size={20} />, path: '/qr-manager' },
-    { name: 'Lịch sử sử dụng', icon: <History size={20} />, path: '/usage-history' },
-    { name: 'Subscription 1/10 USD', icon: <WalletCards size={20} />, path: '/subscriptions' },
+    { name: 'Tổng quan (Dashboard)', icon: <BarChart3 size={20} />, path: '/', roles: ['Admin', 'ShopManager'] },
+    { name: 'Quản lý POI', icon: <MapPin size={20} />, path: '/pois', roles: ['Admin', 'ShopManager'] },
+    { name: 'Quản lý Audio', icon: <Music size={20} />, path: '/audio', roles: ['Admin', 'ShopManager'] },
+    { name: 'Quản lý Bản Dịch', icon: <Languages size={20} />, path: '/translations', roles: ['Admin', 'ShopManager'] },
+    { name: 'Quản lý Tour', icon: <Route size={20} />, path: '/tours', roles: ['Admin', 'ShopManager'] },
+    { name: 'QR Manager', icon: <QrCode size={20} />, path: '/qr-manager', roles: ['Admin', 'ShopManager'] },
+    { name: 'Lịch sử sử dụng', icon: <History size={20} />, path: '/usage-history', roles: ['Admin'] },
+    { name: 'Subscription 1/10 USD', icon: <WalletCards size={20} />, path: '/subscriptions', roles: ['Admin'] },
   ];
+
+  const role = currentUser?.role;
+  const visibleMenuItems = menuItems.filter((item) => {
+    if (!role) {
+      return true;
+    }
+
+    return item.roles.includes(role);
+  });
 
   function handleLogout() {
     logout();
@@ -43,12 +52,12 @@ export default function Layout() {
       {/* Sidebar */}
       <div className="w-64 bg-white shadow-[2px_0_8px_-3px_rgba(236,72,153,0.1)] border-r border-pink-100 z-10 flex flex-col">
         <div className="h-16 flex flex-col justify-center px-6 border-b border-pink-100 bg-white">
-          <h1 className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-purple-500 leading-tight">Vĩnh Khánh </h1>
+          <h1 className="text-xl font-black text-transparent bg-clip-text bg-linear-to-r from-pink-600 to-purple-500 leading-tight">Vĩnh Khánh </h1>
           <p className="text-[10px] text-pink-400 font-medium uppercase tracking-wide">Thuyết Minh Tự Động</p>
         </div>
         
         <nav className="flex-1 p-4 space-y-2">
-          {menuItems.map((item) => (
+          {visibleMenuItems.map((item) => (
             <NavLink
               key={item.path}
               to={item.path}
@@ -83,7 +92,7 @@ export default function Layout() {
                     <div className="text-sm font-medium text-gray-700">{currentUser.externalRef}</div>
                     <div className="text-xs text-gray-500">{getRoleLabel(currentUser.role)}</div>
                   </div>
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-pink-500 to-purple-500 flex items-center justify-center text-white font-bold shadow-md">
+                  <div className="w-9 h-9 rounded-xl bg-linear-to-tr from-pink-500 to-purple-500 flex items-center justify-center text-white font-bold shadow-md">
                     {getUserInitial(currentUser.externalRef)}
                   </div>
                 </>

@@ -12,7 +12,7 @@ public partial class MapPage : ContentPage
     public MapPage()
     {
         InitializeComponent();
-        _httpClient = new HttpClient { BaseAddress = new Uri(AppConfig.ApiBaseUrl) };
+        _httpClient = AppConfig.CreateHttpClient();
 
         // Default: Trường Đại học Sài Gòn (cơ sở 1)
         map.MoveToRegion(MapSpan.FromCenterAndRadius(
@@ -30,7 +30,7 @@ public partial class MapPage : ContentPage
 
             if (pois == null || pois.Count == 0)
             {
-                await DisplayAlert("Info", "No POIs found", "OK");
+                await DisplayAlertAsync("Info", "No POIs found", "OK");
                 return;
             }
 
@@ -76,7 +76,7 @@ public partial class MapPage : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Error", $"Failed to load POIs: {ex.Message}", "OK");
+            await DisplayAlertAsync("Error", $"Failed to load POIs: {ex.Message}", "OK");
         }
     }
 

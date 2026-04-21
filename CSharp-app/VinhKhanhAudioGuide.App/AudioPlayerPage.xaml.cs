@@ -48,7 +48,7 @@ public partial class AudioPlayerPage : ContentPage
     public AudioPlayerPage()
     {
         InitializeComponent();
-        _httpClient = new HttpClient { BaseAddress = new Uri(AppConfig.ApiBaseUrl) };
+        _httpClient = AppConfig.CreateHttpClient();
     }
 
     private async Task LoadAudioAsync()
@@ -66,9 +66,15 @@ public partial class AudioPlayerPage : ContentPage
 
         try
         {
+            if (!Guid.TryParse(_userId, out var userId))
+            {
+                StatusLabel.Text = "Lỗi: userId không hợp lệ";
+                return;
+            }
+
             var response = await _httpClient.PostAsJsonAsync("qr/start", new
             {
-                UserId = Guid.Parse(_userId),
+                UserId = userId,
                 QrPayload = _qrPayload,
                 LanguageCode = _currentLanguage
             });
@@ -77,7 +83,7 @@ public partial class AudioPlayerPage : ContentPage
             {
                 var err = await response.Content.ReadAsStringAsync();
                 StatusLabel.Text = "Lỗi: không thể tải audio";
-                await DisplayAlert("Lỗi", err, "OK");
+                await DisplayAlertAsync("Lỗi", err, "OK");
                 return;
             }
 
@@ -102,7 +108,7 @@ public partial class AudioPlayerPage : ContentPage
         catch (Exception ex)
         {
             StatusLabel.Text = "Lỗi kết nối";
-            await DisplayAlert("Lỗi", ex.Message, "OK");
+            await DisplayAlertAsync("Lỗi", ex.Message, "OK");
         }
     }
 
@@ -110,7 +116,7 @@ public partial class AudioPlayerPage : ContentPage
     {
         if (filePath.StartsWith("http://") || filePath.StartsWith("https://"))
             return filePath;
-        var baseUrl = AppConfig.ApiBaseUrl.Replace("/api/v1/", "").TrimEnd('/');
+        var baseUrl = AppConfig.MediaBaseUrl;
         return $"{baseUrl}/{filePath.TrimStart('/')}";
     }
 
@@ -137,7 +143,7 @@ public partial class AudioPlayerPage : ContentPage
         _sessionId = Guid.Empty;
     }
 
-    private void OnPlayPauseClicked(object sender, EventArgs e)
+    private void OnPlayPauseClicked(object? sender, EventArgs e)
     {
         if (_isPlaying)
         {
@@ -162,7 +168,7 @@ public partial class AudioPlayerPage : ContentPage
         }
     }
 
-    private async void OnStopClicked(object sender, EventArgs e)
+    private async void OnStopClicked(object? sender, EventArgs e)
     {
         if (_isPlaying && _playStartedAt != DateTime.MinValue)
             _totalPlayedSeconds += (int)(DateTime.UtcNow - _playStartedAt).TotalSeconds;
@@ -199,7 +205,7 @@ public partial class AudioPlayerPage : ContentPage
         await EndSessionAsync();
     }
 
-    private async void OnLanguageViClicked(object sender, EventArgs e)
+    private async void OnLanguageViClicked(object? sender, EventArgs e)
     {
         _currentLanguage = "vi";
         BtnVi.BackgroundColor = Color.FromArgb("#EC4899");
@@ -212,7 +218,7 @@ public partial class AudioPlayerPage : ContentPage
         await LoadAudioAsync();
     }
 
-    private async void OnLanguageEnClicked(object sender, EventArgs e)
+    private async void OnLanguageEnClicked(object? sender, EventArgs e)
     {
         _currentLanguage = "en";
         BtnEn.BackgroundColor = Color.FromArgb("#EC4899");

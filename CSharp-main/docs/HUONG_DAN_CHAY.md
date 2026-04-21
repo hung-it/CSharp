@@ -1,75 +1,74 @@
-# Huong Dan Chay Du An (Backend + Frontend Admin)
+# Huong Dan Chay Du An (Backend + Frontend Admin + MAUI)
 
 Luu y pham vi:
 - Web chi dung cho admin quan ly noi dung/van hanh.
-- User cuoi se dung app mobile (MAUI), khong dung web.
+- User cuoi su dung app mobile MAUI.
 
 ## 1. Yeu cau moi truong
 - .NET SDK 10
 - Node.js 20+
+- Visual Studio 2022 / workload .NET MAUI (neu chay app MAUI tren Windows)
 
 ## 2. Kiem tra nhanh truoc khi chay
-Mo terminal tai thu muc goc repo va chay:
+Mo terminal tai thu muc goc repo D:\PhoAmThuc va chay:
 
-dotnet build PhoAmThuc.sln -v minimal
-dotnet test PhoAmThuc.sln -v minimal
+powershell -ExecutionPolicy Bypass -File .\scripts\run-backend-tests.ps1
+
+Kiem tra frontend build:
+
+Set-Location .\CSharp-main\PhoAmThuc.Admin
+npm run build
 
 ## 3. Chay Backend API
-1. Mo terminal tai thu muc goc repo.
-2. Chay lenh:
+Lenh chay backend tu root:
 
-dotnet run --project VinhKhanhAudioGuide.Api/VinhKhanhAudioGuide.Api.csproj --launch-profile http
+dotnet run --project .\CSharp-main\VinhKhanhAudioGuide.Api\VinhKhanhAudioGuide.Api.csproj --urls http://localhost:5140
 
-3. API se lang nghe tai:
+Hoac chay nhanh API + frontend bang script:
 
-http://localhost:5140
+powershell -ExecutionPolicy Bypass -File .\scripts\run-dev.ps1
 
-4. Smoke test backend:
-- Health:
-   http://localhost:5140/api/v1/health
-- Danh sach POI:
-   http://localhost:5140/api/v1/pois
+Sau khi API chay:
+- Health: http://localhost:5140/api/v1/health
+- POI list: http://localhost:5140/api/v1/pois
+
+Smoke test backend:
+
+powershell -ExecutionPolicy Bypass -File .\scripts\run-api-smoke.ps1 -BaseUrl "http://localhost:5140"
 
 ## 4. Chay Frontend Admin
-1. Mo terminal moi tai thu muc PhoAmThuc.Admin.
-2. Cai dependency:
+1. Mo terminal tai .\CSharp-main\PhoAmThuc.Admin
+2. Lan dau: npm install
+3. Chay: npm run dev
+4. Truy cap: http://localhost:5173 (hoac cong tiep theo neu 5173 ban)
 
-npm install
+## 5. Chay MAUI tren Windows
+Dung script helper tu root de tranh loi dotnet run sai thu muc:
 
-3. Tao file moi truong (lan dau):
+Build MAUI:
 
-copy .env.example .env
+powershell -ExecutionPolicy Bypass -File .\scripts\run-maui.ps1 -BuildOnly
 
-4. Chay frontend:
+Run MAUI:
 
-npm run dev
+powershell -ExecutionPolicy Bypass -File .\scripts\run-maui.ps1
 
-5. Truy cap:
-- http://localhost:5173
-- Neu 5173 dang ban, Vite se doi cong (vi du 5174).
+Run MAUI va tu mo backend API:
 
-## 5. Cac man admin can test
-Sau khi vao web admin, test cac man:
-- Dashboard Analytics
-- Quan ly POI
-- Quan ly Audio (CRUD: them/sua/xoa audio theo tung POI)
-- Quan ly Ban Dich
-- Quan ly Tour
-- Lich su su dung
-- Subscription (CRUD + check access theo segment)
+powershell -ExecutionPolicy Bypass -File .\scripts\run-maui.ps1 -StartBackend
 
-## 6. Kiem tra ket noi Frontend-Backend
-- Frontend dang dung base URL mac dinh:
-   http://localhost:5140/api/v1
-- Co the doi bang bien moi truong trong .env:
-   VITE_API_BASE_URL=http://localhost:5140/api/v1
+## 6. Checklist runtime MAUI de test nhanh
+1. App mo duoc va vao trang tong quan khong crash.
+2. Danh sach POI load du lieu backend thanh cong.
+3. QR scan page mo duoc camera va xu ly ket qua scan.
+4. Audio player bat/tam dung/chuyen track binh thuong.
+5. Nut mo Admin web hoac dieu huong lien quan hoat dong.
+6. Khong co loi ket noi API khi backend dang chay o http://localhost:5140.
 
 ## 7. Loi thuong gap
+- dotnet run tai root bao "Couldn't find a project to run":
+  Dung script .\scripts\run-maui.ps1 hoac truyen --project day du.
 - Frontend bao loi ket noi API:
-   - Kiem tra backend co dang chay khong.
-   - Kiem tra dung cong 5140.
-- Port 5140 da bi chiem:
-   - Dung process cu dang chiem cong, hoac doi applicationUrl trong launchSettings.
-- Frontend khong chay duoc vite:
-   - Chua npm install.
-   - Thu xoa node_modules + npm install lai.
+  Kiem tra backend co dang chay va cong 5140 dung.
+- Smoke test fail o health:
+  Co the truyen BaseUrl dang root hoac /api/v1, script da ho tro ca hai.

@@ -19,8 +19,8 @@
 
             <!-- Stats row -->
             <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
-                <Frame Grid.Column="0" BackgroundColor="{StaticResource Pink100}"
-                       CornerRadius="12" Padding="12" HasShadow="False">
+                  <Border Grid.Column="0" BackgroundColor="{StaticResource Pink100}"
+                       StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="12">
                     <VerticalStackLayout Spacing="4">
                         <Label Text="📍" FontSize="22" HorizontalOptions="Center" />
                         <Label x:Name="PoiCountLabel" Text="—" FontSize="26"
@@ -29,10 +29,10 @@
                         <Label Text="POI" FontSize="11" TextColor="{StaticResource Pink400}"
                                HorizontalOptions="Center" />
                     </VerticalStackLayout>
-                </Frame>
+                  </Border>
 
-                <Frame Grid.Column="1" BackgroundColor="{StaticResource Pink100}"
-                       CornerRadius="12" Padding="12" HasShadow="False">
+                  <Border Grid.Column="1" BackgroundColor="{StaticResource Pink100}"
+                       StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="12">
                     <VerticalStackLayout Spacing="4">
                         <Label Text="✈️" FontSize="22" HorizontalOptions="Center" />
                         <Label x:Name="TourCountLabel" Text="—" FontSize="26"
@@ -41,10 +41,10 @@
                         <Label Text="Tour" FontSize="11" TextColor="{StaticResource Pink400}"
                                HorizontalOptions="Center" />
                     </VerticalStackLayout>
-                </Frame>
+                  </Border>
 
-                <Frame Grid.Column="2" BackgroundColor="{StaticResource Pink100}"
-                       CornerRadius="12" Padding="12" HasShadow="False">
+                  <Border Grid.Column="2" BackgroundColor="{StaticResource Pink100}"
+                       StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="12">
                     <VerticalStackLayout Spacing="4">
                         <Label Text="🎧" FontSize="22" HorizontalOptions="Center" />
                         <Label x:Name="ListenCountLabel" Text="—" FontSize="26"
@@ -53,7 +53,7 @@
                         <Label Text="Lượt nghe" FontSize="11" TextColor="{StaticResource Pink400}"
                                HorizontalOptions="Center" />
                     </VerticalStackLayout>
-                </Frame>
+                  </Border>
             </Grid>
 
             <!-- Quét QR -->
@@ -63,8 +63,15 @@
                     CornerRadius="12" HeightRequest="54"
                     Clicked="OnScanQRClicked" />
 
+                <Button Text="🌐  Mở Web Admin"
+                    BackgroundColor="{StaticResource Pink100}"
+                    TextColor="{StaticResource Pink700}" FontSize="15" FontAttributes="Bold"
+                    BorderColor="{StaticResource Pink300}" BorderWidth="1"
+                    CornerRadius="12" HeightRequest="50"
+                    Clicked="OnOpenAdminWebClicked" />
+
             <!-- Top POI -->
-            <Frame BackgroundColor="White" CornerRadius="12" Padding="16" HasShadow="False">
+            <Border BackgroundColor="White" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="16">
                 <VerticalStackLayout Spacing="10">
                     <Label Text="🏆 Top POI được nghe nhiều nhất"
                            FontSize="14" FontAttributes="Bold"
@@ -95,10 +102,10 @@
                            FontSize="13" TextColor="{StaticResource Pink300}"
                            HorizontalOptions="Center" IsVisible="False" />
                 </VerticalStackLayout>
-            </Frame>
+            </Border>
 
             <!-- Thống kê 7 ngày -->
-            <Frame BackgroundColor="White" CornerRadius="12" Padding="16" HasShadow="False">
+            <Border BackgroundColor="White" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="16">
                 <VerticalStackLayout Spacing="6">
                     <Label Text="📊 Thống kê 7 ngày gần nhất"
                            FontSize="14" FontAttributes="Bold"
@@ -116,7 +123,7 @@
                         </VerticalStackLayout>
                     </Grid>
                 </VerticalStackLayout>
-            </Frame>
+            </Border>
 
         </VerticalStackLayout>
     </ScrollView>

@@ -7,15 +7,27 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
-$adminPath = Join-Path $repoRoot 'PhoAmThuc.Admin'
-$backendProject = Join-Path $repoRoot 'VinhKhanhAudioGuide.Api\VinhKhanhAudioGuide.Api.csproj'
+$adminCandidates = @(
+    (Join-Path $repoRoot 'CSharp-main\PhoAmThuc.Admin'),
+    (Join-Path $repoRoot 'PhoAmThuc.Admin')
+)
+
+$adminPath = $adminCandidates |
+    Where-Object {
+        (Test-Path $_) -and
+        (Test-Path (Join-Path $_ 'package.json')) -and
+        (Test-Path (Join-Path $_ 'index.html'))
+    } |
+    Select-Object -First 1
+
+$backendProject = Join-Path $repoRoot 'CSharp-main\VinhKhanhAudioGuide.Api\VinhKhanhAudioGuide.Api.csproj'
 
 if (-not (Test-Path $backendProject)) {
     throw "Backend project not found: $backendProject"
 }
 
 if (-not (Test-Path $adminPath)) {
-    throw "Frontend admin folder not found: $adminPath"
+    throw "No runnable frontend admin folder found. Expected one of: $($adminCandidates -join ', ')"
 }
 
 $frontendSetup = if ($InstallDependencies) {
@@ -33,6 +45,7 @@ $frontendCommand = "Set-Location '$adminPath'; ${frontendSetup}npm run dev"
 
 Write-Host 'Preparing local dev environment...'
 Write-Host "Repo root: $repoRoot"
+Write-Host "Frontend path: $adminPath"
 
 if ($DryRun) {
     Write-Host ''

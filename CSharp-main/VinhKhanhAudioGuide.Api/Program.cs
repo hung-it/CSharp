@@ -53,7 +53,8 @@ builder.Services.AddCors(options =>
             if (builder.Environment.IsDevelopment() && Uri.TryCreate(origin, UriKind.Absolute, out var uri))
             {
                 return uri.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase)
-                    || uri.Host.Equals("127.0.0.1", StringComparison.OrdinalIgnoreCase);
+                    || uri.Host.Equals("127.0.0.1", StringComparison.OrdinalIgnoreCase)
+                    || uri.Host.Equals("10.0.2.2", StringComparison.OrdinalIgnoreCase);
             }
 
             return false;

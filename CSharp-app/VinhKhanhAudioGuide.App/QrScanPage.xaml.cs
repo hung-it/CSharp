@@ -1,4 +1,3 @@
-using System.Net.Http.Json;
 using ZXing.Net.Maui;
 
 namespace VinhKhanhAudioGuide.App;
@@ -14,7 +13,7 @@ public partial class QrScanPage : ContentPage
 
         BarcodeReader.Options = new BarcodeReaderOptions
         {
-            Formats = BarcodeFormats.QrCode,
+            Formats = BarcodeFormats.TwoDimensional,
             AutoRotate = true,
             Multiple = false
         };
@@ -26,35 +25,21 @@ public partial class QrScanPage : ContentPage
         _isProcessing = false;
 
         // Resolve userId thực
-        _resolvedUserId = await ResolveUserIdAsync();
+        _resolvedUserId = await AppConfig.ResolveDefaultUserIdAsync();
+        if (string.IsNullOrWhiteSpace(_resolvedUserId))
+        {
+            await DisplayAlertAsync("Lỗi kết nối", "Không resolve được user từ backend. Vui lòng kiểm tra backend đang chạy.", "OK");
+            await Shell.Current.GoToAsync("..");
+            return;
+        }
 
         var status = await Permissions.RequestAsync<Permissions.Camera>();
         if (status != PermissionStatus.Granted)
         {
-            await DisplayAlert("Cần quyền camera",
+            await DisplayAlertAsync("Cần quyền camera",
                 "Vui lòng cấp quyền camera để quét mã QR.", "OK");
             await Shell.Current.GoToAsync("..");
         }
-    }
-
-    private static async Task<string> ResolveUserIdAsync()
-    {
-        try
-        {
-            using var http = new HttpClient { BaseAddress = new Uri(AppConfig.ApiBaseUrl) };
-            var resp = await http.PostAsJsonAsync("users/resolve", new
-            {
-                ExternalRef = "USER_DEMO",
-                PreferredLanguage = "vi"
-            });
-            if (resp.IsSuccessStatusCode)
-            {
-                var user = await resp.Content.ReadFromJsonAsync<ResolvedUser>();
-                return user?.Id.ToString() ?? string.Empty;
-            }
-        }
-        catch { }
-        return string.Empty;
     }
 
     protected override void OnDisappearing()
@@ -64,7 +49,7 @@ public partial class QrScanPage : ContentPage
         BarcodeReader.IsDetecting = false;
     }
 
-    private async void OnBarcodesDetected(object sender, BarcodeDetectionEventArgs e)
+    private async void OnBarcodesDetected(object? sender, BarcodeDetectionEventArgs e)
     {
         // Chỉ xử lý 1 lần, tránh trigger nhiều lần liên tiếp
         if (_isProcessing) return;
@@ -96,13 +81,8 @@ public partial class QrScanPage : ContentPage
         });
     }
 
-    private async void OnCloseClicked(object sender, EventArgs e)
+    private async void OnCloseClicked(object? sender, EventArgs e)
     {
         await Shell.Current.GoToAsync("..");
     }
-}
-
-public class ResolvedUser
-{
-    public Guid Id { get; set; }
 }

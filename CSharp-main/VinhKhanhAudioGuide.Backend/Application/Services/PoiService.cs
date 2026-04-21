@@ -39,6 +39,24 @@ public sealed class PoiService(AudioGuideDbContext dbContext) : IPoiService
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IEnumerable<Poi>> GetPoisByShopAsync(Guid shopId, CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Pois
+            .Include(p => p.AudioAssets)
+            .Where(p => p.ShopId == shopId)
+            .OrderBy(p => p.Name)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<IEnumerable<Poi>> GetPoisByShopAndDistrictAsync(Guid shopId, string district, CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Pois
+            .Include(p => p.AudioAssets)
+            .Where(p => p.ShopId == shopId && p.District == district)
+            .OrderBy(p => p.Name)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<Poi> CreatePoiAsync(
         string code,
         string name,
@@ -50,6 +68,7 @@ public sealed class PoiService(AudioGuideDbContext dbContext) : IPoiService
         int priority = 0,
         string? imageUrl = null,
         string? mapLink = null,
+        Guid? shopId = null,
         CancellationToken cancellationToken = default)
     {
         var existingPoi = await GetPoiByCodeAsync(code, cancellationToken);
@@ -69,7 +88,8 @@ public sealed class PoiService(AudioGuideDbContext dbContext) : IPoiService
             District = district,
             Priority = priority,
             ImageUrl = imageUrl,
-            MapLink = mapLink
+            MapLink = mapLink,
+            ShopId = shopId
         };
 
         _dbContext.Pois.Add(poi);

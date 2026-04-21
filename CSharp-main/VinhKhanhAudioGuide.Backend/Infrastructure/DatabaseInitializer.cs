@@ -29,20 +29,51 @@ internal sealed class DatabaseInitializer(
             return;
         }
 
-        await EnsurePoiColumnAsync("Priority", "INTEGER NOT NULL DEFAULT 0", cancellationToken);
-        await EnsurePoiColumnAsync("ImageUrl", "TEXT NULL", cancellationToken);
-        await EnsurePoiColumnAsync("MapLink", "TEXT NULL", cancellationToken);
+        await EnsurePriorityColumnAsync(cancellationToken);
+        await EnsureImageUrlColumnAsync(cancellationToken);
+        await EnsureMapLinkColumnAsync(cancellationToken);
     }
 
-    private async Task EnsurePoiColumnAsync(string columnName, string columnDefinition, CancellationToken cancellationToken)
+    private async Task EnsurePriorityColumnAsync(CancellationToken cancellationToken)
     {
+        const string columnName = "Priority";
         if (await PoiColumnExistsAsync(columnName, cancellationToken))
         {
             return;
         }
 
         await _dbContext.Database.ExecuteSqlRawAsync(
-            $"ALTER TABLE \"Pois\" ADD COLUMN \"{columnName}\" {columnDefinition};",
+            "ALTER TABLE \"Pois\" ADD COLUMN \"Priority\" INTEGER NOT NULL DEFAULT 0;",
+            cancellationToken);
+
+        _logger.LogInformation("Applied schema migration: added Pois.{ColumnName}", columnName);
+    }
+
+    private async Task EnsureImageUrlColumnAsync(CancellationToken cancellationToken)
+    {
+        const string columnName = "ImageUrl";
+        if (await PoiColumnExistsAsync(columnName, cancellationToken))
+        {
+            return;
+        }
+
+        await _dbContext.Database.ExecuteSqlRawAsync(
+            "ALTER TABLE \"Pois\" ADD COLUMN \"ImageUrl\" TEXT NULL;",
+            cancellationToken);
+
+        _logger.LogInformation("Applied schema migration: added Pois.{ColumnName}", columnName);
+    }
+
+    private async Task EnsureMapLinkColumnAsync(CancellationToken cancellationToken)
+    {
+        const string columnName = "MapLink";
+        if (await PoiColumnExistsAsync(columnName, cancellationToken))
+        {
+            return;
+        }
+
+        await _dbContext.Database.ExecuteSqlRawAsync(
+            "ALTER TABLE \"Pois\" ADD COLUMN \"MapLink\" TEXT NULL;",
             cancellationToken);
 
         _logger.LogInformation("Applied schema migration: added Pois.{ColumnName}", columnName);

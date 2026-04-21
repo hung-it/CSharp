@@ -6,25 +6,6 @@
     xmlns:local="clr-namespace:VinhKhanhAudioGuide.App"
     Title="VinhKhanhAudioGuide.App">
 
-    <Shell.Resources>
-        <ShellContent x:Name="AudioRoute"
-                      Route="audio"
-                      ContentTemplate="{DataTemplate local:AudioPlayerPage}"
-                      IsVisible="False" />
-        <ShellContent x:Name="PoiDetailRoute"
-                      Route="poiDetail"
-                      ContentTemplate="{DataTemplate local:PoiDetailPage}"
-                      IsVisible="False" />
-        <ShellContent x:Name="QrScanRoute"
-                      Route="qrScan"
-                      ContentTemplate="{DataTemplate local:QrScanPage}"
-                      IsVisible="False" />
-        <ShellContent x:Name="TourDetailRoute"
-                      Route="tourDetail"
-                      ContentTemplate="{DataTemplate local:TourDetailPage}"
-                      IsVisible="False" />
-    </Shell.Resources>
-
     <TabBar>
         <Tab Title="Dashboard" Icon="home.png">
             <ShellContent ContentTemplate="{DataTemplate local:MainPage}" />
