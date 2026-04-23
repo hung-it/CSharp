@@ -2,158 +2,202 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="VinhKhanhAudioGuide.App.TourManagerPage"
-             BackgroundColor="#FFFBF5">
+             Title="Tuyến Tour"
+             BackgroundColor="#FFF5F5">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="16" Spacing="16">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-            <!-- 🧭 Header -->
-            <VerticalStackLayout Spacing="4">
-                <Label Text="✈️ Tuyến Tour" FontSize="22" FontAttributes="Bold"
-                       TextColor="#1F2937" />
-                <Label Text="Chọn tour để khám phá Phố Ăn Vĩnh Khách 🍜"
-                       FontSize="13" TextColor="#6B7280" />
-            </VerticalStackLayout>
+        <!-- Header -->
+        <Frame Grid.Row="0" BackgroundColor="#FF69B4" CornerRadius="0" Padding="16" HasShadow="False">
+            <StackLayout>
+                <Label Text="✈️ Tuyến Tour" FontSize="22" FontAttributes="Bold" TextColor="White" 
+                       HorizontalOptions="Center"/>
+            </StackLayout>
+        </Frame>
 
-            <!-- 🎫 Tour Cards -->
-            <CollectionView x:Name="TourCollectionView" SelectionMode="Single"
-                           SelectionChanged="OnTourSelected">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Border BackgroundColor="White" StrokeThickness="0"
-                                StrokeShape="RoundRectangle 16" Padding="16" Margin="0,0,0,12">
-                            <VerticalStackLayout Spacing="12">
+        <ScrollView Grid.Row="1">
+            <StackLayout Padding="16" Spacing="16">
 
-                                <!-- Tour Header -->
-                                <Grid ColumnDefinitions="*,Auto">
-                                    <VerticalStackLayout Grid.Column="0" Spacing="4">
-                                        <Label Text="{Binding Name}" FontSize="17"
-                                               FontAttributes="Bold" TextColor="#1F2937" />
-                                        <Label Text="{Binding Description}" FontSize="12"
-                                               TextColor="#6B7280" />
-                                    </VerticalStackLayout>
-                                    <Label Grid.Column="1" Text="›" FontSize="24"
-                                           FontAttributes="Bold" TextColor="#9CA3AF"
-                                           VerticalOptions="Center" />
-                                </Grid>
+                <!-- My Tours Stats -->
+                <Frame BackgroundColor="White" CornerRadius="12" Padding="16" HasShadow="True">
+                    <StackLayout>
+                        <Label Text="📊 Tour của bạn" FontSize="18" FontAttributes="Bold" TextColor="#333"/>
+                        <Grid Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
 
-                                <!-- Tour Stats -->
-                                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
-                                    <Border Grid.Column="0" BackgroundColor="#FDF2F8"
-                                            StrokeThickness="0" StrokeShape="RoundRectangle 8"
-                                            Padding="8">
-                                        <VerticalStackLayout HorizontalOptions="Center">
-                                            <Label Text="{Binding StopCount}" FontSize="16"
-                                                   FontAttributes="Bold" TextColor="#EC4899"
-                                                   HorizontalOptions="Center" />
-                                            <Label Text="điểm dừng" FontSize="9"
-                                                   TextColor="#9CA3AF" HorizontalOptions="Center" />
-                                        </VerticalStackLayout>
-                                    </Border>
-                                    <Border Grid.Column="1" BackgroundColor="#EFF6FF"
-                                            StrokeThickness="0" StrokeShape="RoundRectangle 8"
-                                            Padding="8">
-                                        <VerticalStackLayout HorizontalOptions="Center">
-                                            <Label Text="{Binding Duration}" FontSize="16"
-                                                   FontAttributes="Bold" TextColor="#3B82F6"
-                                                   HorizontalOptions="Center" />
-                                            <Label Text="thời gian" FontSize="9"
-                                                   TextColor="#9CA3AF" HorizontalOptions="Center" />
-                                        </VerticalStackLayout>
-                                    </Border>
-                                    <Border Grid.Column="2" BackgroundColor="#ECFDF5"
-                                            StrokeThickness="0" StrokeShape="RoundRectangle 8"
-                                            Padding="8">
-                                        <VerticalStackLayout HorizontalOptions="Center">
-                                            <Label Text="{Binding Difficulty}" FontSize="16"
-                                                   FontAttributes="Bold" TextColor="#10B981"
-                                                   HorizontalOptions="Center" />
-                                            <Label Text="độ khó" FontSize="9"
-                                                   TextColor="#9CA3AF" HorizontalOptions="Center" />
-                                        </VerticalStackLayout>
-                                    </Border>
-                                </Grid>
+                            <StackLayout Grid.Column="0" HorizontalOptions="Center">
+                                <Label x:Name="ToursCompletedLabel" Text="0" FontSize="28" FontAttributes="Bold" 
+                                       TextColor="#FF69B4" HorizontalOptions="Center"/>
+                                <Label Text="tour đã làm" FontSize="11" TextColor="#666" HorizontalOptions="Center"/>
+                            </StackLayout>
+                            <StackLayout Grid.Column="1" HorizontalOptions="Center">
+                                <Label x:Name="PoisVisitedLabel" Text="0" FontSize="28" FontAttributes="Bold" 
+                                       TextColor="#FF69B4" HorizontalOptions="Center"/>
+                                <Label Text="điểm đã ghé" FontSize="11" TextColor="#666" HorizontalOptions="Center"/>
+                            </StackLayout>
+                            <StackLayout Grid.Column="2" HorizontalOptions="Center">
+                                <Label x:Name="AudioListenedLabel" Text="0" FontSize="28" FontAttributes="Bold" 
+                                       TextColor="#FF69B4" HorizontalOptions="Center"/>
+                                <Label Text="audio đã nghe" FontSize="11" TextColor="#666" HorizontalOptions="Center"/>
+                            </StackLayout>
+                        </Grid>
+                    </StackLayout>
+                </Frame>
 
-                                <!-- Districts Badge -->
-                                <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
-                                    <HorizontalStackLayout Spacing="6">
-                                        <Border BackgroundColor="#FEF3C7" StrokeThickness="0"
-                                                StrokeShape="RoundRectangle 10" Padding="8,4">
-                                            <Label Text="🏘️ Xóm Chiếu" FontSize="11"
-                                                   TextColor="#B45309" />
-                                        </Border>
-                                        <Border BackgroundColor="#DBEAFE" StrokeThickness="0"
-                                                StrokeShape="RoundRectangle 10" Padding="8,4">
-                                            <Label Text="🏠 Vĩnh Hội" FontSize="11"
-                                                   TextColor="#1E40AF" />
-                                        </Border>
-                                        <Border BackgroundColor="#D1FAE5" StrokeThickness="0"
-                                                StrokeShape="RoundRectangle 10" Padding="8,4">
-                                            <Label Text="🏪 Khánh Hội" FontSize="11"
-                                                   TextColor="#047857" />
-                                        </Border>
-                                    </HorizontalStackLayout>
-                                </ScrollView>
+                <!-- District Tours -->
+                <Label Text="🏘️ Các tuyến tour" FontSize="18" FontAttributes="Bold" TextColor="#333"/>
 
-                                <!-- Start Button -->
-                                <Button Text="🚀 Bắt đầu tour" BackgroundColor="#EC4899"
-                                        TextColor="White" FontSize="14" FontAttributes="Bold"
-                                        CornerRadius="12" HeightRequest="46"
-                                        Clicked="OnStartTourClicked" />
+                <!-- Xóm Chiếu Tour -->
+                <Frame BackgroundColor="White" CornerRadius="12" Padding="16" HasShadow="True">
+                    <StackLayout>
+                        <StackLayout Orientation="Horizontal">
+                            <Label Text="🏘️" FontSize="32"/>
+                            <StackLayout Margin="12,0,0,0">
+                                <Label Text="Tuyến Xóm Chiếu" FontSize="18" FontAttributes="Bold" TextColor="#333"/>
+                                <Label Text="Khám phá ẩm thực truyền thống" FontSize="12" TextColor="#666"/>
+                            </StackLayout>
+                        </StackLayout>
+                        <Grid Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackLayout Grid.Column="0">
+                                <Label Text="📍" FontSize="20" HorizontalOptions="Center"/>
+                                <Label x:Name="XomChieuStopsLabel" Text="5" FontSize="16" FontAttributes="Bold" 
+                                       TextColor="#FF69B4" HorizontalOptions="Center"/>
+                                <Label Text="điểm dừng" FontSize="10" TextColor="#666" HorizontalOptions="Center"/>
+                            </StackLayout>
+                            <StackLayout Grid.Column="1">
+                                <Label Text="⏱️" FontSize="20" HorizontalOptions="Center"/>
+                                <Label Text="2" FontSize="16" FontAttributes="Bold" 
+                                       TextColor="#FF69B4" HorizontalOptions="Center"/>
+                                <Label Text="thời gian" FontSize="10" TextColor="#666" HorizontalOptions="Center"/>
+                            </StackLayout>
+                            <StackLayout Grid.Column="2">
+                                <Label Text="📏" FontSize="20" HorizontalOptions="Center"/>
+                                <Label Text="Dễ" FontSize="16" FontAttributes="Bold" 
+                                       TextColor="#FF69B4" HorizontalOptions="Center"/>
+                                <Label Text="độ khó" FontSize="10" TextColor="#666" HorizontalOptions="Center"/>
+                            </StackLayout>
+                        </Grid>
+                        <Button Text="🚀 Bắt đầu tour" BackgroundColor="#FF69B4" TextColor="White" 
+                                CornerRadius="20" Margin="0,12,0,0" Clicked="StartXomChieuTour_Clicked"/>
+                    </StackLayout>
+                </Frame>
 
-                            </VerticalStackLayout>
-                        </Border>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
+                <!-- Vĩnh Hội Tour -->
+                <Frame BackgroundColor="White" CornerRadius="12" Padding="16" HasShadow="True">
+                    <StackLayout>
+                        <StackLayout Orientation="Horizontal">
+                            <Label Text="🏠" FontSize="32"/>
+                            <StackLayout Margin="12,0,0,0">
+                                <Label Text="Tuyến Vĩnh Hội" FontSize="18" FontAttributes="Bold" TextColor="#333"/>
+                                <Label Text="Di sản văn hóa lịch sử" FontSize="12" TextColor="#666"/>
+                            </StackLayout>
+                        </StackLayout>
+                        <Grid Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackLayout Grid.Column="0">
+                                <Label Text="📍" FontSize="20" HorizontalOptions="Center"/>
+                                <Label x:Name="VinhHoiStopsLabel" Text="7" FontSize="16" FontAttributes="Bold" 
+                                       TextColor="#FF69B4" HorizontalOptions="Center"/>
+                                <Label Text="điểm dừng" FontSize="10" TextColor="#666" HorizontalOptions="Center"/>
+                            </StackLayout>
+                            <StackLayout Grid.Column="1">
+                                <Label Text="⏱️" FontSize="20" HorizontalOptions="Center"/>
+                                <Label Text="3" FontSize="16" FontAttributes="Bold" 
+                                       TextColor="#FF69B4" HorizontalOptions="Center"/>
+                                <Label Text="thời gian" FontSize="10" TextColor="#666" HorizontalOptions="Center"/>
+                            </StackLayout>
+                            <StackLayout Grid.Column="2">
+                                <Label Text="📏" FontSize="20" HorizontalOptions="Center"/>
+                                <Label Text="Trung bình" FontSize="14" FontAttributes="Bold" 
+                                       TextColor="#FF69B4" HorizontalOptions="Center"/>
+                                <Label Text="độ khó" FontSize="10" TextColor="#666" HorizontalOptions="Center"/>
+                            </StackLayout>
+                        </Grid>
+                        <Button Text="🚀 Bắt đầu tour" BackgroundColor="#FF69B4" TextColor="White" 
+                                CornerRadius="20" Margin="0,12,0,0" Clicked="StartVinhHoiTour_Clicked"/>
+                    </StackLayout>
+                </Frame>
 
-            <!-- 📊 Tour của bạn -->
-            <Border BackgroundColor="#F9FAFB" StrokeThickness="0"
-                    StrokeShape="RoundRectangle 16" Padding="16" Margin="0,8,0,0">
-                <VerticalStackLayout Spacing="12">
-                    <Label Text="📊 Tour của bạn" FontSize="15" FontAttributes="Bold"
-                           TextColor="#374151" />
-                    <Grid ColumnDefinitions="*,*,*">
-                        <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center">
-                            <Label x:Name="MyTourCount" Text="0" FontSize="24"
-                                   FontAttributes="Bold" TextColor="#EC4899"
-                                   HorizontalOptions="Center" />
-                            <Label Text="tour đã làm" FontSize="10" TextColor="#9CA3AF"
-                                   HorizontalOptions="Center" />
-                        </VerticalStackLayout>
-                        <VerticalStackLayout Grid.Column="1" HorizontalOptions="Center">
-                            <Label x:Name="MyPoiCount" Text="0" FontSize="24"
-                                   FontAttributes="Bold" TextColor="#3B82F6"
-                                   HorizontalOptions="Center" />
-                            <Label Text="điểm đã ghé" FontSize="10" TextColor="#9CA3AF"
-                                   HorizontalOptions="Center" />
-                        </VerticalStackLayout>
-                        <VerticalStackLayout Grid.Column="2" HorizontalOptions="Center">
-                            <Label x:Name="MyAudioCount" Text="0" FontSize="24"
-                                   FontAttributes="Bold" TextColor="#10B981"
-                                   HorizontalOptions="Center" />
-                            <Label Text="audio đã nghe" FontSize="10" TextColor="#9CA3AF"
-                                   HorizontalOptions="Center" />
-                        </VerticalStackLayout>
-                    </Grid>
-                </VerticalStackLayout>
-            </Border>
+                <!-- Khánh Hội Tour -->
+                <Frame BackgroundColor="White" CornerRadius="12" Padding="16" HasShadow="True">
+                    <StackLayout>
+                        <StackLayout Orientation="Horizontal">
+                            <Label Text="🏪" FontSize="32"/>
+                            <StackLayout Margin="12,0,0,0">
+                                <Label Text="Tuyến Khánh Hội" FontSize="18" FontAttributes="Bold" TextColor="#333"/>
+                                <Label Text="Chợ truyền thống &amp; ẩm thực đường phố" FontSize="12" TextColor="#666"/>
+                            </StackLayout>
+                        </StackLayout>
+                        <Grid Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackLayout Grid.Column="0">
+                                <Label Text="📍" FontSize="20" HorizontalOptions="Center"/>
+                                <Label x:Name="KhanhHoiStopsLabel" Text="6" FontSize="16" FontAttributes="Bold" 
+                                       TextColor="#FF69B4" HorizontalOptions="Center"/>
+                                <Label Text="điểm dừng" FontSize="10" TextColor="#666" HorizontalOptions="Center"/>
+                            </StackLayout>
+                            <StackLayout Grid.Column="1">
+                                <Label Text="⏱️" FontSize="20" HorizontalOptions="Center"/>
+                                <Label Text="2.5" FontSize="16" FontAttributes="Bold" 
+                                       TextColor="#FF69B4" HorizontalOptions="Center"/>
+                                <Label Text="thời gian" FontSize="10" TextColor="#666" HorizontalOptions="Center"/>
+                            </StackLayout>
+                            <StackLayout Grid.Column="2">
+                                <Label Text="📏" FontSize="20" HorizontalOptions="Center"/>
+                                <Label Text="Dễ" FontSize="16" FontAttributes="Bold" 
+                                       TextColor="#FF69B4" HorizontalOptions="Center"/>
+                                <Label Text="độ khó" FontSize="10" TextColor="#666" HorizontalOptions="Center"/>
+                            </StackLayout>
+                        </Grid>
+                        <Button Text="🚀 Bắt đầu tour" BackgroundColor="#FF69B4" TextColor="White" 
+                                CornerRadius="20" Margin="0,12,0,0" Clicked="StartKhanhHoiTour_Clicked"/>
+                    </StackLayout>
+                </Frame>
 
-            <!-- 💡 Mẹo -->
-            <Border BackgroundColor="#FEF3C7" StrokeThickness="0"
-                    StrokeShape="RoundRectangle 12" Padding="14">
-                <HorizontalStackLayout Spacing="10">
-                    <Label Text="💡" FontSize="20" VerticalOptions="Center" />
-                    <VerticalStackLayout>
-                        <Label Text="Mẹo" FontSize="13" FontAttributes="Bold"
-                               TextColor="#92400E" />
-                        <Label Text="Đến gần điểm dừng và bấm nút nghe để trải nghiệm audio guide!"
-                               FontSize="12" TextColor="#B45309" />
-                    </VerticalStackLayout>
-                </HorizontalStackLayout>
-            </Border>
+                <!-- Tips Section -->
+                <Frame BackgroundColor="#FFFACD" CornerRadius="12" Padding="16" HasShadow="True">
+                    <StackLayout>
+                        <StackLayout Orientation="Horizontal">
+                            <Label Text="💡" FontSize="24"/>
+                            <Label Text="Mẹo" FontSize="18" FontAttributes="Bold" TextColor="#666" 
+                                   VerticalOptions="Center" Margin="8,0,0,0"/>
+                        </StackLayout>
+                        <Label Text="🎧 Bật audio guide để nghe thuyết minh khi đến mỗi điểm dừng" 
+                               FontSize="14" TextColor="#666" Margin="0,8,0,0"/>
+                        <Label Text="📍 GPS sẽ tự động phát audio khi bạn đến gần điểm tham quan" 
+                               FontSize="14" TextColor="#666" Margin="0,4,0,0"/>
+                        <Label Text="🔋 Nhớ sạc pin và mang tai nghe để có trải nghiệm tốt nhất!" 
+                               FontSize="14" TextColor="#666" Margin="0,4,0,0"/>
+                    </StackLayout>
+                </Frame>
 
-        </VerticalStackLayout>
-    </ScrollView>
+                <!-- Spacer -->
+                <BoxView HeightRequest="50"/>
+
+            </StackLayout>
+        </ScrollView>
+
+    </Grid>
 
 </ContentPage>

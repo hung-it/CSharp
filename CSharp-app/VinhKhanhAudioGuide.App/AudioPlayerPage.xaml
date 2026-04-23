@@ -1,91 +1,178 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:VinhKhanhAudioGuide.App"
              x:Class="VinhKhanhAudioGuide.App.AudioPlayerPage"
-             BackgroundColor="{StaticResource Pink50}"
-             Title="🎧 Nghe Audio">
+             Title="Nghe Audio"
+             BackgroundColor="#FFF5F5">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="24" Spacing="20">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
 
-            <!-- 📍 POI Info -->
-            <Border BackgroundColor="{StaticResource Pink100}" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="20">
-                <VerticalStackLayout Spacing="8">
-                    <Label x:Name="PoiNameLabel" Text="⏳ Đang tải..." FontSize="22"
-                           FontAttributes="Bold" TextColor="{StaticResource Pink900}"
-                           HorizontalOptions="Center" HorizontalTextAlignment="Center" />
-                    <Label x:Name="PoiCodeLabel" Text="" FontSize="13"
-                           TextColor="{StaticResource Pink500}" HorizontalOptions="Center" />
-                </VerticalStackLayout>
-            </Border>
+        <!-- Header -->
+        <Frame Grid.Row="0" BackgroundColor="#FF69B4" CornerRadius="0" Padding="20" HasShadow="False">
+            <StackLayout HorizontalOptions="Center">
+                <Label Text="🎧 Nghe Audio" FontSize="24" FontAttributes="Bold" TextColor="White" 
+                       HorizontalOptions="Center"/>
+                <Label x:Name="PoiNameLabel" Text="Chọn điểm tham quan" FontSize="14" 
+                       TextColor="White" HorizontalOptions="Center" Margin="0,8,0,0" 
+                       Opacity="0.9"/>
+            </StackLayout>
+        </Frame>
 
-            <!-- 🎵 Audio Player -->
-            <Border BackgroundColor="White" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="20">
-                <VerticalStackLayout Spacing="16">
+        <!-- Main Content -->
+        <ScrollView Grid.Row="1">
+            <StackLayout Padding="24" Spacing="24">
 
-                    <!-- Album art placeholder -->
-                    <Border BackgroundColor="{StaticResource Pink200}" StrokeThickness="0" StrokeShape="RoundRectangle 60"
-                            WidthRequest="120" HeightRequest="120"
-                            HorizontalOptions="Center" Padding="0">
-                        <Label x:Name="PlayingIcon" Text="🎧" FontSize="40"
-                               HorizontalOptions="Center" VerticalOptions="Center" />
-                    </Border>
+                <!-- Audio Player Card -->
+                <Frame BackgroundColor="White" CornerRadius="20" Padding="32" HasShadow="True">
+                    <StackLayout HorizontalOptions="Center">
+                        <!-- Album Art -->
+                        <Frame BackgroundColor="#FFE4E1" CornerRadius="60" WidthRequest="120" HeightRequest="120" 
+                               Padding="0" HasShadow="False">
+                            <Label Text="🎵" FontSize="48" HorizontalOptions="Center" 
+                                   VerticalOptions="Center"/>
+                        </Frame>
 
-                    <!-- Status -->
-                    <Label x:Name="StatusLabel" Text="📋 Sẵn sàng phát"
-                           FontSize="14" TextColor="{StaticResource Pink600}"
-                           HorizontalOptions="Center" />
+                        <!-- Status -->
+                        <Label x:Name="StatusLabel" Text="⏳ Đang tải..." 
+                               FontSize="16" TextColor="#999" 
+                               HorizontalOptions="Center" Margin="0,20,0,0"/>
 
-                    <!-- Duration -->
-                    <Label x:Name="DurationLabel" Text=""
-                           FontSize="12" TextColor="{StaticResource Pink400}"
-                           HorizontalOptions="Center" />
+                        <!-- Progress -->
+                        <StackLayout Margin="0,16,0,0">
+                            <Slider x:Name="ProgressSlider" Minimum="0" Maximum="100" 
+                                    Value="0" ThumbColor="#FF69B4"
+                                    MinimumTrackColor="#FFB6C1" MaximumTrackColor="#E0E0E0"/>
+                            <Grid>
+                                <Label x:Name="CurrentTimeLabel" Text="0:00" FontSize="12" 
+                                       TextColor="#999" HorizontalOptions="Start"/>
+                                <Label x:Name="TotalTimeLabel" Text="0:00" FontSize="12" 
+                                       TextColor="#999" HorizontalOptions="End"/>
+                            </Grid>
+                        </StackLayout>
 
-                    <!-- Progress Bar -->
-                    <Slider x:Name="ProgressSlider" Minimum="0" Maximum="100" Value="0"
-                            IsEnabled="False" />
+                        <!-- Controls -->
+                        <Grid Margin="0,20,0,0" HorizontalOptions="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="80"/>
+                                <ColumnDefinition Width="60"/>
+                            </Grid.ColumnDefinitions>
 
-                    <!-- Controls -->
-                    <HorizontalStackLayout HorizontalOptions="Center" Spacing="16">
-                        <Button x:Name="PlayPauseButton"
-                                Text="▶️ Phát"
-                                BackgroundColor="{StaticResource Pink500}"
-                                TextColor="White"
-                                CornerRadius="25"
-                                WidthRequest="120" HeightRequest="50"
-                                Clicked="OnPlayPauseClicked"
-                                IsEnabled="False" />
+                            <Button Grid.Column="0" Text="⏮️" FontSize="24" 
+                                    BackgroundColor="Transparent" TextColor="#FF69B4"
+                                    Clicked="PreviousButton_Clicked"/>
+                            <Button x:Name="PlayPauseButton" Grid.Column="1" Text="▶️" FontSize="32" 
+                                    BackgroundColor="#FF69B4" TextColor="White" 
+                                    CornerRadius="40" WidthRequest="80" HeightRequest="80"
+                                    Clicked="PlayPauseButton_Clicked"/>
+                            <Button Grid.Column="2" Text="⏭️" FontSize="24" 
+                                    BackgroundColor="Transparent" TextColor="#FF69B4"
+                                    Clicked="NextButton_Clicked"/>
+                        </Grid>
+                    </StackLayout>
+                </Frame>
 
-                        <Button Text="⏹️ Dừng"
-                                BackgroundColor="{StaticResource Pink300}"
-                                TextColor="White"
-                                CornerRadius="25"
-                                WidthRequest="120" HeightRequest="50"
-                                Clicked="OnStopClicked" />
-                    </HorizontalStackLayout>
+                <!-- Language Selection -->
+                <Frame BackgroundColor="White" CornerRadius="16" Padding="20" HasShadow="True">
+                    <StackLayout>
+                        <Label Text="🌐 Ngôn ngữ" FontSize="18" FontAttributes="Bold" TextColor="#333"/>
+                        <StackLayout Orientation="Horizontal" HorizontalOptions="Center" Margin="0,16,0,0">
+                            <Button x:Name="VietnameseButton" Text="🇻🇳 Tiếng Việt" 
+                                    BackgroundColor="#FF69B4" TextColor="White" 
+                                    CornerRadius="20" Margin="8,0"
+                                    Clicked="VietnameseButton_Clicked"/>
+                            <Button x:Name="EnglishButton" Text="🇬🇧 English" 
+                                    BackgroundColor="#E0E0E0" TextColor="#333" 
+                                    CornerRadius="20" Margin="8,0"
+                                    Clicked="EnglishButton_Clicked"/>
+                        </StackLayout>
+                        <Label x:Name="LanguageNoteLabel" Text="💡 Audio tiếng Anh yêu cầu gói Premium" 
+                               FontSize="12" TextColor="#999" 
+                               HorizontalOptions="Center" Margin="0,12,0,0"
+                               IsVisible="False"/>
+                    </StackLayout>
+                </Frame>
 
-                </VerticalStackLayout>
-            </Border>
+                <!-- Audio Info -->
+                <Frame BackgroundColor="#FFF8E1" CornerRadius="16" Padding="20" HasShadow="True">
+                    <StackLayout>
+                        <Label Text="📝 Thông tin audio" FontSize="16" FontAttributes="Bold" TextColor="#333"/>
+                        <StackLayout Orientation="Horizontal" Margin="0,12,0,0">
+                            <Label Text="📍" FontSize="16"/>
+                            <Label x:Name="AudioPoiLabel" Text="Chưa chọn điểm" FontSize="14" 
+                                   TextColor="#666" Margin="8,0,0,0"/>
+                        </StackLayout>
+                        <StackLayout Orientation="Horizontal" Margin="0,8,0,0">
+                            <Label Text="⏱️" FontSize="16"/>
+                            <Label x:Name="AudioDurationLabel" Text="0 phút" FontSize="14" 
+                                   TextColor="#666" Margin="8,0,0,0"/>
+                        </StackLayout>
+                        <StackLayout Orientation="Horizontal" Margin="0,8,0,0">
+                            <Label Text="🔤" FontSize="16"/>
+                            <Label x:Name="AudioLanguageLabel" Text="Tiếng Việt" FontSize="14" 
+                                   TextColor="#666" Margin="8,0,0,0"/>
+                        </StackLayout>
+                    </StackLayout>
+                </Frame>
 
-            <!-- 🌐 Ngôn ngữ -->
-            <Border BackgroundColor="White" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="16">
-                <VerticalStackLayout Spacing="10">
-                    <Label Text="🌐 Ngôn ngữ" FontSize="14" FontAttributes="Bold"
-                           TextColor="{StaticResource Pink800}" />
-                    <HorizontalStackLayout Spacing="10">
-                        <Button x:Name="BtnVi" Text="🇻🇳 Tiếng Việt"
-                                BackgroundColor="{StaticResource Pink500}" TextColor="White"
-                                CornerRadius="8" FontSize="13"
-                                Clicked="OnLanguageViClicked" />
-                        <Button x:Name="BtnEn" Text="🇬🇧 English"
-                                BackgroundColor="{StaticResource Pink200}" TextColor="{StaticResource Pink800}"
-                                CornerRadius="8" FontSize="13"
-                                Clicked="OnLanguageEnClicked" />
-                    </HorizontalStackLayout>
-                </VerticalStackLayout>
-            </Border>
+                <!-- Speed Control -->
+                <Frame BackgroundColor="White" CornerRadius="16" Padding="20" HasShadow="True">
+                    <StackLayout>
+                        <Label Text="⚡ Tốc độ phát" FontSize="16" FontAttributes="Bold" TextColor="#333"/>
+                        <StackLayout Orientation="Horizontal" HorizontalOptions="Center" Margin="0,12,0,0">
+                            <Button x:Name="Speed075Button" Text="0.75x" 
+                                    BackgroundColor="#E0E0E0" TextColor="#333" 
+                                    CornerRadius="15" Padding="12,6"
+                                    Clicked="SpeedButton_Clicked" Tag="0.75"/>
+                            <Button x:Name="Speed100Button" Text="1x" 
+                                    BackgroundColor="#FF69B4" TextColor="White" 
+                                    CornerRadius="15" Padding="16,6" Margin="8,0"
+                                    Clicked="SpeedButton_Clicked" Tag="1.0"/>
+                            <Button x:Name="Speed125Button" Text="1.25x" 
+                                    BackgroundColor="#E0E0E0" TextColor="#333" 
+                                    CornerRadius="15" Padding="12,6"
+                                    Clicked="SpeedButton_Clicked" Tag="1.25"/>
+                            <Button x:Name="Speed150Button" Text="1.5x" 
+                                    BackgroundColor="#E0E0E0" TextColor="#333" 
+                                    CornerRadius="15" Padding="12,6" Margin="8,0"
+                                    Clicked="SpeedButton_Clicked" Tag="1.5"/>
+                        </StackLayout>
+                    </StackLayout>
+                </Frame>
 
-        </VerticalStackLayout>
-    </ScrollView>
+                <!-- Spacer -->
+                <BoxView HeightRequest="50"/>
+
+            </StackLayout>
+        </ScrollView>
+
+        <!-- Bottom Status Bar -->
+        <Frame Grid.Row="2" BackgroundColor="White" CornerRadius="20" Margin="16" Padding="16" HasShadow="True">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackLayout Grid.Column="0" Orientation="Horizontal">
+                    <Label x:Name="ConnectionStatusLabel" Text="✅" FontSize="20"/>
+                    <Label x:Name="ConnectionTextLabel" Text="Sẵn sàng phát" FontSize="14" 
+                           TextColor="#666" VerticalOptions="Center" Margin="8,0,0,0"/>
+                </StackLayout>
+
+                <Button Grid.Column="1" Text="📍 Chọn POI" 
+                        BackgroundColor="#FF69B4" TextColor="White" 
+                        CornerRadius="20"
+                        Clicked="SelectPoiButton_Clicked"/>
+            </Grid>
+        </Frame>
+
+    </Grid>
 
 </ContentPage>

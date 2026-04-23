@@ -1,478 +1,326 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Maui.Controls;
-using Plugin.Maui.Audio;
-using System.Net.Http.Json;
-using System.Timers;
 
-namespace VinhKhanhAudioGuide.App;
-
-[QueryProperty(nameof(QrPayload), "qr")]
-[QueryProperty(nameof(UserId), "userId")]
-public partial class AudioPlayerPage : ContentPage
+namespace VinhKhanhAudioGuide.App
 {
-    private readonly HttpClient _httpClient;
-    private readonly IAudioManager _audioManager;
-    private IAudioPlayer? _audioPlayer;
-    private System.Timers.Timer? _progressTimer;
-
-    private string _currentLanguage = "vi";
-    private string _qrPayload = string.Empty;
-    private string _userId = string.Empty;
-    private string _currentAudioUrl = string.Empty;
-    private string _currentAudioFilePath = string.Empty;
-    private Guid _sessionId = Guid.Empty;
-    private int _totalPlayedSeconds = 0;
-    private bool _sessionEnded = false;
-    private bool _loadRequested = false;
-    private bool _isPlaying = false;
-    private CancellationTokenSource? _downloadCts;
-
-    public string QrPayload
+    public partial class AudioPlayerPage : ContentPage
     {
-        set
+        private const string LOADING_STATUS = "⏳ Đang tải...";
+        private const string READY_STATUS = "✅ Sẵn sàng phát";
+        private const string LOADING_AUDIO = "⏳ Đang tải audio...";
+        private const string LOADING_PERCENT = "⏳ Đang tải... {0}%";
+        private const string READY_PLAY = "✅ Sẵn sàng";
+        private const string PLAYING_STATUS = "🎵 Đang phát...";
+        private const string PAUSED_STATUS = "⏸️ Đã tạm dừng";
+        private const string STOPPED_STATUS = "⏹️ Đã dừng";
+        private const string COMPLETED_STATUS = "🎉 Đã phát xong!";
+        private const string ERROR_LOAD = "❌ Lỗi tải audio";
+        private const string ERROR_CONNECTION = "❌ Lỗi kết nối";
+        private const string ERROR_MISSING_INFO = "❌ Lỗi: Thiếu thông tin";
+        private const string PREMIUM_DIALOG = "💎 Premium";
+        private const string ENGLISH_PREMIUM = "🔓 Audio tiếng Anh yêu cầu gói Premium";
+        private const string PLAY_BUTTON = "▶️ Phát";
+        private const string PAUSE_BUTTON = "⏸️ Tạm dừng";
+        private const string SELECT_POI = "📍 Chọn POI";
+        private const string POI_LIST = "Danh sách POI";
+        private const string VIETNAMESE = "Tiếng Việt";
+        private const string ENGLISH = "Tiếng Anh";
+        private const string OK = "OK";
+
+        private string currentPoiId = null;
+        private string currentPoiName = null;
+        private bool isPlaying = false;
+        private bool isPaused = false;
+        private double playbackSpeed = 1.0;
+
+        public AudioPlayerPage()
         {
-            _qrPayload = Uri.UnescapeDataString(value ?? string.Empty);
-            TryLoadAudio();
-        }
-    }
-
-    public string UserId
-    {
-        set
-        {
-            _userId = value ?? string.Empty;
-            TryLoadAudio();
-        }
-    }
-
-    private void TryLoadAudio()
-    {
-        if (_loadRequested) return;
-        if (string.IsNullOrEmpty(_qrPayload) || string.IsNullOrEmpty(_userId)) return;
-        _loadRequested = true;
-        MainThread.BeginInvokeOnMainThread(async () =>
-        {
-            try { await LoadAudioAsync(); }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"TryLoadAudio error: {ex.Message}");
-                UpdateStatus("❌ Lỗi tải audio");
-            }
-        });
-    }
-
-    public AudioPlayerPage(IAudioManager audioManager)
-    {
-        InitializeComponent();
-        _httpClient = AppConfig.CreateHttpClient();
-        _audioManager = audioManager;
-
-        _progressTimer = new System.Timers.Timer(500);
-        _progressTimer.Elapsed += OnProgressTimerElapsed;
-    }
-
-    private void OnProgressTimerElapsed(object? sender, ElapsedEventArgs e)
-    {
-        MainThread.BeginInvokeOnMainThread(() =>
-        {
-            if (_audioPlayer != null && _audioPlayer.Duration > 0)
-            {
-                double progress = _audioPlayer.CurrentPosition / _audioPlayer.Duration * 100;
-                ProgressSlider.Value = progress;
-
-                var current = TimeSpan.FromSeconds(_audioPlayer.CurrentPosition);
-                var total = TimeSpan.FromSeconds(_audioPlayer.Duration);
-                DurationLabel.Text = $"{current:mm\\:ss} / {total:mm\\:ss}";
-            }
-        });
-    }
-
-    private async Task<string?> DownloadAudioToLocalAsync(string url, CancellationToken cancellationToken)
-    {
-        try
-        {
-            var cacheDir = Path.Combine(FileSystem.CacheDirectory, "audio_cache");
-            if (!Directory.Exists(cacheDir))
-                Directory.CreateDirectory(cacheDir);
-
-            var fileName = Path.GetFileName(new Uri(url).LocalPath);
-            var filePath = Path.Combine(cacheDir, fileName);
-
-            if (File.Exists(filePath))
-            {
-                var info = new FileInfo(filePath);
-                if (info.Length > 1000)
-                {
-                    System.Diagnostics.Debug.WriteLine($"Using cached audio: {filePath}");
-                    return filePath;
-                }
-            }
-
-            UpdateStatus("⏳ Đang tải audio...");
-
-            using var response = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-            response.EnsureSuccessStatusCode();
-
-            var totalBytes = response.Content.Headers.ContentLength ?? -1L;
-            var canReportProgress = totalBytes != -1;
-
-            using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
-            using var fileStream = new FileStream(filePath, System.IO.FileMode.Create, FileAccess.Write, FileShare.None, 8192, true);
-
-            var buffer = new byte[8192];
-            long totalRead = 0;
-            int bytesRead;
-
-            while ((bytesRead = await contentStream.ReadAsync(buffer, cancellationToken)) > 0)
-            {
-                await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead), cancellationToken);
-                totalRead += bytesRead;
-
-                if (canReportProgress && totalBytes > 0)
-                {
-                    var percent = (int)((totalRead * 100) / totalBytes);
-                    UpdateStatus($"⏳ Đang tải... {percent}%");
-                }
-            }
-
-            System.Diagnostics.Debug.WriteLine($"Downloaded audio to: {filePath} ({totalRead} bytes)");
-            return filePath;
-        }
-        catch (OperationCanceledException)
-        {
-            System.Diagnostics.Debug.WriteLine("Audio download cancelled");
-            return null;
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"DownloadAudioToLocal error: {ex.Message}");
-            return null;
-        }
-    }
-
-    private async Task LoadAudioAsync()
-    {
-        if (string.IsNullOrEmpty(_qrPayload) || string.IsNullOrEmpty(_userId))
-        {
-            UpdateStatus("❌ Lỗi: Thiếu thông tin");
-            return;
+            InitializeComponent();
+            InitializePlayer();
         }
 
-        _downloadCts?.Cancel();
-        _downloadCts = new CancellationTokenSource();
-
-        try { await EndSessionAsync(); }
-        catch { }
-
-        StopPlayback();
-        UpdateStatus("⏳ Đang tải...");
-        SetControlsEnabled(false);
-        _sessionEnded = false;
-        _totalPlayedSeconds = 0;
-
-        try
+        public AudioPlayerPage(string poiId, string poiName)
         {
-            if (!Guid.TryParse(_userId, out var userId))
-            {
-                UpdateStatus("❌ Lỗi: userId không hợp lệ");
-                await DisplayAlertAsync("❌ Lỗi", "ID người dùng không hợp lệ", "OK");
-                return;
-            }
-
-            var response = await _httpClient.PostAsJsonAsync("qr/start", new
-            {
-                UserId = userId,
-                QrPayload = _qrPayload,
-                LanguageCode = _currentLanguage
-            });
-
-            if (!response.IsSuccessStatusCode)
-            {
-                UpdateStatus("❌ Lỗi tải audio");
-                var errText = await response.Content.ReadAsStringAsync();
-                System.Diagnostics.Debug.WriteLine($"QR Start error: {errText}");
-                await DisplayAlertAsync("❌ Lỗi", $"Không thể tải audio. Code: {(int)response.StatusCode}", "OK");
-                return;
-            }
-
-            var result = await response.Content.ReadFromJsonAsync<QrStartResponse>();
-
-            if (result?.Content == null)
-            {
-                UpdateStatus("📭 Không có audio");
-                await DisplayAlertAsync("📢 Thông báo", "Audio chưa được cung cấp cho điểm này.", "OK");
-                return;
-            }
-
-            _sessionId = result.Session?.Id ?? Guid.Empty;
-            PoiNameLabel.Text = result.Content.PoiName ?? "Điểm tham quan";
-            PoiCodeLabel.Text = result.Content.PoiCode ?? "";
-
-            var audioPath = result.Content.AudioPath;
-            if (string.IsNullOrEmpty(audioPath))
-            {
-                UpdateStatus("📭 Chưa có audio");
-                PlayingIcon.Text = "❌";
-                await DisplayAlertAsync("📢 Thông báo", "Audio chưa được cung cấp. Vui lòng liên hệ quản trị viên.", "OK");
-                return;
-            }
-
-            _currentAudioUrl = ResolveAudioUrl(audioPath);
-            System.Diagnostics.Debug.WriteLine($"Loading audio from: {_currentAudioUrl}");
-
-            UpdateStatus("⏳ Đang tải audio...");
-
-            var localFilePath = await DownloadAudioToLocalAsync(_currentAudioUrl, _downloadCts.Token);
-
-            if (string.IsNullOrEmpty(localFilePath))
-            {
-                UpdateStatus("❌ Lỗi tải audio");
-                await DisplayAlertAsync("❌ Lỗi", "Không thể tải file audio. Kiểm tra kết nối mạng.", "OK");
-                return;
-            }
-
-            _currentAudioFilePath = localFilePath;
-
-            StopPlayback();
-
-            try
-            {
-                _audioPlayer = _audioManager.CreatePlayer(_currentAudioFilePath);
-                _audioPlayer.PlaybackEnded += OnPlaybackEnded;
-
-                var total = TimeSpan.FromSeconds(_audioPlayer.Duration);
-                DurationLabel.Text = $"0:00 / {total:mm\\:ss}";
-                ProgressSlider.Maximum = 100;
-                ProgressSlider.Value = 0;
-                ProgressSlider.IsEnabled = true;
-
-                UpdateStatus("✅ Sẵn sàng - nhấn Phát để nghe");
-                SetControlsEnabled(true);
-                PlayingIcon.Text = "🎧";
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Audio player error: {ex.Message}");
-                UpdateStatus("❌ Lỗi tải audio");
-                await DisplayAlertAsync("❌ Lỗi", $"Không thể phát audio: {ex.Message}", "OK");
-            }
+            InitializeComponent();
+            currentPoiId = poiId;
+            currentPoiName = poiName;
+            InitializePlayer();
         }
-        catch (OperationCanceledException)
+
+        private void InitializePlayer()
         {
-            UpdateStatus("⏹️ Đã hủy");
-        }
-        catch (HttpRequestException ex)
-        {
-            UpdateStatus("❌ Lỗi kết nối");
-            PlayingIcon.Text = "❌";
-            System.Diagnostics.Debug.WriteLine($"HTTP error: {ex.Message}");
-            await DisplayAlertAsync("❌ Lỗi kết nối", $"Không thể kết nối server: {ex.Message}", "OK");
-        }
-        catch (Exception ex)
-        {
-            UpdateStatus("❌ Lỗi");
-            PlayingIcon.Text = "❌";
-            System.Diagnostics.Debug.WriteLine($"Audio load error: {ex.Message}");
-            await DisplayAlertAsync("❌ Lỗi", $"Đã xảy ra lỗi: {ex.Message}", "OK");
-        }
-    }
-
-    private void UpdateStatus(string message)
-    {
-        MainThread.BeginInvokeOnMainThread(() =>
-        {
-            StatusLabel.Text = message;
-        });
-    }
-
-    private void SetControlsEnabled(bool enabled)
-    {
-        MainThread.BeginInvokeOnMainThread(() =>
-        {
-            PlayPauseButton.IsEnabled = enabled;
-        });
-    }
-
-    private static string ResolveAudioUrl(string filePath)
-    {
-        if (filePath.StartsWith("http://") || filePath.StartsWith("https://"))
-            return filePath;
-        var baseUrl = AppConfig.MediaBaseUrl;
-        return $"{baseUrl}/{filePath.TrimStart('/')}";
-    }
-
-    private async Task EndSessionAsync()
-    {
-        if (_sessionId == Guid.Empty || _sessionEnded)
-            return;
-
-        _sessionEnded = true;
-        TrackingService.RecordListeningEnd(_totalPlayedSeconds);
-
-        try
-        {
-            await _httpClient.PostAsJsonAsync(
-                $"sessions/{_sessionId}/end",
-                new { DurationSeconds = _totalPlayedSeconds });
-        }
-        catch { }
-
-        _sessionId = Guid.Empty;
-    }
-
-    private void OnPlaybackEnded(object? sender, EventArgs e)
-    {
-        _isPlaying = false;
-        MainThread.BeginInvokeOnMainThread(() =>
-        {
-            PlayPauseButton.Text = "▶️ Phát";
-            UpdateStatus("🎉 Đã phát xong!");
-            PlayingIcon.Text = "✅";
-            _progressTimer?.Stop();
-            ProgressSlider.Value = 0;
-        });
-    }
-
-    private void StopPlayback()
-    {
-        _progressTimer?.Stop();
-        if (_audioPlayer != null)
-        {
-            try
+            UpdateLanguageButtons();
+            UpdateStatus(LOADING_STATUS);
+            
+            // Update POI info if available
+            if (!string.IsNullOrEmpty(currentPoiName))
             {
-                _audioPlayer.PlaybackEnded -= OnPlaybackEnded;
-                _audioPlayer.Stop();
-                _audioPlayer.Dispose();
-            }
-            catch { }
-            _audioPlayer = null;
-        }
-    }
-
-    private void OnPlayPauseClicked(object? sender, EventArgs e)
-    {
-        try
-        {
-            if (_audioPlayer == null)
-            {
-                UpdateStatus("❌ Chưa có audio");
-                return;
-            }
-
-            if (_isPlaying)
-            {
-                _audioPlayer.Pause();
-                _progressTimer?.Stop();
-                _isPlaying = false;
-                PlayPauseButton.Text = "▶️ Phát";
-                UpdateStatus("⏸️ Đã tạm dừng");
-                PlayingIcon.Text = "⏸️";
+                PoiNameLabel.Text = currentPoiName;
+                AudioPoiLabel.Text = currentPoiName;
+                StatusLabel.Text = READY_STATUS;
+                UpdateStatus(READY_STATUS);
             }
             else
             {
-                _audioPlayer.Play();
-                _progressTimer?.Start();
-                _isPlaying = true;
-                PlayPauseButton.Text = "⏸️ Tạm dừng";
-                UpdateStatus("🎵 Đang phát...");
-                PlayingIcon.Text = "🎵";
+                StatusLabel.Text = LOADING_STATUS;
+            }
+
+            // Check if English is available
+            UpdatePremiumNote();
+        }
+
+        private void UpdateLanguageButtons()
+        {
+            if (AppConfig.CurrentLanguage == "vi")
+            {
+                VietnameseButton.BackgroundColor = Color.FromArgb("#FF69B4");
+                VietnameseButton.TextColor = Colors.White;
+                EnglishButton.BackgroundColor = Color.FromArgb("#E0E0E0");
+                EnglishButton.TextColor = Color.FromArgb("#333333");
+                AudioLanguageLabel.Text = VIETNAMESE;
+            }
+            else
+            {
+                VietnameseButton.BackgroundColor = Color.FromArgb("#E0E0E0");
+                VietnameseButton.TextColor = Color.FromArgb("#333333");
+                EnglishButton.BackgroundColor = Color.FromArgb("#FF69B4");
+                EnglishButton.TextColor = Colors.White;
+                AudioLanguageLabel.Text = ENGLISH;
             }
         }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"Play/Pause error: {ex.Message}");
-            UpdateStatus("❌ Lỗi phát audio");
-        }
-    }
 
-    private async void OnStopClicked(object? sender, EventArgs e)
-    {
-        try
+        private void UpdatePremiumNote()
         {
-            StopPlayback();
-            _isPlaying = false;
-            PlayPauseButton.Text = "▶️ Phát";
-            UpdateStatus("⏹️ Đã dừng");
-            PlayingIcon.Text = "🎧";
+            LanguageNoteLabel.IsVisible = !FeatureGate.HasEnglishAudio;
+        }
+
+        private void UpdateStatus(string status)
+        {
+            StatusLabel.Text = status;
+            
+            if (status.Contains("✅"))
+            {
+                StatusLabel.TextColor = Color.FromArgb("#4CAF50");
+                ConnectionStatusLabel.Text = "✅";
+                ConnectionTextLabel.Text = "Sẵn sàng phát";
+            }
+            else if (status.Contains("❌"))
+            {
+                StatusLabel.TextColor = Colors.Red;
+                ConnectionStatusLabel.Text = "❌";
+                ConnectionTextLabel.Text = "Lỗi";
+            }
+            else if (status.Contains("🎵"))
+            {
+                StatusLabel.TextColor = Color.FromArgb("#FF69B4");
+                ConnectionStatusLabel.Text = "🎵";
+                ConnectionTextLabel.Text = "Đang phát";
+            }
+            else if (status.Contains("⏸️"))
+            {
+                StatusLabel.TextColor = Color.FromArgb("#FFA500");
+                ConnectionStatusLabel.Text = "⏸️";
+                ConnectionTextLabel.Text = "Đã tạm dừng";
+            }
+            else
+            {
+                StatusLabel.TextColor = Color.FromArgb("#999999");
+            }
+        }
+
+        private async void VietnameseButton_Clicked(object sender, EventArgs e)
+        {
+            AppConfig.CurrentLanguage = "vi";
+            UpdateLanguageButtons();
+            
+            // Reload audio if playing
+            if (isPlaying)
+            {
+                await StopAudioAsync();
+            }
+        }
+
+        private async void EnglishButton_Clicked(object sender, EventArgs e)
+        {
+            if (!FeatureGate.HasEnglishAudio)
+            {
+                await DisplayAlert(PREMIUM_DIALOG, ENGLISH_PREMIUM, OK);
+                return;
+            }
+
+            AppConfig.CurrentLanguage = "en";
+            UpdateLanguageButtons();
+            
+            // Reload audio if playing
+            if (isPlaying)
+            {
+                await StopAudioAsync();
+            }
+        }
+
+        private async void PlayPauseButton_Clicked(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(currentPoiId))
+            {
+                await DisplayAlert("❌", ERROR_MISSING_INFO, OK);
+                return;
+            }
+
+            if (isPlaying)
+            {
+                await PauseAudioAsync();
+            }
+            else
+            {
+                await PlayAudioAsync();
+            }
+        }
+
+        private async Task PlayAudioAsync()
+        {
+            try
+            {
+                UpdateStatus(LOADING_AUDIO);
+                PlayPauseButton.Text = "⏳";
+                PlayPauseButton.IsEnabled = false;
+
+                // Simulate loading audio
+                for (int i = 0; i <= 100; i += 20)
+                {
+                    UpdateStatus(string.Format(LOADING_PERCENT, i));
+                    await Task.Delay(200);
+                }
+
+                // Start playing
+                isPlaying = true;
+                isPaused = false;
+                PlayPauseButton.Text = PAUSE_BUTTON;
+                PlayPauseButton.IsEnabled = true;
+                UpdateStatus(PLAYING_STATUS);
+
+                // Simulate playback progress
+                await SimulatePlaybackAsync();
+            }
+            catch (Exception ex)
+            {
+                UpdateStatus(ERROR_LOAD);
+                await DisplayAlert("❌", $"{ERROR_LOAD}: {ex.Message}", OK);
+                PlayPauseButton.Text = PLAY_BUTTON;
+                PlayPauseButton.IsEnabled = true;
+            }
+        }
+
+        private async Task SimulatePlaybackAsync()
+        {
+            while (isPlaying && !isPaused)
+            {
+                await Task.Delay(1000);
+                
+                var currentValue = ProgressSlider.Value;
+                if (currentValue >= 100)
+                {
+                    await OnPlaybackCompletedAsync();
+                    break;
+                }
+                ProgressSlider.Value += (playbackSpeed * 2);
+                
+                var totalSeconds = 300; // 5 minutes
+                var currentSeconds = (int)(totalSeconds * ProgressSlider.Value / 100);
+                CurrentTimeLabel.Text = FormatTime(currentSeconds);
+                TotalTimeLabel.Text = FormatTime(totalSeconds);
+            }
+        }
+
+        private string FormatTime(int seconds)
+        {
+            var minutes = seconds / 60;
+            var secs = seconds % 60;
+            return $"{minutes}:{secs:D2}";
+        }
+
+        private async Task PauseAudioAsync()
+        {
+            isPaused = true;
+            isPlaying = false;
+            PlayPauseButton.Text = PLAY_BUTTON;
+            UpdateStatus(PAUSED_STATUS);
+            await Task.Delay(100);
+        }
+
+        private async Task StopAudioAsync()
+        {
+            isPlaying = false;
+            isPaused = false;
             ProgressSlider.Value = 0;
-            DurationLabel.Text = "0:00 / 0:00";
-            _totalPlayedSeconds = 0;
+            CurrentTimeLabel.Text = "0:00";
+            PlayPauseButton.Text = PLAY_BUTTON;
+            UpdateStatus(STOPPED_STATUS);
+            await Task.Delay(100);
         }
-        catch (Exception ex)
+
+        private async Task OnPlaybackCompletedAsync()
         {
-            System.Diagnostics.Debug.WriteLine($"Stop error: {ex.Message}");
+            isPlaying = false;
+            isPaused = false;
+            PlayPauseButton.Text = PLAY_BUTTON;
+            UpdateStatus(COMPLETED_STATUS);
+            
+            // Update stats
+            AppConfig.ListenCount++;
+            
+            await Task.Delay(2000);
+            UpdateStatus(READY_STATUS);
         }
 
-        await EndSessionAsync();
-    }
-
-    protected override async void OnDisappearing()
-    {
-        base.OnDisappearing();
-
-        _downloadCts?.Cancel();
-
-        if (_isPlaying && _audioPlayer != null)
+        private async void PreviousButton_Clicked(object sender, EventArgs e)
         {
-            _totalPlayedSeconds += (int)_audioPlayer.CurrentPosition;
+            ProgressSlider.Value = 0;
+            if (isPlaying)
+            {
+                await StopAudioAsync();
+            }
         }
 
-        StopPlayback();
-        await EndSessionAsync();
-    }
-
-    private async void OnLanguageViClicked(object? sender, EventArgs e)
-    {
-        _currentLanguage = "vi";
-        BtnVi.BackgroundColor = Color.FromArgb("#EC4899");
-        BtnVi.TextColor = Colors.White;
-        BtnEn.BackgroundColor = Color.FromArgb("#FBCFE8");
-        BtnEn.TextColor = Color.FromArgb("#9D174D");
-        _loadRequested = false;
-        _currentAudioUrl = string.Empty;
-        _currentAudioFilePath = string.Empty;
-        await LoadAudioAsync();
-    }
-
-    private async void OnLanguageEnClicked(object? sender, EventArgs e)
-    {
-        if (!FeatureGate.IsPremium)
+        private async void NextButton_Clicked(object sender, EventArgs e)
         {
-            await DisplayAlertAsync("💎 Premium",
-                "🔒 Audio tiếng Anh là tính năng Premium.\n\n" +
-                "Vui lòng nâng cấp tài khoản để sử dụng.", "OK");
-            return;
+            if (isPlaying)
+            {
+                await StopAudioAsync();
+            }
+            await DisplayAlert("⏭️", "Đang chuyển sang audio tiếp theo...", OK);
         }
 
-        _currentLanguage = "en";
-        BtnEn.BackgroundColor = Color.FromArgb("#EC4899");
-        BtnEn.TextColor = Colors.White;
-        BtnVi.BackgroundColor = Color.FromArgb("#FBCFE8");
-        BtnVi.TextColor = Color.FromArgb("#9D174D");
-        _loadRequested = false;
-        _currentAudioUrl = string.Empty;
-        _currentAudioFilePath = string.Empty;
-        await LoadAudioAsync();
+        private void SpeedButton_Clicked(object sender, EventArgs e)
+        {
+            var button = sender as Button;
+            if (button.Tag != null)
+            {
+                playbackSpeed = double.Parse(button.Tag.ToString());
+            }
+
+            // Update button styles
+            Speed075Button.BackgroundColor = playbackSpeed == 0.75 ? Color.FromArgb("#FF69B4") : Color.FromArgb("#E0E0E0");
+            Speed075Button.TextColor = playbackSpeed == 0.75 ? Colors.White : Color.FromArgb("#333333");
+            Speed100Button.BackgroundColor = playbackSpeed == 1.0 ? Color.FromArgb("#FF69B4") : Color.FromArgb("#E0E0E0");
+            Speed100Button.TextColor = playbackSpeed == 1.0 ? Colors.White : Color.FromArgb("#333333");
+            Speed125Button.BackgroundColor = playbackSpeed == 1.25 ? Color.FromArgb("#FF69B4") : Color.FromArgb("#E0E0E0");
+            Speed125Button.TextColor = playbackSpeed == 1.25 ? Colors.White : Color.FromArgb("#333333");
+            Speed150Button.BackgroundColor = playbackSpeed == 1.5 ? Color.FromArgb("#FF69B4") : Color.FromArgb("#E0E0E0");
+            Speed150Button.TextColor = playbackSpeed == 1.5 ? Colors.White : Color.FromArgb("#333333");
+        }
+
+        private async void SelectPoiButton_Clicked(object sender, EventArgs e)
+        {
+            await Navigation.PushAsync(new PoiListPage());
+        }
+
+        protected override void OnDisappearing()
+        {
+            base.OnDisappearing();
+            _ = StopAudioAsync();
+        }
     }
-}
-
-public class QrStartResponse
-{
-    public QrSessionInfo? Session { get; set; }
-    public QrContentInfo? Content { get; set; }
-}
-
-public class QrSessionInfo
-{
-    public Guid Id { get; set; }
-    public Guid UserId { get; set; }
-    public Guid PoiId { get; set; }
-}
-
-public class QrContentInfo
-{
-    public Guid PoiId { get; set; }
-    public string PoiCode { get; set; } = string.Empty;
-    public string PoiName { get; set; } = string.Empty;
-    public string AudioPath { get; set; } = string.Empty;
-    public bool IsTextToSpeech { get; set; }
 }

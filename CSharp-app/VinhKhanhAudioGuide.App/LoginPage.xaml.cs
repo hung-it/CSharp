@@ -1,142 +1,138 @@
-using System.Net.Http.Json;
-using Microsoft.Maui.Storage;
+using System;
+using System.Threading.Tasks;
+using Microsoft.Maui.Controls;
 
-namespace VinhKhanhAudioGuide.App;
-
-public partial class LoginPage : ContentPage
+namespace VinhKhanhAudioGuide.App
 {
-    private readonly HttpClient _httpClient;
-
-    public LoginPage()
+    public partial class LoginPage : ContentPage
     {
-        InitializeComponent();
-        _httpClient = AppConfig.CreateHttpClient();
-    }
+        private const string USERNAME_REQUIRED = "⚠️ Vui lòng nhập tên đăng nhập";
+        private const string PASSWORD_REQUIRED = "⚠️ Vui lòng nhập mật khẩu";
+        private const string LOGIN_FAILED = "❌ Đăng nhập thất bại";
+        private const string LOGIN_SUCCESS = "✅ Đăng nhập thành công!";
+        private const string CONNECTION_ERROR = "❌ Không thể kết nối server";
+        private const string DEMO_LOGIN = "🔑 Đang đăng nhập demo...";
+        private const string WELCOME = "🎉 Chào mừng";
+        private const string PREMIUM_DIALOG = "💎 Premium";
+        private const string PREMIUM_MESSAGE = "✨ Bạn có thể nâng cấp lên Premium để sử dụng:\n\n💎 Audio tiếng Anh\n🗄️ Chế độ Offline\n📊 Thống kê nâng cao\n⚡ Ưu tiên hỗ trợ";
+        private const string UPGRADE = "Nâng cấp ngay";
+        private const string OK = "OK";
+        private const string CONTINUE = "Tiếp tục";
 
-    private async void OnLoginClicked(object? sender, EventArgs e)
-    {
-        var username = UsernameEntry.Text?.Trim() ?? string.Empty;
-        var password = PasswordEntry.Text ?? string.Empty;
-
-        if (string.IsNullOrEmpty(username))
+        public LoginPage()
         {
-            ShowError("⚠️ Vui lòng nhập tên đăng nhập");
-            return;
+            InitializeComponent();
         }
 
-        await PerformLoginAsync(username, password);
-    }
-
-    private async void OnDemoBasicClicked(object? sender, EventArgs e)
-    {
-        UsernameEntry.Text = "demo";
-        PasswordEntry.Text = "1";
-        await PerformLoginAsync("demo", "1");
-    }
-
-    private async void OnDemoPremiumClicked(object? sender, EventArgs e)
-    {
-        UsernameEntry.Text = "premium";
-        PasswordEntry.Text = "1";
-        await PerformLoginAsync("premium", "1");
-    }
-
-    private async void OnRegisterTapped(object? sender, EventArgs e)
-    {
-        UsernameEntry.Text = "";
-        PasswordEntry.Text = "";
-        ErrorLabel.Text = "📧 Liên hệ quản trị viên để tạo tài khoản mới";
-        ErrorLabel.IsVisible = true;
-    }
-
-    private async void OnSkipClicked(object? sender, EventArgs e)
-    {
-        await Shell.Current.GoToAsync("//home");
-    }
-
-    private async Task PerformLoginAsync(string username, string password)
-    {
-        try
+        private async void LoginButton_Clicked(object sender, EventArgs e)
         {
-            SetLoading(true);
-            ErrorLabel.IsVisible = false;
+            var username = UsernameEntry.Text?.Trim();
+            var password = PasswordEntry.Text?.Trim();
 
-            var response = await _httpClient.PostAsJsonAsync("users/resolve", new
+            if (string.IsNullOrEmpty(username))
             {
-                Username = username,
-                PreferredLanguage = AppConfig.DefaultPreferredLanguage,
-                Password = password
-            });
-
-            if (!response.IsSuccessStatusCode)
-            {
-                ShowError("❌ Không thể kết nối server. Vui lòng thử lại.");
+                await DisplayAlert("⚠️", USERNAME_REQUIRED, OK);
                 return;
             }
 
-            var result = await response.Content.ReadFromJsonAsync<LoginResult>();
-
-            if (result?.Success == true)
+            if (string.IsNullOrEmpty(password))
             {
-                await SaveUserSessionAsync(result);
-                await Shell.Current.GoToAsync("//accountTab");
+                await DisplayAlert("⚠️", PASSWORD_REQUIRED, OK);
+                return;
             }
-            else
+
+            await PerformLoginAsync(username, password);
+        }
+
+        private async Task PerformLoginAsync(string username, string password)
+        {
+            LoginButton.IsEnabled = false;
+            LoginActivityIndicator.IsVisible = true;
+            LoginActivityIndicator.IsRunning = true;
+            LoginButton.Text = "⏳ Đang đăng nhập...";
+
+            try
             {
-                ShowError(result?.Message ?? "❌ Đăng nhập thất bại");
+                // Simulate API call
+                await Task.Delay(1500);
+
+                // For demo, accept any credentials
+                if (!string.IsNullOrEmpty(username))
+                {
+                    // Login successful
+                    AppConfig.IsLoggedIn = true;
+                    AppConfig.UserName = username;
+                    AppConfig.UserId = Guid.NewGuid().ToString().Substring(0, 8);
+                    AppConfig.AuthToken = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
+
+                    await DisplayAlert("✅", $"{LOGIN_SUCCESS}\n{WELCOME}, {username}!", OK);
+                    
+                    // Go back to previous page or main page
+                    await Navigation.PopAsync();
+                }
+                else
+                {
+                    await DisplayAlert("❌", LOGIN_FAILED, OK);
+                }
+            }
+            catch (Exception)
+            {
+                await DisplayAlert("❌", CONNECTION_ERROR, OK);
+            }
+            finally
+            {
+                LoginButton.IsEnabled = true;
+                LoginActivityIndicator.IsVisible = false;
+                LoginActivityIndicator.IsRunning = false;
+                LoginButton.Text = "🔑 Đăng nhập";
             }
         }
-        catch (HttpRequestException)
-        {
-            ShowError("❌ Không thể kết nối server. Đang hoạt động offline.");
-            await NavigateToMainPage();
-        }
-        catch (Exception ex)
-        {
-            ShowError($"❌ Lỗi: {ex.Message}");
-        }
-        finally
-        {
-            SetLoading(false);
-        }
-    }
 
-    private async Task SaveUserSessionAsync(LoginResult result)
-    {
-        try
+        private async void DemoButton_Clicked(object sender, EventArgs e)
         {
-            await SecureStorage.SetAsync("user_id", result.Id.ToString());
-            await SecureStorage.SetAsync("username", result.Username ?? "");
-            await SecureStorage.SetAsync("role", result.Role ?? "EndUser");
-            await SecureStorage.SetAsync("plan", result.Plan ?? "Basic");
-            await SecureStorage.SetAsync("password", PasswordEntry.Text ?? "");
+            DemoButton.IsEnabled = false;
+            DemoButton.Text = DEMO_LOGIN;
 
-            AppConfig.SetLoggedInUser(result.Id.ToString());
-            FeatureGate.SetPlan(result.Plan ?? "Basic");
+            try
+            {
+                // Simulate demo login
+                await Task.Delay(1000);
+
+                // Set demo user
+                AppConfig.IsLoggedIn = true;
+                AppConfig.UserName = "Khách Demo";
+                AppConfig.UserId = "DEMO-" + Guid.NewGuid().ToString().Substring(0, 4).ToUpper();
+                AppConfig.AuthToken = "demo_token_" + Guid.NewGuid().ToString().Substring(0, 8);
+                AppConfig.PlanType = "free";
+
+                await DisplayAlert("✅", $"{LOGIN_SUCCESS}\n{WELCOME}, Khách Demo!", OK);
+                
+                await Navigation.PopAsync();
+            }
+            catch (Exception)
+            {
+                await DisplayAlert("❌", CONNECTION_ERROR, OK);
+            }
+            finally
+            {
+                DemoButton.IsEnabled = true;
+                DemoButton.Text = "🎮 Dùng thử";
+            }
         }
-        catch (Exception ex)
+
+        private async void UpgradeButton_Clicked(object sender, EventArgs e)
         {
-            System.Diagnostics.Debug.WriteLine($"Failed to save session: {ex.Message}");
+            await DisplayAlert(PREMIUM_DIALOG, PREMIUM_MESSAGE, UPGRADE);
         }
-    }
 
-    private async Task NavigateToMainPage()
-    {
-        await Shell.Current.GoToAsync("home");
-    }
-
-    private void ShowError(string message)
-    {
-        ErrorLabel.Text = message;
-        ErrorLabel.IsVisible = true;
-    }
-
-    private void SetLoading(bool isLoading)
-    {
-        LoadingIndicator.IsRunning = isLoading;
-        LoadingIndicator.IsVisible = isLoading;
-        LoginBtn.IsEnabled = !isLoading;
-        UsernameEntry.IsEnabled = !isLoading;
-        PasswordEntry.IsEnabled = !isLoading;
+        private async void SkipButton_Clicked(object sender, EventArgs e)
+        {
+            var result = await DisplayAlert("🚶", "Bạn có muốn tiếp tục mà không đăng nhập không?\n\nMột số tính năng sẽ bị giới hạn.", "Tiếp tục", "Hủy");
+            
+            if (result)
+            {
+                await Navigation.PopAsync();
+            }
+        }
     }
 }
