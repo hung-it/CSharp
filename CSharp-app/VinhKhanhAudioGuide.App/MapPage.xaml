@@ -1,39 +1,61 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:maps="clr-namespace:Microsoft.Maui.Controls.Maps;assembly=Microsoft.Maui.Controls.Maps"
              x:Class="VinhKhanhAudioGuide.App.MapPage"
-             BackgroundColor="{StaticResource Pink50}">
+             BackgroundColor="#FFFBF5">
 
     <Grid RowDefinitions="Auto,*,Auto">
+
         <!-- Header -->
-        <Label Text="Bản Đồ POI" FontSize="20" FontAttributes="Bold" TextColor="{StaticResource Pink900}" 
-               Padding="20,15,20,10" HorizontalOptions="Center" Grid.Row="0" />
+        <Border Grid.Row="0" BackgroundColor="White" StrokeThickness="0" Padding="16,12">
+            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
+                <VerticalStackLayout Grid.Column="0" Spacing="2">
+                    <Label Text="🗺️ Bản đồ POI" FontSize="18" FontAttributes="Bold"
+                           TextColor="#1F2937" />
+                    <Label x:Name="LocationStatusLabel" Text="Đang xác định vị trí..." FontSize="11"
+                           TextColor="#6B7280" />
+                </VerticalStackLayout>
+                <Button Grid.Column="1" Text="📍 Vị trí" BackgroundColor="#3B82F6"
+                        TextColor="White" CornerRadius="20" HeightRequest="40"
+                        Padding="12,8" Clicked="OnCenterLocationClicked" />
+            </Grid>
+        </Border>
 
-        <!-- Map -->
-        <maps:Map x:Name="map" 
-                  Grid.Row="1"
-                  HorizontalOptions="Fill"
-                  VerticalOptions="Fill"
-                  IsZoomEnabled="True"
-                  IsScrollEnabled="True" />
+        <!-- WebView Map -->
+        <WebView x:Name="mapWebView" Grid.Row="1" HorizontalOptions="Fill" VerticalOptions="Fill" />
 
-        <!-- POI List Below Map -->
-        <Border Grid.Row="2" BackgroundColor="White" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="15" Margin="15,10,15,15">
-            <VerticalStackLayout Spacing="10">
-                <Label Text="Danh Sách POI Gần" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource Pink900}" />
-                <CollectionView x:Name="NearbyPoisCollectionView" MaximumHeightRequest="150">
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate>
-                            <VerticalStackLayout Padding="10" Spacing="5">
-                                <Label Text="{Binding Name}" FontSize="14" TextColor="{StaticResource Pink800}" FontAttributes="Bold" />
-                                <Label Text="{Binding Description}" FontSize="12" TextColor="{StaticResource Pink600}" />
-                            </VerticalStackLayout>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
+        <!-- Bottom Panel -->
+        <Border Grid.Row="2" BackgroundColor="White" StrokeThickness="0"
+                StrokeShape="RoundRectangle 20,20,0,0" Padding="16">
+            <VerticalStackLayout Spacing="12">
+
+                <!-- Nearby POI Quick List -->
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="📍 Gần bạn" FontSize="14" FontAttributes="Bold"
+                           TextColor="#1F2937" />
+                    <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
+                        <HorizontalStackLayout x:Name="NearbyPoiStack" Spacing="10">
+                            <!-- Items will be added dynamically -->
+                        </HorizontalStackLayout>
+                    </ScrollView>
+                </VerticalStackLayout>
+
+                <!-- Action Buttons -->
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
+                    <Button Grid.Column="0" Text="🔄" BackgroundColor="#F3F4F6"
+                            TextColor="#374151" CornerRadius="10" HeightRequest="44"
+                            Clicked="OnRefreshMapClicked" />
+                    <Button Grid.Column="1" Text="📷 QR" BackgroundColor="#FCE7F3"
+                            TextColor="#BE185D" CornerRadius="10" HeightRequest="44"
+                            Clicked="OnScanQRClicked" />
+                    <Button Grid.Column="2" Text="🎯" BackgroundColor="#ECFDF5"
+                            TextColor="#047857" CornerRadius="10" HeightRequest="44"
+                            Clicked="OnShowAllPoiClicked" />
+                </Grid>
+
             </VerticalStackLayout>
         </Border>
+
     </Grid>
 
 </ContentPage>

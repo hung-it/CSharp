@@ -3,291 +3,725 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VinhKhanhAudioGuide - App Preview</title>
+    <title>Phố Ăn Vĩnh Khách - App Preview</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f5f5;
-            display: flex; justify-content: center; align-items: center;
+            background: linear-gradient(135deg, #FFFBF5 0%, #FFF5F7 100%);
             min-height: 100vh; padding: 20px;
         }
         .container { display: flex; gap: 40px; flex-wrap: wrap; justify-content: center; align-items: flex-start; }
 
         .phone-frame {
-            width: 375px; height: 812px; background: white;
-            border-radius: 40px; border: 12px solid #333;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 390px; height: 844px; background: white;
+            border-radius: 44px; border: 12px solid #1F2937;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.25);
             overflow: hidden; display: flex; flex-direction: column;
         }
         .status-bar {
-            height: 40px; background: #ec4899; color: white; flex-shrink: 0;
+            height: 44px; background: #EC4899; color: white; flex-shrink: 0;
             display: flex; align-items: center; justify-content: space-between;
-            padding: 0 20px; font-size: 12px; font-weight: 600;
+            padding: 0 24px; font-size: 14px; font-weight: 600;
         }
         .page-container {
-            flex: 1; overflow-y: auto; background: #fdf2f8;
-            padding: 16px; display: none; flex-direction: column;
+            flex: 1; overflow-y: auto; background: #FFFBF5;
+            padding: 0; display: none; flex-direction: column;
         }
         .page-container.active { display: flex; }
-        .page-title { font-size: 20px; font-weight: bold; color: #831843; text-align: center; margin-bottom: 12px; }
 
-        /* Map */
-        .map-wrap {
-            width: 100%; height: 300px; border-radius: 12px;
-            overflow: hidden; margin-bottom: 10px; flex-shrink: 0;
-            position: relative; border: 2px solid #fbcfe8;
-        }
-        .map-wrap iframe { width: 100%; height: 100%; border: none; display: block; }
-
-        /* POI list */
-        .section-title { font-size: 13px; font-weight: 700; color: #831843; margin-bottom: 8px; }
-        .poi-item {
-            background: #fce7f3; border-radius: 8px; padding: 10px 12px;
-            margin-bottom: 7px; border-left: 4px solid #ec4899; flex-shrink: 0;
-        }
-        .poi-name { font-size: 13px; color: #be185d; font-weight: 600; margin-bottom: 2px; }
-        .poi-desc { font-size: 11px; color: #db2777; }
-        .poi-district { font-size: 10px; color: #f472b6; margin-top: 2px; }
-
-        /* Dashboard */
-        .dash-card {
-            background: #fce7f3; border-radius: 10px; padding: 14px;
-            margin-bottom: 12px; border: 1px solid #fbcfe8;
-        }
-        .dash-label { font-size: 13px; color: #be185d; margin-bottom: 4px; }
-        .dash-value { font-size: 30px; font-weight: bold; color: #db2777; }
-        .btn {
-            background: #ec4899; color: white; border: none;
-            border-radius: 8px; padding: 12px; font-size: 14px;
-            font-weight: 600; cursor: pointer; width: 100%; margin-top: 6px;
-        }
-        .btn:hover { background: #db2777; }
-
-        /* Tour */
-        .tour-item {
-            background: #fce7f3; border-radius: 8px; padding: 10px 12px;
-            margin-bottom: 8px; border-left: 4px solid #f472b6;
-        }
-        .tour-name { font-size: 13px; color: #be185d; font-weight: 600; margin-bottom: 2px; }
-        .tour-desc { font-size: 11px; color: #db2777; }
+        ::-webkit-scrollbar { width: 3px; }
+        ::-webkit-scrollbar-thumb { background: #EC4899; border-radius: 2px; }
 
         /* Tab bar */
         .tab-bar {
-            height: 72px; background: white; border-top: 1px solid #fbcfe8;
+            height: 84px; background: white; border-top: 1px solid #F3F4F6;
             display: flex; justify-content: space-around; align-items: flex-start;
             padding-top: 8px; flex-shrink: 0;
         }
         .tab-item {
             display: flex; flex-direction: column; align-items: center;
-            cursor: pointer; flex: 1; color: #ccc; font-size: 10px; font-weight: 500;
+            cursor: pointer; flex: 1; color: #9CA3AF; font-size: 10px; font-weight: 500;
             transition: color 0.2s;
         }
-        .tab-item.active { color: #ec4899; }
-        .tab-icon { font-size: 22px; margin-bottom: 4px; }
-
-        ::-webkit-scrollbar { width: 3px; }
-        ::-webkit-scrollbar-thumb { background: #ec4899; border-radius: 2px; }
+        .tab-item.active { color: #EC4899; }
+        .tab-icon { font-size: 24px; margin-bottom: 4px; }
 
         /* Side panel */
         .description {
-            background: white; padding: 24px; border-radius: 12px;
-            width: 320px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            background: white; padding: 28px; border-radius: 16px;
+            width: 340px; box-shadow: 0 8px 24px rgba(0,0,0,0.1);
         }
-        .description h2 { color: #831843; margin-bottom: 14px; font-size: 17px; }
-        .description ul { list-style: none; margin-bottom: 14px; }
-        .description li { padding: 7px 0; color: #555; font-size: 13px; border-bottom: 1px solid #f0f0f0; }
+        .description h2 { color: #1F2937; margin-bottom: 16px; font-size: 18px; }
+        .description h3 { color: #374151; margin: 16px 0 8px; font-size: 14px; }
+        .description ul { list-style: none; margin-bottom: 12px; }
+        .description li { padding: 6px 0; color: #6B7280; font-size: 13px; border-bottom: 1px solid #F3F4F6; }
         .description li:last-child { border-bottom: none; }
-        .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; margin-left: 6px; }
-        .badge-xom { background: #fce7f3; color: #be185d; }
-        .badge-vinh { background: #e0f2fe; color: #0369a1; }
-        .badge-khanh { background: #dcfce7; color: #15803d; }
+        .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; margin-left: 6px; }
+        .badge-new { background: #ECFDF5; color: #047857; }
+        .badge-imp { background: #FEF3C7; color: #B45309; }
+
         .info-box {
-            background: #fef3c7; border: 1px solid #fcd34d;
-            border-radius: 6px; padding: 10px; font-size: 12px; color: #92400e;
+            background: #EFF6FF; border: 1px solid #BFDBFE;
+            border-radius: 8px; padding: 12px; font-size: 12px; color: #1E40AF;
+            margin-top: 12px;
         }
+
+        /* Dashboard Page */
+        .dash-header {
+            background: #EC4899; padding: 20px; border-radius: 0 0 24px 24px;
+        }
+        .dash-welcome { color: white; font-size: 18px; font-weight: bold; margin-bottom: 4px; }
+        .dash-sub { color: #FDF2F8; font-size: 13px; }
+        .dash-qr-btn {
+            background: white; color: #EC4899; border: none; border-radius: 24px;
+            padding: 14px 24px; font-size: 14px; font-weight: bold; width: 100%;
+            margin-top: 12px; cursor: pointer;
+        }
+
+        .dash-stats {
+            display: flex; gap: 12px; padding: 16px;
+        }
+        .stat-card {
+            flex: 1; background: white; border-radius: 14px; padding: 14px;
+            text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .stat-icon { font-size: 24px; margin-bottom: 4px; }
+        .stat-value { font-size: 26px; font-weight: bold; color: #1F2937; }
+        .stat-label { font-size: 10px; color: #9CA3AF; }
+
+        .dash-section {
+            background: white; margin: 0 16px 12px; border-radius: 16px; padding: 16px;
+        }
+        .section-title { font-size: 14px; font-weight: bold; color: #1F2937; margin-bottom: 12px; }
+
+        /* POI Item */
+        .poi-card {
+            background: #F0F9FF; border-radius: 12px; padding: 14px; margin-bottom: 8px;
+            display: flex; align-items: center; gap: 12px;
+        }
+        .poi-icon { font-size: 28px; }
+        .poi-info { flex: 1; }
+        .poi-name { font-size: 14px; font-weight: bold; color: #1E40AF; margin-bottom: 2px; }
+        .poi-meta { font-size: 11px; color: #3B82F6; }
+        .poi-play { 
+            background: #3B82F6; color: white; border: none; border-radius: 20px;
+            width: 40px; height: 40px; font-size: 16px; cursor: pointer;
+        }
+
+        /* Popular POI */
+        .popular-card {
+            background: #FDF2F8; border-radius: 12px; padding: 12px; margin-bottom: 8px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .rank { font-size: 16px; font-weight: bold; color: #F59E0B; width: 28px; }
+        .popular-name { font-size: 13px; font-weight: bold; color: #831743; }
+        .popular-district { font-size: 11px; color: #BE185D; }
+        .popular-count {
+            background: #FCE7F3; padding: 4px 10px; border-radius: 10px;
+            font-size: 11px; font-weight: bold; color: #EC4899;
+        }
+
+        /* Quick Actions Grid */
+        .quick-actions {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 0 16px;
+        }
+        .quick-btn {
+            border-radius: 16px; padding: 16px 8px; text-align: center;
+            cursor: pointer; transition: transform 0.2s;
+        }
+        .quick-btn:hover { transform: scale(1.02); }
+        .quick-icon { font-size: 32px; margin-bottom: 6px; }
+        .quick-label { font-size: 12px; font-weight: 600; }
+        .qa-map { background: #DBEAFE; }
+        .qa-map .quick-label { color: #1E40AF; }
+        .qa-qr { background: #FCE7F3; }
+        .qa-qr .quick-label { color: #BE185D; }
+        .qa-tour { background: #ECFDF5; }
+        .qa-tour .quick-label { color: #047857; }
+        .qa-poi { background: #FEF3C7; grid-column: span 2; }
+        .qa-poi .quick-label { color: #B45309; }
+        .qa-audio { background: #F3E8FF; }
+        .qa-audio .quick-label { color: #7C3AED; }
+
+        /* Connection Status */
+        .conn-status {
+            display: flex; align-items: center; gap: 8px; padding: 10px 16px;
+            background: #F0FDF4; margin: 12px 16px; border-radius: 10px;
+        }
+        .conn-dot { width: 8px; height: 8px; background: #22C55E; border-radius: 50%; }
+        .conn-text { font-size: 12px; color: #16A34A; }
+
+        /* My Stats */
+        .my-stats {
+            display: flex; justify-content: space-around; padding: 16px; background: white;
+            margin: 0 16px 12px; border-radius: 14px;
+        }
+        .my-stat { text-align: center; }
+        .my-stat-value { font-size: 28px; font-weight: bold; }
+        .my-stat-label { font-size: 10px; color: #6B7280; }
+        .stat-pink { color: #EC4899; }
+        .stat-blue { color: #3B82F6; }
+        .stat-green { color: #10B981; }
+
+        /* Language Selection */
+        .lang-section {
+            background: #F9FAFB; margin: 0 16px 12px; border-radius: 14px; padding: 14px;
+        }
+        .lang-btns { display: flex; gap: 10px; margin-top: 8px; }
+        .lang-btn {
+            flex: 1; padding: 10px; border-radius: 20px; font-size: 13px;
+            border: none; cursor: pointer; font-weight: 500;
+        }
+        .lang-vi { background: #EC4899; color: white; }
+        .lang-en { background: #E5E7EB; color: #374151; }
+
+        /* POI List Page */
+        .list-header {
+            padding: 16px; background: white;
+        }
+        .list-title { font-size: 20px; font-weight: bold; color: #1F2937; margin-bottom: 12px; }
+        .search-box {
+            background: white; border-radius: 10px; padding: 10px 14px;
+            display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+            border: 1px solid #E5E7EB;
+        }
+        .search-box input {
+            flex: 1; border: none; outline: none; font-size: 14px;
+        }
+        .filter-chips {
+            display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px;
+        }
+        .chip {
+            padding: 8px 14px; border-radius: 16px; font-size: 12px; white-space: nowrap;
+            background: #F3F4F6; color: #374151; border: none; cursor: pointer;
+        }
+        .chip.active { background: #EC4899; color: white; }
+
+        .poi-list-item {
+            background: white; margin: 0 16px 10px; border-radius: 12px; padding: 14px;
+            display: flex; gap: 12px;
+        }
+        .poi-list-info { flex: 1; }
+        .poi-list-name { font-size: 15px; font-weight: bold; color: #1F2937; margin-bottom: 4px; }
+        .poi-list-desc { font-size: 12px; color: #6B7280; margin-bottom: 6px; }
+        .poi-list-badges { display: flex; gap: 8px; }
+        .district-badge {
+            background: #FDF2F8; padding: 4px 8px; border-radius: 8px;
+            font-size: 11px; color: #BE185D;
+        }
+        .distance-badge { font-size: 11px; color: #3B82F6; }
+
+        /* Map Page */
+        .map-header {
+            padding: 12px 16px; background: white; display: flex;
+            justify-content: space-between; align-items: center;
+        }
+        .map-title { font-size: 18px; font-weight: bold; color: #1F2937; }
+        .map-location { font-size: 11px; color: #6B7280; }
+        .map-container { flex: 1; background: #E5E7EB; position: relative; }
+        .map-placeholder {
+            width: 100%; height: 100%; display: flex; align-items: center;
+            justify-content: center; background: linear-gradient(45deg, #DBEAFE, #BFDBFE);
+            color: #3B82F6; font-size: 48px;
+        }
+        .map-bottom {
+            background: white; padding: 16px; border-radius: 20px 20px 0 0;
+        }
+        .nearby-scroll {
+            display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px;
+        }
+        .nearby-card {
+            background: #F0F9FF; border-radius: 10px; padding: 12px; min-width: 160px;
+        }
+        .nearby-name { font-size: 12px; font-weight: bold; color: #1E40AF; margin-bottom: 2px; }
+        .nearby-meta { font-size: 10px; color: #3B82F6; }
+
+        /* Tour Page */
+        .tour-header { padding: 16px; }
+        .tour-title { font-size: 22px; font-weight: bold; color: #1F2937; margin-bottom: 4px; }
+        .tour-sub { font-size: 13px; color: #6B7280; }
+        .tour-card {
+            background: white; margin: 0 16px 12px; border-radius: 16px; padding: 16px;
+        }
+        .tour-name { font-size: 17px; font-weight: bold; color: #1F2937; margin-bottom: 4px; }
+        .tour-desc { font-size: 12px; color: #6B7280; margin-bottom: 12px; }
+        .tour-stats {
+            display: flex; gap: 8px; margin-bottom: 12px;
+        }
+        .tour-stat {
+            flex: 1; padding: 8px; border-radius: 8px; text-align: center;
+        }
+        .ts-stops { background: #FDF2F8; }
+        .ts-stops .ts-val { color: #EC4899; }
+        .ts-time { background: #EFF6FF; }
+        .ts-time .ts-val { color: #3B82F6; }
+        .ts-diff { background: #ECFDF5; }
+        .ts-diff .ts-val { color: #10B981; }
+        .ts-val { font-size: 16px; font-weight: bold; }
+        .ts-label { font-size: 9px; color: #9CA3AF; }
+        .tour-badges { display: flex; gap: 6px; margin-bottom: 12px; }
+        .tour-badge { padding: 4px 8px; border-radius: 10px; font-size: 11px; }
+        .tb-xom { background: #FEF3C7; color: #B45309; }
+        .tb-vinh { background: #DBEAFE; color: #1E40AF; }
+        .tb-khanh { background: #D1FAE5; color: #047857; }
+        .tour-start-btn {
+            width: 100%; background: #EC4899; color: white; border: none;
+            border-radius: 12px; padding: 14px; font-size: 14px; font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* Settings Page */
+        .settings-header { padding: 16px; }
+        .settings-title { font-size: 22px; font-weight: bold; color: #1F2937; }
+        .settings-card {
+            background: white; margin: 0 16px 12px; border-radius: 12px; padding: 16px;
+        }
+        .settings-section-title { font-size: 15px; font-weight: bold; color: #374151; margin-bottom: 12px; }
+        .settings-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 0; border-bottom: 1px solid #F3F4F6;
+        }
+        .settings-row:last-child { border-bottom: none; }
+        .settings-label { font-size: 13px; color: #1F2937; }
+        .settings-value { font-size: 13px; color: #EC4899; }
+        .settings-slider {
+            width: 100%; margin: 8px 0;
+            accent-color: #EC4899;
+        }
+        .settings-btn {
+            width: 100%; padding: 12px; border-radius: 10px; border: none;
+            font-size: 13px; cursor: pointer; margin-top: 8px;
+        }
+        .btn-primary { background: #EC4899; color: white; }
+        .btn-secondary { background: #EFF6FF; color: #2563EB; }
+        .btn-danger { background: #FEF2F2; color: #DC2626; }
+
     </style>
 </head>
 <body>
 <div class="container">
 
+    <!-- Phone Frame -->
     <div class="phone-frame">
         <div class="status-bar">
             <span>9:41</span>
-            <span>VinhKhanhAudioGuide</span>
+            <span>Phố Ăn Vĩnh Khách</span>
             <span>🔋</span>
         </div>
 
-        <!-- Dashboard -->
+        <!-- Dashboard Page -->
         <div class="page-container active" id="page-dashboard">
-            <div class="page-title">Dashboard</div>
-            <div class="dash-card">
-                <div class="dash-label">Tổng POI</div>
-                <div class="dash-value">14</div>
+            <!-- Welcome Header -->
+            <div class="dash-header">
+                <div class="dash-welcome">👋 Chào mừng đến Phố Ăn Vĩnh Khách!</div>
+                <div class="dash-sub">Khám phá ẩm thực Sài Gòn với hướng dẫn audio đa ngôn ngữ</div>
+                <button class="dash-qr-btn" onclick="switchPage('dashboard', 0)">📷 Quét QR Code để bắt đầu</button>
             </div>
-            <div class="dash-card">
-                <div class="dash-label">Tổng Tour</div>
-                <div class="dash-value">2</div>
+
+            <!-- Connection Status -->
+            <div class="conn-status">
+                <div class="conn-dot"></div>
+                <span class="conn-text">Đã kết nối server • vừa xong</span>
             </div>
-            <div class="dash-card">
-                <div class="dash-label">Tổng Lượt Nghe</div>
-                <div class="dash-value">0</div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <div class="quick-btn qa-map">
+                    <div class="quick-icon">🗺️</div>
+                    <div class="quick-label">Bản đồ</div>
+                </div>
+                <div class="quick-btn qa-qr">
+                    <div class="quick-icon">📷</div>
+                    <div class="quick-label">Quét QR</div>
+                </div>
+                <div class="quick-btn qa-tour">
+                    <div class="quick-icon">✈️</div>
+                    <div class="quick-label">Tour</div>
+                </div>
+                <div class="quick-btn qa-poi">
+                    <div class="quick-icon">📍</div>
+                    <div class="quick-label">12 Điểm tham quan</div>
+                </div>
+                <div class="quick-btn qa-audio">
+                    <div class="quick-icon">🎧</div>
+                    <div class="quick-label">Audio</div>
+                </div>
             </div>
-            <button class="btn">Quét QR Code</button>
+
+            <!-- My Stats -->
+            <div class="dash-section">
+                <div class="section-title">📊 Hành trình của bạn</div>
+                <div class="my-stats">
+                    <div class="my-stat">
+                        <div class="my-stat-value stat-pink">0</div>
+                        <div class="my-stat-label">Điểm đã ghé</div>
+                    </div>
+                    <div class="my-stat">
+                        <div class="my-stat-value stat-blue">0</div>
+                        <div class="my-stat-label">Lượt nghe</div>
+                    </div>
+                    <div class="my-stat">
+                        <div class="my-stat-value stat-green">0</div>
+                        <div class="my-stat-label">Phút nghe</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nearby POIs -->
+            <div class="dash-section">
+                <div class="section-title">📍 Gần bạn</div>
+                <div class="poi-card">
+                    <div class="poi-icon">🥖</div>
+                    <div class="poi-info">
+                        <div class="poi-name">Quán Bánh Mì Xóm Chiếu</div>
+                        <div class="poi-meta">Xóm Chiếu • 150m</div>
+                    </div>
+                    <button class="poi-play">▶</button>
+                </div>
+                <div class="poi-card">
+                    <div class="poi-icon">🛒</div>
+                    <div class="poi-info">
+                        <div class="poi-name">Chợ Xóm Chiếu</div>
+                        <div class="poi-meta">Xóm Chiếu • 280m</div>
+                    </div>
+                    <button class="poi-play">▶</button>
+                </div>
+            </div>
+
+            <!-- Popular POIs -->
+            <div class="dash-section">
+                <div class="section-title">🔥 Điểm phổ biến</div>
+                <div class="popular-card">
+                    <div class="rank">🥇</div>
+                    <div>
+                        <div class="popular-name">Nhà Thờ Vĩnh Hội</div>
+                        <div class="popular-district">Vĩnh Hội</div>
+                    </div>
+                    <div class="popular-count">245 lượt</div>
+                </div>
+                <div class="popular-card">
+                    <div class="rank">🥈</div>
+                    <div>
+                        <div class="popular-name">Chùa Khánh Hội</div>
+                        <div class="popular-district">Khánh Hội</div>
+                    </div>
+                    <div class="popular-count">198 lượt</div>
+                </div>
+                <div class="popular-card">
+                    <div class="rank">🥉</div>
+                    <div>
+                        <div class="popular-name">Chợ Đêm Khánh Hội</div>
+                        <div class="popular-district">Khánh Hội</div>
+                    </div>
+                    <div class="popular-count">156 lượt</div>
+                </div>
+            </div>
+
+            <!-- Language Selection -->
+            <div class="lang-section">
+                <div class="section-title">🌐 Ngôn ngữ</div>
+                <div class="lang-btns">
+                    <button class="lang-btn lang-vi">🇻🇳 Tiếng Việt</button>
+                    <button class="lang-btn lang-en">🇬🇧 English</button>
+                </div>
+            </div>
         </div>
 
-        <!-- Map -->
+        <!-- Map Page -->
         <div class="page-container" id="page-map">
-            <div class="page-title">Bản Đồ POI</div>
-
-            <!-- Google Maps Embed với tất cả 14 POI markers -->
-            <div class="map-wrap">
-                <iframe
-                    src="https://www.google.com/maps/embed?pb=!1m56!1m12!1m3!1d3919.8!2d106.688!3d10.762!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m41!3e2!4m5!1s0x0:0x0!2zMTAuNzUzMCwxMDYuNjg3OA!3m2!1d10.7530!2d106.6878!4m5!1s0x0:0x0!2zMTAuNzU0MCwxMDYuNjg4MA!3m2!1d10.7540!2d106.6880!4m5!1s0x0:0x0!2zMTAuNzU1MCwxMDYuNjg4Mg!3m2!1d10.7550!2d106.6882!4m5!1s0x0:0x0!2zMTAuNzUyNCwxMDYuNjg2OQ!3m2!1d10.7524!2d106.6869!4m5!1s0x0:0x0!2zMTAuNzYwMCwxMDYuNjkwMA!3m2!1d10.7600!2d106.6900!4m5!1s0x0:0x0!2zMTAuNzYyMCwxMDYuNjkyMA!3m2!1d10.7620!2d106.6920!5e0!3m2!1svi!2svn!4v1700000000000!5m2!1svi!2svn"
-                    allowfullscreen="" loading="lazy">
-                </iframe>
+            <div class="map-header">
+                <div>
+                    <div class="map-title">🗺️ Bản đồ POI</div>
+                    <div class="map-location">📍 Vĩ độ: 10.7553, Kinh độ: 106.6602</div>
+                </div>
+                <button style="background: #EFF6FF; border: none; border-radius: 20px; padding: 10px 14px; font-size: 18px;">📍</button>
             </div>
-
-            <div class="section-title">📍 14 POI — Xóm Chiếu · Vĩnh Hội · Khánh Hội</div>
-
-            <div class="poi-item">
-                <div class="poi-name">🥖 Quán Bánh Mì Xóm Chiếu</div>
-                <div class="poi-desc">Quán bánh mì nổi tiếng</div>
-                <div class="poi-district">📌 10.7530, 106.6878 · Xóm Chiếu</div>
+            <div class="map-container">
+                <div class="map-placeholder">🗺️</div>
             </div>
-            <div class="poi-item">
-                <div class="poi-name">🛒 Chợ Xóm Chiếu</div>
-                <div class="poi-desc">Chợ truyền thống</div>
-                <div class="poi-district">📌 10.7540, 106.6880 · Xóm Chiếu</div>
-            </div>
-            <div class="poi-item">
-                <div class="poi-name">🏯 Đình Xóm Chiếu</div>
-                <div class="poi-desc">Đình thờ cổ</div>
-                <div class="poi-district">📌 10.7550, 106.6882 · Xóm Chiếu</div>
-            </div>
-            <div class="poi-item">
-                <div class="poi-name">🏠 Nhà Cổ Xóm Chiếu</div>
-                <div class="poi-desc">Nhà cổ mang kiến trúc Nam Bộ</div>
-                <div class="poi-district">📌 10.7524, 106.6869 · Xóm Chiếu</div>
-            </div>
-            <div class="poi-item">
-                <div class="poi-name">⛪ Nhà Thờ Vĩnh Hội</div>
-                <div class="poi-desc">Nhà thờ Công giáo</div>
-                <div class="poi-district">📌 10.7600, 106.6900 · Vĩnh Hội</div>
-            </div>
-            <div class="poi-item">
-                <div class="poi-name">🏨 Khách Sạn Vĩnh Hội</div>
-                <div class="poi-desc">Khách sạn lịch sử</div>
-                <div class="poi-district">📌 10.7610, 106.6910 · Vĩnh Hội</div>
-            </div>
-            <div class="poi-item">
-                <div class="poi-name">🌳 Cây Cổ Thụ Vĩnh Hội</div>
-                <div class="poi-desc">Cây cổ thụ hơn 100 năm</div>
-                <div class="poi-district">📌 10.7620, 106.6920 · Vĩnh Hội</div>
-            </div>
-            <div class="poi-item">
-                <div class="poi-name">🍜 Hẻm Ẩm Thực Vĩnh Hội</div>
-                <div class="poi-desc">Khu hẻm ăn uống địa phương</div>
-                <div class="poi-district">📌 10.7617, 106.6896 · Vĩnh Hội</div>
-            </div>
-            <div class="poi-item">
-                <div class="poi-name">🌿 Công Viên Bờ Kênh</div>
-                <div class="poi-desc">Không gian xanh ven kênh</div>
-                <div class="poi-district">📌 10.7632, 106.6931 · Vĩnh Hội</div>
-            </div>
-            <div class="poi-item">
-                <div class="poi-name">🍚 Tiệm Cơm Khánh Hội</div>
-                <div class="poi-desc">Tiệm cơm nổi tiếng</div>
-                <div class="poi-district">📌 10.7670, 106.6950 · Khánh Hội</div>
-            </div>
-            <div class="poi-item">
-                <div class="poi-name">🛕 Chùa Khánh Hội</div>
-                <div class="poi-desc">Chùa Phật giáo</div>
-                <div class="poi-district">📌 10.7680, 106.6960 · Khánh Hội</div>
-            </div>
-            <div class="poi-item">
-                <div class="poi-name">🐟 Hồ Cá Khánh Hội</div>
-                <div class="poi-desc">Hồ cá tự nhiên</div>
-                <div class="poi-district">📌 10.7690, 106.6970 · Khánh Hội</div>
-            </div>
-            <div class="poi-item">
-                <div class="poi-name">⚓ Bến Tàu Khánh Hội</div>
-                <div class="poi-desc">Bến tàu cũ gắn với lịch sử khu vực</div>
-                <div class="poi-district">📌 10.7661, 106.6984 · Khánh Hội</div>
-            </div>
-            <div class="poi-item">
-                <div class="poi-name">🌙 Chợ Đêm Khánh Hội</div>
-                <div class="poi-desc">Khu chợ đêm sôi động</div>
-                <div class="poi-district">📌 10.7702, 106.6968 · Khánh Hội</div>
+            <div class="map-bottom">
+                <div class="section-title">📍 Gần bạn</div>
+                <div class="nearby-scroll">
+                    <div class="nearby-card">
+                        <div class="nearby-name">Quán Bánh Mì</div>
+                        <div class="nearby-meta">Xóm Chiếu • 150m</div>
+                        <button class="poi-play" style="margin-top: 8px; width: 100%;">▶</button>
+                    </div>
+                    <div class="nearby-card">
+                        <div class="nearby-name">Chợ Xóm Chiếu</div>
+                        <div class="nearby-meta">Xóm Chiếu • 280m</div>
+                        <button class="poi-play" style="margin-top: 8px; width: 100%;">▶</button>
+                    </div>
+                    <div class="nearby-card">
+                        <div class="nearby-name">Đình Xóm Chiếu</div>
+                        <div class="nearby-meta">Xóm Chiếu • 350m</div>
+                        <button class="poi-play" style="margin-top: 8px; width: 100%;">▶</button>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 12px;">
+                    <button style="flex: 1; background: #F3F4F6; border: none; border-radius: 10px; padding: 12px;">🔄</button>
+                    <button style="flex: 1; background: #FCE7F3; border: none; border-radius: 10px; padding: 12px;">📷 QR</button>
+                    <button style="flex: 1; background: #ECFDF5; border: none; border-radius: 10px; padding: 12px;">🎯</button>
+                </div>
             </div>
         </div>
 
-        <!-- POI List -->
+        <!-- POI List Page -->
         <div class="page-container" id="page-poi">
-            <div class="page-title">Danh Sách POI</div>
-            <div class="poi-item"><div class="poi-name">🥖 Quán Bánh Mì Xóm Chiếu</div><div class="poi-desc">Quán bánh mì nổi tiếng</div><div class="poi-district">Xóm Chiếu</div></div>
-            <div class="poi-item"><div class="poi-name">🛒 Chợ Xóm Chiếu</div><div class="poi-desc">Chợ truyền thống</div><div class="poi-district">Xóm Chiếu</div></div>
-            <div class="poi-item"><div class="poi-name">🏯 Đình Xóm Chiếu</div><div class="poi-desc">Đình thờ cổ</div><div class="poi-district">Xóm Chiếu</div></div>
-            <div class="poi-item"><div class="poi-name">🏠 Nhà Cổ Xóm Chiếu</div><div class="poi-desc">Nhà cổ mang kiến trúc Nam Bộ</div><div class="poi-district">Xóm Chiếu</div></div>
-            <div class="poi-item"><div class="poi-name">⛪ Nhà Thờ Vĩnh Hội</div><div class="poi-desc">Nhà thờ Công giáo</div><div class="poi-district">Vĩnh Hội</div></div>
-            <div class="poi-item"><div class="poi-name">🏨 Khách Sạn Vĩnh Hội</div><div class="poi-desc">Khách sạn lịch sử</div><div class="poi-district">Vĩnh Hội</div></div>
-            <div class="poi-item"><div class="poi-name">🌳 Cây Cổ Thụ Vĩnh Hội</div><div class="poi-desc">Cây cổ thụ hơn 100 năm</div><div class="poi-district">Vĩnh Hội</div></div>
-            <div class="poi-item"><div class="poi-name">🍜 Hẻm Ẩm Thực Vĩnh Hội</div><div class="poi-desc">Khu hẻm ăn uống địa phương</div><div class="poi-district">Vĩnh Hội</div></div>
-            <div class="poi-item"><div class="poi-name">🌿 Công Viên Bờ Kênh</div><div class="poi-desc">Không gian xanh ven kênh</div><div class="poi-district">Vĩnh Hội</div></div>
-            <div class="poi-item"><div class="poi-name">🍚 Tiệm Cơm Khánh Hội</div><div class="poi-desc">Tiệm cơm nổi tiếng</div><div class="poi-district">Khánh Hội</div></div>
-            <div class="poi-item"><div class="poi-name">🛕 Chùa Khánh Hội</div><div class="poi-desc">Chùa Phật giáo</div><div class="poi-district">Khánh Hội</div></div>
-            <div class="poi-item"><div class="poi-name">🐟 Hồ Cá Khánh Hội</div><div class="poi-desc">Hồ cá tự nhiên</div><div class="poi-district">Khánh Hội</div></div>
-            <div class="poi-item"><div class="poi-name">⚓ Bến Tàu Khánh Hội</div><div class="poi-desc">Bến tàu cũ gắn với lịch sử</div><div class="poi-district">Khánh Hội</div></div>
-            <div class="poi-item"><div class="poi-name">🌙 Chợ Đêm Khánh Hội</div><div class="poi-desc">Khu chợ đêm sôi động</div><div class="poi-district">Khánh Hội</div></div>
+            <div class="list-header">
+                <div class="list-title">📍 Điểm Tham Quan</div>
+                <div class="search-box">
+                    <span>🔍</span>
+                    <input type="text" placeholder="Tìm kiếm POI...">
+                </div>
+                <div class="filter-chips">
+                    <button class="chip active">Tất cả (12)</button>
+                    <button class="chip">🏘️ Xóm Chiếu (4)</button>
+                    <button class="chip">🏠 Vĩnh Hội (5)</button>
+                    <button class="chip">🏪 Khánh Hội (3)</button>
+                </div>
+            </div>
+            <div style="padding: 0 16px 16px;">
+                <div class="poi-list-item">
+                    <div class="poi-icon">🥖</div>
+                    <div class="poi-list-info">
+                        <div class="poi-list-name">Quán Bánh Mì Xóm Chiếu</div>
+                        <div class="poi-list-desc">Quán bánh mì nổi tiếng</div>
+                        <div class="poi-list-badges">
+                            <span class="district-badge">Xóm Chiếu</span>
+                            <span class="distance-badge">150m</span>
+                        </div>
+                    </div>
+                    <button class="poi-play">▶</button>
+                </div>
+                <div class="poi-list-item">
+                    <div class="poi-icon">🛒</div>
+                    <div class="poi-list-info">
+                        <div class="poi-list-name">Chợ Xóm Chiếu</div>
+                        <div class="poi-list-desc">Chợ truyền thống</div>
+                        <div class="poi-list-badges">
+                            <span class="district-badge">Xóm Chiếu</span>
+                            <span class="distance-badge">280m</span>
+                        </div>
+                    </div>
+                    <button class="poi-play">▶</button>
+                </div>
+                <div class="poi-list-item">
+                    <div class="poi-icon">🏯</div>
+                    <div class="poi-list-info">
+                        <div class="poi-list-name">Đình Xóm Chiếu</div>
+                        <div class="poi-list-desc">Đình thờ cổ</div>
+                        <div class="poi-list-badges">
+                            <span class="district-badge">Xóm Chiếu</span>
+                            <span class="distance-badge">350m</span>
+                        </div>
+                    </div>
+                    <button class="poi-play">▶</button>
+                </div>
+                <div class="poi-list-item">
+                    <div class="poi-icon">⛪</div>
+                    <div class="poi-list-info">
+                        <div class="poi-list-name">Nhà Thờ Vĩnh Hội</div>
+                        <div class="poi-list-desc">Nhà thờ Công giáo</div>
+                        <div class="poi-list-badges">
+                            <span class="district-badge">Vĩnh Hội</span>
+                            <span class="distance-badge">650m</span>
+                        </div>
+                    </div>
+                    <button class="poi-play">▶</button>
+                </div>
+            </div>
         </div>
 
-        <!-- Tour -->
+        <!-- Tour Page -->
         <div class="page-container" id="page-tour">
-            <div class="page-title">Quản Lý Tour</div>
-            <div class="tour-item">
-                <div class="tour-name">🗺️ Vòng Quanh Phố</div>
-                <div class="tour-desc">Tuyến du lịch quanh 3 khu: Xóm Chiếu → Vĩnh Hội → Khánh Hội · 10 điểm dừng</div>
+            <div class="tour-header">
+                <div class="tour-title">✈️ Tuyến Tour</div>
+                <div class="tour-sub">Chọn tour để khám phá Phố Ăn Vĩnh Khách</div>
             </div>
-            <div class="tour-item">
-                <div class="tour-name">🍽️ Tuyến Ẩm Thực</div>
-                <div class="tour-desc">Khám phá những quán ăn nổi tiếng · 5 điểm dừng</div>
+
+            <div class="tour-card">
+                <div class="tour-name">🗺️ Khám Phá Phố Ăn Vĩnh Khách</div>
+                <div class="tour-desc">Hành trình khám phá toàn bộ 12 điểm ẩm thực và di sản văn hóa đặc sắc tại Phố Cổ Vĩnh Khách</div>
+                <div class="tour-stats">
+                    <div class="tour-stat ts-stops">
+                        <div class="ts-val">12</div>
+                        <div class="ts-label">điểm dừng</div>
+                    </div>
+                    <div class="tour-stat ts-time">
+                        <div class="ts-val">2-3h</div>
+                        <div class="ts-label">thời gian</div>
+                    </div>
+                    <div class="tour-stat ts-diff">
+                        <div class="ts-val">TB</div>
+                        <div class="ts-label">độ khó</div>
+                    </div>
+                </div>
+                <div class="tour-badges">
+                    <span class="tour-badge tb-xom">🏘️ Xóm Chiếu</span>
+                    <span class="tour-badge tb-vinh">🏠 Vĩnh Hội</span>
+                    <span class="tour-badge tb-khanh">🏪 Khánh Hội</span>
+                </div>
+                <button class="tour-start-btn">🚀 Bắt đầu tour</button>
+            </div>
+
+            <div class="tour-card">
+                <div class="tour-name">🍜 Tuyến Ăn Uống Đường Phố</div>
+                <div class="tour-desc">Tập trung vào các điểm ăn uống đặc sản: bánh mì, cơm, hẻm ăn và chợ đêm</div>
+                <div class="tour-stats">
+                    <div class="tour-stat ts-stops">
+                        <div class="ts-val">6</div>
+                        <div class="ts-label">điểm dừng</div>
+                    </div>
+                    <div class="tour-stat ts-time">
+                        <div class="ts-val">1-2h</div>
+                        <div class="ts-label">thời gian</div>
+                    </div>
+                    <div class="tour-stat ts-diff">
+                        <div class="ts-val">Dễ</div>
+                        <div class="ts-label">độ khó</div>
+                    </div>
+                </div>
+                <div class="tour-badges">
+                    <span class="tour-badge tb-xom">🏘️ Xóm Chiếu</span>
+                    <span class="tour-badge tb-khanh">🏪 Khánh Hội</span>
+                </div>
+                <button class="tour-start-btn">🚀 Bắt đầu tour</button>
+            </div>
+
+            <div class="tour-card">
+                <div class="tour-name">🏛️ Hành Trình Di Sản Văn Hóa</div>
+                <div class="tour-desc">Khám phá các điểm di sản lịch sử: đình, chùa, nhà thờ, nhà cổ</div>
+                <div class="tour-stats">
+                    <div class="tour-stat ts-stops">
+                        <div class="ts-val">6</div>
+                        <div class="ts-label">điểm dừng</div>
+                    </div>
+                    <div class="tour-stat ts-time">
+                        <div class="ts-val">1-2h</div>
+                        <div class="ts-label">thời gian</div>
+                    </div>
+                    <div class="tour-stat ts-diff">
+                        <div class="ts-val">Dễ</div>
+                        <div class="ts-label">độ khó</div>
+                    </div>
+                </div>
+                <div class="tour-badges">
+                    <span class="tour-badge tb-xom">🏘️ Xóm Chiếu</span>
+                    <span class="tour-badge tb-vinh">🏠 Vĩnh Hội</span>
+                </div>
+                <button class="tour-start-btn">🚀 Bắt đầu tour</button>
             </div>
         </div>
 
-        <!-- Tab bar -->
+        <!-- Settings Page -->
+        <div class="page-container" id="page-settings">
+            <div class="settings-header">
+                <div class="settings-title">⚙️ Cài đặt</div>
+            </div>
+
+            <div class="settings-card">
+                <div class="settings-section-title">🌐 Ngôn ngữ</div>
+                <div class="lang-btns">
+                    <button class="lang-btn lang-vi">🇻🇳 Tiếng Việt</button>
+                    <button class="lang-btn lang-en">🇬🇧 English</button>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <div class="settings-section-title">📍 GPS & Vị trí</div>
+                <div class="settings-row">
+                    <span class="settings-label">Độ nhạy GPS</span>
+                    <span class="settings-value">50m</span>
+                </div>
+                <input type="range" class="settings-slider" min="20" max="100" value="50">
+                <div class="settings-row">
+                    <span class="settings-label">Tự động phát audio</span>
+                    <span style="color: #10B981;">✓</span>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <div class="settings-section-title">🎧 Audio</div>
+                <div class="settings-row">
+                    <span class="settings-label">Loại audio ưu tiên</span>
+                    <span class="settings-value">Ghi âm sẵn</span>
+                </div>
+                <div class="settings-row">
+                    <span class="settings-label">Âm lượng</span>
+                    <span class="settings-value">80%</span>
+                </div>
+                <input type="range" class="settings-slider" min="0" max="100" value="80">
+            </div>
+
+            <div class="settings-card">
+                <div class="settings-section-title">📡 Dữ liệu & Đồng bộ</div>
+                <div class="settings-row">
+                    <span class="settings-label">Chế độ offline</span>
+                    <span style="color: #9CA3AF;">○</span>
+                </div>
+                <button class="settings-btn btn-secondary">📥 Tải dữ liệu offline</button>
+                <button class="settings-btn btn-danger">🗑️ Xóa dữ liệu cache</button>
+            </div>
+        </div>
+
+        <!-- Tab Bar -->
         <div class="tab-bar">
-            <div class="tab-item active" onclick="switchPage('dashboard',0)">
-                <div class="tab-icon">📊</div><div>Dashboard</div>
+            <div class="tab-item active" onclick="switchPage('dashboard', 0)">
+                <div class="tab-icon">🏠</div><div>Trang chủ</div>
             </div>
-            <div class="tab-item" onclick="switchPage('map',1)">
-                <div class="tab-icon">🗺️</div><div>Bản Đồ</div>
+            <div class="tab-item" onclick="switchPage('map', 1)">
+                <div class="tab-icon">🗺️</div><div>Bản đồ</div>
             </div>
-            <div class="tab-item" onclick="switchPage('poi',2)">
+            <div class="tab-item" onclick="switchPage('poi', 2)">
                 <div class="tab-icon">📍</div><div>POI</div>
             </div>
-            <div class="tab-item" onclick="switchPage('tour',3)">
+            <div class="tab-item" onclick="switchPage('tour', 3)">
                 <div class="tab-icon">✈️</div><div>Tour</div>
+            </div>
+            <div class="tab-item" onclick="switchPage('settings', 4)">
+                <div class="tab-icon">⚙️</div><div>Cài đặt</div>
             </div>
         </div>
     </div>
 
-    <!-- Side panel -->
+    <!-- Description Panel -->
     <div class="description">
-        <h2>📱 App Preview — 14 POI thực</h2>
+        <h2>📱 App Preview — Phố Ăn Vĩnh Khách</h2>
+        
+        <h3>🎯 Cho USER (Du khách)</h3>
         <ul>
-            <li>✅ Dữ liệu từ <strong>DataSeeder (CSharp-main)</strong></li>
-            <li>✅ Default: <strong>ĐH Sài Gòn cơ sở 1</strong></li>
-            <li>✅ Google Maps Embed thật trên tab Bản Đồ</li>
-            <li>✅ 14 POI với tọa độ chính xác</li>
-            <li>✅ <span class="badge badge-xom">Xóm Chiếu</span> 4 POI</li>
-            <li>✅ <span class="badge badge-vinh">Vĩnh Hội</span> 5 POI</li>
-            <li>✅ <span class="badge badge-khanh">Khánh Hội</span> 5 POI</li>
-            <li>✅ 2 Tour: Vòng Quanh Phố + Ẩm Thực</li>
+            <li>✅ <strong>Dashboard</strong> — Xem tổng quan, POIs gần, điểm phổ biến</li>
+            <li>✅ <strong>Bản đồ</strong> — GPS tracking, geofence, POI markers</li>
+            <li>✅ <strong>Danh sách POI</strong> — Filter theo khu vực, tìm kiếm</li>
+            <li>✅ <strong>Tour</strong> — Chọn tuyến, bắt đầu khám phá</li>
+            <li>✅ <strong>Cài đặt</strong> — Ngôn ngữ, GPS, audio, offline</li>
+            <li>✅ <strong>QR Scan</strong> — Quét mã QR tại điểm tham quan</li>
         </ul>
+
+        <h3>📊 Đồng bộ với Backend</h3>
+        <ul>
+            <li>✅ <span class="badge badge-new">Mới</span> Visit Tracking — ghi nhận lượt thăm POI</li>
+            <li>✅ <span class="badge badge-new">Mới</span> Session Tracking — ghi nhận audio đã nghe</li>
+            <li>✅ <span class="badge badge-new">Mới</span> Route Tracking — lưu tuyến di chuyển ẩn danh</li>
+            <li>✅ <span class="badge badge-new">Mới</span> Geofence Events — sự kiện vào/ra vùng POI</li>
+            <li>✅ <span class="badge badge-new">Mới</span> Tour View Tracking — ghi nhận xem tour</li>
+            <li>✅ <span class="badge badge-imp">Cải tiến</span> User Resolution — auto tạo user khi dùng app</li>
+        </ul>
+
         <div class="info-box">
-            <strong>MapPage.xaml.cs fallback:</strong><br>
-            Nếu API trả về Latitude/Longitude = 0, app tự tra bảng <code>_knownPois</code> theo tên POI với tọa độ thực từ DataSeeder.
+            <strong>📍 Tọa độ thực từ DataSeeder:</strong><br>
+            14 POI chia 3 khu: Xóm Chiếu (4), Vĩnh Hội (5), Khánh Hội (5)
         </div>
+
+        <h3>🔄 Web Dashboard (Admin/Owner)</h3>
+        <ul>
+            <li>Xem thống kê lượt nghe theo POI</li>
+            <li>Xem heatmap vị trí người dùng</li>
+            <li>Xem lịch sử visit sessions</li>
+            <li>Xem analytics tour view</li>
+        </ul>
     </div>
 
 </div>

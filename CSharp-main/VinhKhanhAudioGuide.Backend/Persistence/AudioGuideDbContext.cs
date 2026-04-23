@@ -17,6 +17,11 @@ public sealed class AudioGuideDbContext(DbContextOptions<AudioGuideDbContext> op
     public DbSet<ListeningSession> ListeningSessions => Set<ListeningSession>();
     public DbSet<RoutePoint> RoutePoints => Set<RoutePoint>();
     
+    // Visit Tracking
+    public DbSet<VisitSession> VisitSessions => Set<VisitSession>();
+    public DbSet<TourViewSession> TourViewSessions => Set<TourViewSession>();
+    public DbSet<PoiGeofenceEvent> PoiGeofenceEvents => Set<PoiGeofenceEvent>();
+    
     // Shop Management
     public DbSet<ShopProfile> ShopProfiles => Set<ShopProfile>();
     public DbSet<ShopContent> ShopContents => Set<ShopContent>();
@@ -36,7 +41,10 @@ public sealed class AudioGuideDbContext(DbContextOptions<AudioGuideDbContext> op
         {
             entity.Property(x => x.ExternalRef).HasMaxLength(100);
             entity.Property(x => x.PreferredLanguage).HasMaxLength(10);
+            entity.Property(x => x.Username).HasMaxLength(100);
+            entity.Property(x => x.PasswordHash).HasMaxLength(256);
             entity.HasIndex(x => x.ExternalRef).IsUnique();
+            entity.HasIndex(x => x.Username).IsUnique();
         });
 
         modelBuilder.Entity<Subscription>(entity =>
@@ -68,6 +76,18 @@ public sealed class AudioGuideDbContext(DbContextOptions<AudioGuideDbContext> op
             entity.Property(x => x.ImageUrl).HasMaxLength(500);
             entity.Property(x => x.MapLink).HasMaxLength(500);
             entity.HasIndex(x => x.Code).IsUnique();
+
+            // Relationship: POI có thể có ManagerUser (Shop Owner)
+            entity.HasOne(p => p.ManagerUser)
+                .WithMany()
+                .HasForeignKey(p => p.ManagerUserId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<ShopProfile>(entity =>
+        {
+            entity.Property(x => x.ExternalRef).HasMaxLength(100);
+            entity.HasIndex(x => x.ExternalRef);
         });
 
         modelBuilder.Entity<AudioAsset>(entity =>
@@ -109,6 +129,41 @@ public sealed class AudioGuideDbContext(DbContextOptions<AudioGuideDbContext> op
             entity.Property(x => x.Source).HasMaxLength(50);
             entity.HasIndex(x => x.UserId);
             entity.HasIndex(x => x.RecordedAtUtc);
+        });
+
+        modelBuilder.Entity<VisitSession>(entity =>
+        {
+            entity.HasIndex(x => x.UserId);
+            entity.HasIndex(x => x.PoiId);
+            entity.HasIndex(x => x.VisitedAtUtc);
+            entity.HasIndex(x => new { x.PoiId, x.VisitedAtUtc });
+            entity.HasOne(v => v.Poi)
+                .WithMany(p => p.VisitSessions)
+                .HasForeignKey(v => v.PoiId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<TourViewSession>(entity =>
+        {
+            entity.HasIndex(x => x.UserId);
+            entity.HasIndex(x => x.TourId);
+            entity.HasIndex(x => x.ViewedAtUtc);
+            entity.HasOne(t => t.Tour)
+                .WithMany()
+                .HasForeignKey(t => t.TourId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<PoiGeofenceEvent>(entity =>
+        {
+            entity.HasIndex(x => x.UserId);
+            entity.HasIndex(x => x.PoiId);
+            entity.HasIndex(x => x.OccurredAtUtc);
+            entity.HasIndex(x => new { x.PoiId, x.OccurredAtUtc });
+            entity.HasOne(g => g.Poi)
+                .WithMany(p => p.GeofenceEvents)
+                .HasForeignKey(g => g.PoiId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

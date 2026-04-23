@@ -1,3 +1,5 @@
+using System.Net.Http.Json;
+
 namespace VinhKhanhAudioGuide.App;
 
 [QueryProperty(nameof(PoiId), "poiId")]
@@ -9,12 +11,17 @@ namespace VinhKhanhAudioGuide.App;
 [QueryProperty(nameof(PoiLng), "lng")]
 [QueryProperty(nameof(PoiImageUrl), "imageUrl")]
 [QueryProperty(nameof(PoiMapLink), "mapLink")]
+[QueryProperty(nameof(TriggerSource), "trigger")]
+[QueryProperty(nameof(PageSource), "source")]
 public partial class PoiDetailPage : ContentPage
 {
     private string _poiCode = string.Empty;
     private string _mapLink = string.Empty;
+    private Guid? _visitId;
 
     public string PoiId { get; set; } = string.Empty;
+    public string TriggerSource { get; set; } = "Map";
+    public string PageSource { get; set; } = "Map";
 
     public string PoiName
     {
@@ -63,25 +70,53 @@ public partial class PoiDetailPage : ContentPage
         set => _mapLink = Uri.UnescapeDataString(value ?? string.Empty);
     }
 
-    // Setter cuối — sau khi cả lat lẫn lng đã được set
-    public string PoiLngFinal
-    {
-        set
-        {
-            PoiLng = value;
-            UpdateCoordLabel();
-        }
-    }
-
     public PoiDetailPage()
     {
         InitializeComponent();
     }
 
-    protected override void OnAppearing()
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
         UpdateCoordLabel();
+        await StartVisitTrackingAsync();
+    }
+
+    protected override async void OnDisappearing()
+    {
+        base.OnDisappearing();
+        await TrackingService.EndVisitAsync();
+    }
+
+    private async Task StartVisitTrackingAsync()
+    {
+        if (string.IsNullOrEmpty(PoiId) || !Guid.TryParse(PoiId, out var poiGuid))
+            return;
+
+        try
+        {
+            var userId = await AppConfig.ResolveDefaultUserIdAsync();
+            if (string.IsNullOrWhiteSpace(userId) || !Guid.TryParse(userId, out var userGuid))
+                return;
+
+            double? lat = null, lng = null;
+            if (double.TryParse(PoiLat, out var parsedLat))
+                lat = parsedLat;
+            if (double.TryParse(PoiLng, out var parsedLng))
+                lng = parsedLng;
+
+            _visitId = await TrackingService.StartVisitAsync(
+                userGuid,
+                poiGuid,
+                TriggerSource,
+                PageSource,
+                lat,
+                lng);
+        }
+        catch
+        {
+            // Silent fail - tracking is not critical
+        }
     }
 
     private void UpdateCoordLabel()
@@ -98,15 +133,45 @@ public partial class PoiDetailPage : ContentPage
             return;
         }
 
-        var userId = await AppConfig.ResolveDefaultUserIdAsync();
-        if (string.IsNullOrWhiteSpace(userId))
+        try
         {
-            await DisplayAlertAsync("Lỗi kết nối", "Không resolve được user từ backend. Vui lòng kiểm tra backend đang chạy.", "OK");
-            return;
-        }
+            var userId = await AppConfig.ResolveDefaultUserIdAsync();
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                // Fallback: try direct resolve
+                var httpClient = AppConfig.CreateHttpClient();
+                var response = await httpClient.PostAsJsonAsync("users/resolve", new
+                {
+                    Username = "demo",
+                    PreferredLanguage = "vi",
+                    Password = "1"
+                });
 
-        await Shell.Current.GoToAsync(
-            $"audio?qr={Uri.EscapeDataString(_poiCode)}&userId={userId}");
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadFromJsonAsync<LoginResult>();
+                    userId = result?.Id.ToString() ?? "00000000-0000-0000-0000-000000000001";
+                }
+                else
+                {
+                    userId = "00000000-0000-0000-0000-000000000001";
+                }
+            }
+
+            // Record that user is starting to listen
+            TrackingService.RecordListeningStart();
+
+            await Shell.Current.GoToAsync(
+                $"audio?qr={Uri.EscapeDataString(_poiCode)}&userId={userId}");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Listen error: {ex.Message}");
+            // Use fallback user ID
+            TrackingService.RecordListeningStart();
+            await Shell.Current.GoToAsync(
+                $"audio?qr={Uri.EscapeDataString(_poiCode)}&userId=00000000-0000-0000-0000-000000000001");
+        }
     }
 
     private async void OnMapLinkClicked(object? sender, EventArgs e)

@@ -18,7 +18,7 @@ export function AdminRoute({ children }) {
     return <Navigate to="/login" replace />;
   }
 
-  if (currentUser.role && currentUser.role !== 'Admin') {
+  if (currentUser.role !== 'Admin') {
     return <Navigate to="/" replace />;
   }
 
@@ -32,9 +32,19 @@ export function ShopManagerRoute({ children }) {
     return <Navigate to="/login" replace />;
   }
 
-  if (currentUser.role && currentUser.role !== 'ShopManager' && currentUser.role !== 'Admin') {
+  if (currentUser.role !== 'ShopManager' && currentUser.role !== 'Admin') {
     return <Navigate to="/" replace />;
   }
 
   return children;
+}
+
+export function useUserRole() {
+  const { currentUser } = useUser();
+  return {
+    isAdmin: currentUser?.role === 'Admin',
+    isShopManager: currentUser?.role === 'ShopManager',
+    isAuthenticated: !!currentUser,
+    user: currentUser,
+  };
 }

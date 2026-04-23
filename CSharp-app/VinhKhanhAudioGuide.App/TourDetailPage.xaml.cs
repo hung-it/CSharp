@@ -9,6 +9,9 @@ public partial class TourDetailPage : ContentPage
 {
     private readonly HttpClient _httpClient;
     private string _tourId = string.Empty;
+    private Guid? _tourViewId;
+    private int _poiVisitedCount = 0;
+    private int _audioListenedCount = 0;
 
     public string TourId
     {
@@ -41,16 +44,53 @@ public partial class TourDetailPage : ContentPage
         _httpClient = AppConfig.CreateHttpClient();
     }
 
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+        await StartTourViewTrackingAsync();
+    }
+
+    protected override async void OnDisappearing()
+    {
+        base.OnDisappearing();
+        await TrackingService.EndTourViewAsync(_poiVisitedCount, _audioListenedCount);
+    }
+
+    private async Task StartTourViewTrackingAsync()
+    {
+        if (string.IsNullOrEmpty(_tourId) || !Guid.TryParse(_tourId, out var tourGuid))
+            return;
+
+        try
+        {
+            var userId = await AppConfig.ResolveDefaultUserIdAsync();
+            if (string.IsNullOrWhiteSpace(userId) || !Guid.TryParse(userId, out var userGuid))
+                return;
+
+            _tourViewId = await TrackingService.StartTourViewAsync(userGuid, tourGuid);
+        }
+        catch
+        {
+            // Silent fail
+        }
+    }
+
     private async Task LoadStopsAsync()
     {
         try
         {
+            LoadingOverlay.IsVisible = true;
+            
             var stops = await _httpClient.GetFromJsonAsync<List<TourStopItem>>(
                 $"tours/{_tourId}/stops");
 
+            LoadingOverlay.IsVisible = false;
+
             if (stops == null || stops.Count == 0)
             {
+                // Try to load from default stops if API returns empty
                 EmptyLabel.IsVisible = true;
+                StopsCollectionView.ItemsSource = GetDefaultStops();
                 return;
             }
 
@@ -77,10 +117,41 @@ public partial class TourDetailPage : ContentPage
             StopsCollectionView.ItemsSource = items;
             StopCountLabel.Text = $"{items.Count} điểm dừng";
         }
+        catch (HttpRequestException)
+        {
+            LoadingOverlay.IsVisible = false;
+            // Server not reachable - show default stops
+            EmptyLabel.IsVisible = true;
+            StopsCollectionView.ItemsSource = GetDefaultStops();
+            await DisplayAlertAsync("Thông báo", "Đang hoạt động offline. Hiển thị dữ liệu mặc định.", "OK");
+        }
+        catch (TaskCanceledException)
+        {
+            LoadingOverlay.IsVisible = false;
+            EmptyLabel.IsVisible = true;
+            StopsCollectionView.ItemsSource = GetDefaultStops();
+        }
         catch (Exception ex)
         {
-            await DisplayAlertAsync("Lỗi", $"Không thể tải stops: {ex.Message}", "OK");
+            LoadingOverlay.IsVisible = false;
+            EmptyLabel.IsVisible = true;
+            StopsCollectionView.ItemsSource = GetDefaultStops();
+            System.Diagnostics.Debug.WriteLine($"LoadStops error: {ex.Message}");
         }
+    }
+
+    private List<TourStopViewModel> GetDefaultStops()
+    {
+        // Return sample stops for offline/demo mode
+        return new List<TourStopViewModel>
+        {
+            new() { Sequence = 1, PoiName = "Quán Bánh Mì Đặc Biệt", PoiDistrict = "Xóm Chiếu", NextStopHint = "Rẽ phải vào hẻm", HasHint = true },
+            new() { Sequence = 2, PoiName = "Tiệm Cơm Gia Đình", PoiDistrict = "Khánh Hội", NextStopHint = "Đi bộ 200m", HasHint = true },
+            new() { Sequence = 3, PoiName = "Hẻm Ăn Vĩnh Hội", PoiDistrict = "Vĩnh Hội", NextStopHint = "Hẻm giữa khu dân cư", HasHint = true },
+            new() { Sequence = 4, PoiName = "Quán Cà Phê Sân Đình", PoiDistrict = "Xóm Chiếu", NextStopHint = "View đẹp", HasHint = true },
+            new() { Sequence = 5, PoiName = "Chợ Xóm Chiếu", PoiDistrict = "Xóm Chiếu", NextStopHint = "Qua ngã tư", HasHint = true },
+            new() { Sequence = 6, PoiName = "Đình Xóm Chiếu", PoiDistrict = "Xóm Chiếu", NextStopHint = "Đình thờ cổ", HasHint = true },
+        };
     }
 
     private async void OnStopSelected(object? sender, SelectionChangedEventArgs e)
@@ -89,6 +160,9 @@ public partial class TourDetailPage : ContentPage
             return;
 
         StopsCollectionView.SelectedItem = null;
+
+        // Track that user visited a POI from this tour
+        _poiVisitedCount++;
 
         await Shell.Current.GoToAsync(
             $"poiDetail" +
@@ -100,7 +174,9 @@ public partial class TourDetailPage : ContentPage
             $"&lat={stop.PoiLat}" +
             $"&lng={stop.PoiLng}" +
             $"&imageUrl={Uri.EscapeDataString(stop.PoiImageUrl)}" +
-            $"&mapLink={Uri.EscapeDataString(stop.PoiMapLink)}");
+            $"&mapLink={Uri.EscapeDataString(stop.PoiMapLink)}" +
+            $"&trigger=Tour" +
+            $"&source=TourDetail");
     }
 }
 

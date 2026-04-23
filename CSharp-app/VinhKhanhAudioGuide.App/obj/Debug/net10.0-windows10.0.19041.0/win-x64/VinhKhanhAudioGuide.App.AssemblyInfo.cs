@@ -17,7 +17,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("VinhKhanhAudioGuide.App")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0+66457832d292fd67054c6c4ba90f946f422e5b01")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0+78f847e6c7c903b903009f19393869ab48bbcf35")]
 [assembly: System.Reflection.AssemblyProductAttribute("VinhKhanhAudioGuide.App")]
 [assembly: System.Reflection.AssemblyTitleAttribute("VinhKhanhAudioGuide.App")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

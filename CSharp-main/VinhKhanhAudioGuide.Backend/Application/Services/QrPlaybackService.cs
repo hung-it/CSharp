@@ -101,6 +101,7 @@ public sealed class QrPlaybackService(
             throw new FileNotFoundException("Audio path is empty.");
         }
 
+        // If it's a full URL (http/https), skip validation
         if (Uri.TryCreate(filePath, UriKind.Absolute, out var uri))
         {
             if (string.Equals(uri.Scheme, Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase) ||
@@ -108,30 +109,36 @@ public sealed class QrPlaybackService(
             {
                 return;
             }
-
-            if (uri.IsFile)
-            {
-                var localPath = uri.LocalPath;
-                if (!File.Exists(localPath))
-                {
-                    throw new FileNotFoundException($"Audio file '{localPath}' not found.", localPath);
-                }
-
-                return;
-            }
         }
 
-        if (Path.IsPathRooted(filePath))
+        // Convert path based on runtime environment
+        string fullPath;
+        if (filePath.StartsWith("/audio/") || filePath.StartsWith("\\audio\\"))
         {
-            if (!File.Exists(filePath))
-            {
-                throw new FileNotFoundException($"Audio file '{filePath}' not found.", filePath);
-            }
-
-            return;
+            // Relative to uploads folder
+            var basePath = Path.Combine(AppContext.BaseDirectory, "Data", "uploads");
+            var relativePath = filePath.TrimStart('/').Replace("/", Path.DirectorySeparatorChar.ToString());
+            fullPath = Path.Combine(basePath, relativePath);
+        }
+        else if (filePath.StartsWith("/") || filePath.StartsWith("\\"))
+        {
+            // Unix-style absolute path on Windows - convert
+            fullPath = filePath.TrimStart('/');
+        }
+        else if (filePath.Length >= 2 && filePath[1] == ':')
+        {
+            // Windows absolute path (C:\...)
+            fullPath = filePath;
+        }
+        else
+        {
+            // Relative path
+            fullPath = Path.GetFullPath(filePath);
         }
 
-        // Relative paths can represent app-packaged or deferred-download assets.
-        // Validation is deferred to the mobile playback layer after resolution.
+        if (!File.Exists(fullPath))
+        {
+            throw new FileNotFoundException($"Audio file '{filePath}' not found at '{fullPath}'.", fullPath);
+        }
     }
 }

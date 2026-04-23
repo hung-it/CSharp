@@ -2,36 +2,118 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="VinhKhanhAudioGuide.App.PoiListPage"
-             BackgroundColor="{StaticResource Pink50}">
+             BackgroundColor="#FFFBF5">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="10">
-            <Label Text="Danh Sách POI" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource Pink900}" HorizontalOptions="Center" />
-            <CollectionView x:Name="PoiCollectionView"
-                             SelectionMode="Single"
-                             SelectionChanged="OnPoiSelected">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Border BackgroundColor="{StaticResource Pink100}" StrokeThickness="0" StrokeShape="RoundRectangle 10"
-                                Padding="12" Margin="0,0,0,4">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <VerticalStackLayout Grid.Column="0" Spacing="3">
-                                    <Label Text="{Binding Name}" FontSize="15"
-                                           FontAttributes="Bold" TextColor="{StaticResource Pink800}" />
-                                    <Label Text="{Binding Description}" FontSize="12"
-                                           TextColor="{StaticResource Pink600}" />
-                                    <Label Text="{Binding District}" FontSize="11"
-                                           TextColor="{StaticResource Pink400}" />
-                                </VerticalStackLayout>
-                                <Label Grid.Column="1" Text="›" FontSize="20"
-                                       TextColor="{StaticResource Pink400}"
-                                       VerticalOptions="Center" />
-                            </Grid>
-                        </Border>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
+    <Grid RowDefinitions="Auto,Auto,*" Padding="16">
+
+        <!-- Header -->
+        <VerticalStackLayout Grid.Row="0" Spacing="12">
+            <Label Text="📍 Điểm Tham Quan" FontSize="20" FontAttributes="Bold"
+                   TextColor="#1F2937" />
+            
+            <!-- Search Bar -->
+            <Border BackgroundColor="White" StrokeThickness="0"
+                    StrokeShape="RoundRectangle 10" Padding="4">
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                    <Label Grid.Column="0" Text="🔍" FontSize="16" VerticalOptions="Center"
+                           Margin="8,0" />
+                    <Entry x:Name="SearchEntry" Grid.Column="1" Placeholder="Tìm kiếm POI..."
+                           FontSize="14" BackgroundColor="Transparent" Margin="0"
+                           TextChanged="OnSearchTextChanged" />
+                    <Button Grid.Column="2" Text="✕" BackgroundColor="Transparent"
+                            TextColor="#9CA3AF" Clicked="OnClearSearchClicked" />
+                </Grid>
+            </Border>
+
+            <!-- District Filter Chips -->
+            <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
+                <HorizontalStackLayout Spacing="8">
+                    <Button x:Name="FilterAllBtn" Text="Tất cả (12)" BackgroundColor="#EC4899"
+                            TextColor="White" CornerRadius="16" FontSize="12" Padding="14,8"
+                            Clicked="OnFilterAllClicked" />
+                    <Button x:Name="FilterXomChieuBtn" Text="🏘️ Xóm Chiếu (4)" BackgroundColor="#F3F4F6"
+                            TextColor="#374151" CornerRadius="16" FontSize="12" Padding="14,8"
+                            Clicked="OnFilterXomChieuClicked" />
+                    <Button x:Name="FilterVinhHoiBtn" Text="🏠 Vĩnh Hội (5)" BackgroundColor="#F3F4F6"
+                            TextColor="#374151" CornerRadius="16" FontSize="12" Padding="14,8"
+                            Clicked="OnFilterVinhHoiClicked" />
+                    <Button x:Name="FilterKhanhHoiBtn" Text="🏪 Khánh Hội (3)" BackgroundColor="#F3F4F6"
+                            TextColor="#374151" CornerRadius="16" FontSize="12" Padding="14,8"
+                            Clicked="OnFilterKhanhHoiClicked" />
+                </HorizontalStackLayout>
+            </ScrollView>
         </VerticalStackLayout>
-    </ScrollView>
+
+        <!-- Sort Options -->
+        <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="0,12,0,8">
+            <Label Grid.Column="0" x:Name="ResultCountLabel" Text="14 điểm"
+                   FontSize="13" TextColor="#6B7280" VerticalOptions="Center" />
+            <HorizontalStackLayout Grid.Column="1" Spacing="4">
+                <Label Text="Sắp xếp:" FontSize="12" TextColor="#9CA3AF" VerticalOptions="Center" />
+                <Picker x:Name="SortPicker" Title="Sắp xếp" FontSize="12" 
+                        WidthRequest="120" SelectedIndexChanged="OnSortChanged">
+                    <Picker.Items>
+                        <x:String>Mặc định</x:String>
+                        <x:String>Theo tên</x:String>
+                        <x:String>Gần nhất</x:String>
+                        <x:String>Phổ biến</x:String>
+                    </Picker.Items>
+                </Picker>
+            </HorizontalStackLayout>
+        </Grid>
+
+        <!-- POI List -->
+        <ScrollView Grid.Row="2">
+            <VerticalStackLayout Spacing="10">
+                <CollectionView x:Name="PoiCollectionView" SelectionMode="Single"
+                                SelectionChanged="OnPoiSelected">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Border BackgroundColor="White" StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 12" Padding="14" Margin="0,0,0,8">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                    <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                        <Label Text="{Binding Name}" FontSize="15"
+                                               FontAttributes="Bold" TextColor="#1F2937" />
+                                        <Label Text="{Binding Description}" FontSize="12"
+                                               TextColor="#6B7280" MaxLines="2" LineBreakMode="TailTruncation" />
+                                        <HorizontalStackLayout Spacing="8" Margin="0,4,0,0">
+                                            <Border BackgroundColor="#FDF2F8" StrokeThickness="0"
+                                                    StrokeShape="RoundRectangle 8" Padding="8,4">
+                                                <Label Text="{Binding District}" FontSize="11"
+                                                       TextColor="#BE185D" />
+                                            </Border>
+                                            <Label Text="{Binding DistanceText}" FontSize="11"
+                                                   TextColor="#3B82F6" VerticalOptions="Center" />
+                                        </HorizontalStackLayout>
+                                    </VerticalStackLayout>
+                                    <VerticalStackLayout Grid.Column="1" HorizontalOptions="Center"
+                                                        VerticalOptions="Center" Spacing="8">
+                                        <Button Text="▶" BackgroundColor="#3B82F6" TextColor="White"
+                                                CornerRadius="16" WidthRequest="40" HeightRequest="40"
+                                                Clicked="OnPoiPlayClicked" />
+                                        <Label Text="›" FontSize="20" TextColor="#D1D5DB"
+                                               HorizontalOptions="Center" />
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <!-- Empty State -->
+                <VerticalStackLayout x:Name="EmptyState" IsVisible="False"
+                                    HorizontalOptions="Center" Margin="0,40">
+                    <Image Source="search.png" WidthRequest="80" HeightRequest="80"
+                           Opacity="0.5" HorizontalOptions="Center" />
+                    <Label Text="Không tìm thấy POI" FontSize="16"
+                           TextColor="#9CA3AF" HorizontalOptions="Center" Margin="0,16,0,4" />
+                    <Label Text="Thử tìm kiếm với từ khóa khác" FontSize="13"
+                           TextColor="#D1D5DB" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </ScrollView>
+
+    </Grid>
 
 </ContentPage>

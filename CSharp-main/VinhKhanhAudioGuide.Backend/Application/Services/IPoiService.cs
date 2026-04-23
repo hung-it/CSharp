@@ -25,14 +25,14 @@ public interface IPoiService
     Task<IEnumerable<Poi>> GetPoisByDistrictAsync(string district, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Get POIs owned by a shop.
+    /// Get POIs owned by a shop (legacy - for backward compatibility).
     /// </summary>
     Task<IEnumerable<Poi>> GetPoisByShopAsync(Guid shopId, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Get POIs by shop and district.
+    /// Get POIs owned/managed by a specific user (Shop Manager).
     /// </summary>
-    Task<IEnumerable<Poi>> GetPoisByShopAndDistrictAsync(Guid shopId, string district, CancellationToken cancellationToken = default);
+    Task<IEnumerable<Poi>> GetPoisByManagerAsync(Guid managerUserId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Create a new POI.
@@ -48,7 +48,7 @@ public interface IPoiService
         int priority = 0,
         string? imageUrl = null,
         string? mapLink = null,
-        Guid? shopId = null,
+        Guid? managerUserId = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>

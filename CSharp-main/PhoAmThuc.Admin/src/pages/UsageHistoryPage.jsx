@@ -78,7 +78,7 @@ export default function UsageHistoryPage() {
         <div className='grid grid-cols-1 md:grid-cols-3 gap-3'>
           <input
             className='rounded-xl border border-pink-100 px-3 py-2'
-            placeholder='Nhập external ref để tìm user'
+            placeholder='Nhập tên user để tìm'
             value={search}
             onChange={(event) => setSearch(event.target.value)}
           />
@@ -106,7 +106,7 @@ export default function UsageHistoryPage() {
           <option value=''>Chọn user</option>
           {users.map((user) => (
             <option key={user.id} value={user.id}>
-              {user.externalRef} - Tạo lúc: {new Date(user.createdAtUtc).toLocaleString()}
+              {user.username || user.externalRef} - Tạo lúc: {new Date(user.createdAtUtc).toLocaleString()}
             </option>
           ))}
         </select>
@@ -117,6 +117,7 @@ export default function UsageHistoryPage() {
           <thead>
             <tr className='text-gray-500 border-b border-pink-100'>
               <th className='text-left py-2'>Thời gian bắt đầu</th>
+              <th className='text-left py-2'>User</th>
               <th className='text-left py-2'>POI</th>
               <th className='text-right py-2'>Thời lượng</th>
               <th className='text-right py-2'>Nguồn kích hoạt</th>
@@ -126,6 +127,7 @@ export default function UsageHistoryPage() {
             {sessions.map((session) => (
               <tr key={session.id} className='border-b border-pink-50'>
                 <td className='py-2'>{new Date(session.startedAtUtc).toLocaleString()}</td>
+                <td className='py-2'>{session.username || session.userId}</td>
                 <td className='py-2'>{session.poiName || session.poiId}</td>
                 <td className='py-2 text-right'>{session.durationSeconds || 0}s</td>
                 <td className='py-2 text-right'>{session.triggerSource}</td>
@@ -133,7 +135,7 @@ export default function UsageHistoryPage() {
             ))}
             {sessions.length === 0 && (
               <tr>
-                <td colSpan={4} className='py-4 text-gray-500'>
+                <td colSpan={5} className='py-4 text-gray-500'>
                   Chưa có dữ liệu session.
                 </td>
               </tr>

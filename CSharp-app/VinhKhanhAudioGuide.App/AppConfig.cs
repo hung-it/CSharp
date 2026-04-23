@@ -4,7 +4,8 @@ namespace VinhKhanhAudioGuide.App;
 
 public static class AppConfig
 {
-    public const string DefaultExternalRef = "USER_DEMO";
+    // Demo user username - must match backend seed data
+    public const string DefaultExternalRef = "demo";
     public const string DefaultPreferredLanguage = "vi";
 
     // Android emulator cannot call host machine through localhost.
@@ -22,7 +23,8 @@ public static class AppConfig
         ? AndroidEmulatorFrontendBaseUrl
         : LocalFrontendBaseUrl;
 
-    public static string MediaBaseUrl => ApiBaseUrl.Replace("/api/v1/", "/").TrimEnd('/');
+    // Backend serves static files at /media path (see Program.cs: app.UseStaticFiles with RequestPath = "/media")
+    public static string MediaBaseUrl => ApiBaseUrl.Replace("/api/v1/", "/media/").TrimEnd('/');
 
     public static HttpClient CreateHttpClient()
     {
@@ -39,23 +41,47 @@ public static class AppConfig
 
         try
         {
+            // First try: resolve existing demo user with password
             var response = await client.PostAsJsonAsync("users/resolve", new
             {
-                ExternalRef = DefaultExternalRef,
+                Username = DefaultExternalRef,
+                PreferredLanguage = DefaultPreferredLanguage,
+                Password = "1"
+            }, cancellationToken);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<LoginResult>(cancellationToken: cancellationToken);
+                if (result?.Success == true)
+                {
+                    return result.Id.ToString();
+                }
+            }
+
+            // Second try: create new anonymous user (no password required)
+            var anonUsername = $"anon_{Guid.NewGuid():N}".Substring(0, 20);
+            var createResponse = await client.PostAsJsonAsync("users/resolve", new
+            {
+                Username = anonUsername,
                 PreferredLanguage = DefaultPreferredLanguage
             }, cancellationToken);
 
-            if (!response.IsSuccessStatusCode)
+            if (createResponse.IsSuccessStatusCode)
             {
-                return string.Empty;
+                var createResult = await createResponse.Content.ReadFromJsonAsync<LoginResult>(cancellationToken: cancellationToken);
+                if (createResult?.Success == true)
+                {
+                    return createResult.Id.ToString();
+                }
             }
 
-            var user = await response.Content.ReadFromJsonAsync<ResolvedUserResponse>(cancellationToken: cancellationToken);
-            return user?.Id.ToString() ?? string.Empty;
+            // Fallback: return a fixed anonymous ID for offline mode
+            return "00000000-0000-0000-0000-000000000001";
         }
         catch
         {
-            return string.Empty;
+            // Fallback for offline mode
+            return "00000000-0000-0000-0000-000000000001";
         }
         finally
         {
@@ -67,9 +93,12 @@ public static class AppConfig
     }
 }
 
-public sealed class ResolvedUserResponse
+public class LoginResult
 {
+    public bool Success { get; set; }
+    public string? Message { get; set; }
     public Guid Id { get; set; }
-    public string ExternalRef { get; set; } = string.Empty;
+    public string? Username { get; set; }
     public string? Role { get; set; }
+    public string? Plan { get; set; }
 }

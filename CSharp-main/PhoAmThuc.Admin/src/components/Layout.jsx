@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { MapPin, BarChart3, Music, Languages, Route, History, WalletCards, QrCode, LogOut } from 'lucide-react';
+import { MapPin, BarChart3, Music, Languages, Route, History, WalletCards, QrCode, LogOut, TrendingUp } from 'lucide-react';
 import { useUser } from '../contexts/UserContext.jsx';
 
 export default function Layout() {
@@ -10,10 +10,11 @@ export default function Layout() {
 
   const menuItems = [
     { name: 'Tổng quan (Dashboard)', icon: <BarChart3 size={20} />, path: '/', roles: ['Admin', 'ShopManager'] },
+    { name: 'Phân tích chi tiết', icon: <TrendingUp size={20} />, path: '/analytics', roles: ['Admin', 'ShopManager'] },
     { name: 'Quản lý POI', icon: <MapPin size={20} />, path: '/pois', roles: ['Admin', 'ShopManager'] },
     { name: 'Quản lý Audio', icon: <Music size={20} />, path: '/audio', roles: ['Admin', 'ShopManager'] },
     { name: 'Quản lý Bản Dịch', icon: <Languages size={20} />, path: '/translations', roles: ['Admin', 'ShopManager'] },
-    { name: 'Quản lý Tour', icon: <Route size={20} />, path: '/tours', roles: ['Admin', 'ShopManager'] },
+    { name: 'Quản lý Tour', icon: <Route size={20} />, path: '/tours', roles: ['Admin'] },
     { name: 'QR Manager', icon: <QrCode size={20} />, path: '/qr-manager', roles: ['Admin', 'ShopManager'] },
     { name: 'Lịch sử sử dụng', icon: <History size={20} />, path: '/usage-history', roles: ['Admin'] },
     { name: 'Subscription 1/10 USD', icon: <WalletCards size={20} />, path: '/subscriptions', roles: ['Admin'] },
@@ -43,8 +44,8 @@ export default function Layout() {
     return roleMap[role] || role;
   };
 
-  const getUserInitial = (externalRef) => {
-    return externalRef?.[0]?.toUpperCase() || '?';
+  const getUserInitial = (username) => {
+    return username?.[0]?.toUpperCase() || '?';
   };
 
   return (
@@ -89,11 +90,11 @@ export default function Layout() {
               {currentUser ? (
                 <>
                   <div className="text-right">
-                    <div className="text-sm font-medium text-gray-700">{currentUser.externalRef}</div>
+                    <div className="text-sm font-medium text-gray-700">{currentUser.username}</div>
                     <div className="text-xs text-gray-500">{getRoleLabel(currentUser.role)}</div>
                   </div>
                   <div className="w-9 h-9 rounded-xl bg-linear-to-tr from-pink-500 to-purple-500 flex items-center justify-center text-white font-bold shadow-md">
-                    {getUserInitial(currentUser.externalRef)}
+                    {getUserInitial(currentUser.username)}
                   </div>
                 </>
               ) : (
@@ -107,7 +108,7 @@ export default function Layout() {
             {showUserMenu && (
               <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-pink-100 z-20">
                 <div className="p-3 border-b border-pink-100">
-                  <div className="font-medium text-gray-700">{currentUser?.externalRef}</div>
+                  <div className="font-medium text-gray-700">{currentUser?.username}</div>
                   <div className="text-sm text-gray-500">{getRoleLabel(currentUser?.role)}</div>
                 </div>
                 <div className="p-2">

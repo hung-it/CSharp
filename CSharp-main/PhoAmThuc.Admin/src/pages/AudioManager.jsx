@@ -1,7 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
-import { apiDelete, apiGet, apiPatch, apiPost, apiPostForm } from '../services/apiClient';
+import { apiDelete, apiGet, apiGetWithUser, apiPatch, apiPost, apiPostForm } from '../services/apiClient';
+import { useUser } from '../contexts/UserContext.jsx';
 
 export default function AudioManager() {
+  const { currentUser } = useUser();
+  const isAdmin = currentUser?.role === 'Admin';
+  const isShopManager = currentUser?.role === 'ShopManager';
   const [pois, setPois] = useState([]);
   const [selectedPoiId, setSelectedPoiId] = useState('');
   const [audios, setAudios] = useState([]);
@@ -29,35 +33,34 @@ export default function AudioManager() {
 
     async function loadPois() {
       setIsLoading(true);
-      setError('');
+
       try {
-        const poiData = await apiGet('/pois');
-        if (!active) {
-          return;
+        let poiData;
+        if (isShopManager && currentUser?.id) {
+          const managerData = await apiGetWithUser('/users/me/pois', currentUser.id);
+          poiData = managerData?.pois || [];
+        } else {
+          poiData = await apiGet('/pois');
         }
 
-        const safePois = Array.isArray(poiData) ? poiData : [];
-        setPois(safePois);
-        if (safePois.length > 0) {
-          setSelectedPoiId(safePois[0].id);
-        }
-      } catch (loadError) {
         if (active) {
-          setError(loadError.message || 'Khong the tai danh sach POI.');
+          const safePois = Array.isArray(poiData) ? poiData : [];
+          setPois(safePois);
+          if (safePois.length > 0 && !safePois.find(p => p.id === selectedPoiId)) {
+            setSelectedPoiId(safePois[0].id);
+          }
         }
+      } catch {
+        if (active) setPois([]);
       } finally {
-        if (active) {
-          setIsLoading(false);
-        }
+        if (active) setIsLoading(false);
       }
     }
 
-    loadPois();
+    if (currentUser?.id) loadPois();
 
-    return () => {
-      active = false;
-    };
-  }, []);
+    return () => { active = false; };
+  }, [isShopManager, isAdmin, currentUser?.id]);
 
   useEffect(() => {
     let active = true;
@@ -255,7 +258,7 @@ export default function AudioManager() {
           Quản lý Audio
         </h1>
         <p className='text-sm text-pink-400/90 mt-1'>
-          Quản lý thư viện audio thuyết minh cho từng điểm POI, đảm bảo đúng ngôn ngữ và nội dung phát.
+          Quản lý thư viện audio thuyết minh cho từng điểm POI
         </p>
       </div>
 

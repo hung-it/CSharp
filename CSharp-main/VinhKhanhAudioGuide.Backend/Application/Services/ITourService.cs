@@ -22,7 +22,7 @@ public interface ITourService
     /// <summary>
     /// Create a new tour.
     /// </summary>
-    Task<Tour> CreateTourAsync(string code, string name, string? description = null, CancellationToken cancellationToken = default);
+    Task<Tour> CreateTourAsync(string code, string name, string? description = null, Guid? shopId = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Update tour metadata.

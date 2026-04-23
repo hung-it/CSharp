@@ -3,7 +3,8 @@ namespace VinhKhanhAudioGuide.Backend.Domain.Entities;
 public sealed class ShopProfile
 {
     public Guid Id { get; set; } = Guid.NewGuid();
-    public Guid ManagerUserId { get; set; }
+    public string? ExternalRef { get; set; }
+    public Guid? ManagerUserId { get; set; }
     public required string Name { get; set; }
     public string? Description { get; set; }
     public string? Address { get; set; }

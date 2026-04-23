@@ -32,7 +32,7 @@ public sealed class TourService(AudioGuideDbContext dbContext) : ITourService
             .FirstOrDefaultAsync(t => t.Code == code, cancellationToken);
     }
 
-    public async Task<Tour> CreateTourAsync(string code, string name, string? description = null, CancellationToken cancellationToken = default)
+    public async Task<Tour> CreateTourAsync(string code, string name, string? description = null, Guid? shopId = null, CancellationToken cancellationToken = default)
     {
         var existingTour = await GetTourByCodeAsync(code, cancellationToken);
         if (existingTour is not null)
@@ -44,7 +44,8 @@ public sealed class TourService(AudioGuideDbContext dbContext) : ITourService
         {
             Code = code,
             Name = name,
-            Description = description
+            Description = description,
+            ShopId = shopId
         };
 
         _dbContext.Tours.Add(tour);

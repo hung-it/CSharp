@@ -4,20 +4,23 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:VinhKhanhAudioGuide.App"
-    Title="VinhKhanhAudioGuide.App">
+    Title="Phố Ăn Vĩnh Khách">
 
     <TabBar>
-        <Tab Title="Dashboard" Icon="home.png">
+        <Tab Title="Trang chủ" Route="home">
             <ShellContent ContentTemplate="{DataTemplate local:MainPage}" />
         </Tab>
-        <Tab Title="Bản Đồ" Icon="map.png">
+        <Tab Title="Bản đồ" Route="map">
             <ShellContent ContentTemplate="{DataTemplate local:MapPage}" />
         </Tab>
-        <Tab Title="POI" Icon="list.png">
+        <Tab Title="POI" Route="poi">
             <ShellContent ContentTemplate="{DataTemplate local:PoiListPage}" />
         </Tab>
-        <Tab Title="Tour" Icon="tour.png">
+        <Tab Title="Tour" Route="tour">
             <ShellContent ContentTemplate="{DataTemplate local:TourManagerPage}" />
+        </Tab>
+        <Tab Title="Tài khoản" Route="account">
+            <ShellContent ContentTemplate="{DataTemplate local:SettingsPage}" />
         </Tab>
     </TabBar>
 

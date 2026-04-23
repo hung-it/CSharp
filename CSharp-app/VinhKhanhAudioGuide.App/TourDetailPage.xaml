@@ -69,6 +69,17 @@
                    FontSize="13" TextColor="{StaticResource Pink300}"
                    HorizontalOptions="Center" IsVisible="False" />
 
+            <!-- Loading Overlay -->
+            <Frame x:Name="LoadingOverlay" IsVisible="False" BackgroundColor="#80FFFFFF"
+                   CornerRadius="12" Padding="20" HorizontalOptions="Center"
+                   HasShadow="False" BorderColor="Transparent">
+                <StackLayout Orientation="Horizontal" Spacing="10">
+                    <ActivityIndicator IsRunning="True" Color="#EC4899" />
+                    <Label Text="Đang tải..." FontSize="13" TextColor="#6B7280"
+                           VerticalOptions="Center" />
+                </StackLayout>
+            </Frame>
+
         </VerticalStackLayout>
     </ScrollView>
 

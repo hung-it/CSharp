@@ -1,8 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Search, Plus, MapPin, Edit2, Trash2 } from 'lucide-react';
-import { apiDelete, apiGet, apiPatch, apiPost } from '../services/apiClient';
+import { Search, Plus, MapPin, Edit2, Trash2, Building2, Users, X } from 'lucide-react';
+import { apiDelete, apiGet, apiGetWithUser, apiPatch, apiPost, apiPostWithUser } from '../services/apiClient';
+import { useUser } from '../contexts/UserContext.jsx';
 
 export default function PoiList() {
+  const { currentUser } = useUser();
+  const isAdmin = currentUser?.role === 'Admin';
+  const isShopManager = currentUser?.role === 'ShopManager';
+
+  const [ownerInfo, setOwnerInfo] = useState(null);
+  const [allOwners, setAllOwners] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [poiData, setPoiData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -20,7 +27,8 @@ export default function PoiList() {
     imageUrl: '',
     mapLink: '',
     description: '',
-    triggerRadiusMeters: '60'
+    triggerRadiusMeters: '60',
+    ownerId: ''
   }));
 
   const [editingPoiId, setEditingPoiId] = useState('');
@@ -37,23 +45,72 @@ export default function PoiList() {
     triggerRadiusMeters: '60'
   }));
 
+  // Shop manager creation modal
+  const [showShopManagerModal, setShowShopManagerModal] = useState(false);
+  const [shopManagerForm, setShopManagerForm] = useState({
+    username: '',
+    password: ''
+  });
+  const [isCreatingShopManager, setIsCreatingShopManager] = useState(false);
+
+  const loadOwners = useCallback(async () => {
+    if (!isAdmin) return;
+
+    try {
+      const managersData = await apiGet('/users/shop-managers');
+      setAllOwners(Array.isArray(managersData) ? managersData : []);
+    } catch (err) {
+      console.error('Error loading owners:', err);
+    }
+  }, [isAdmin]);
+
   const loadPois = useCallback(async () => {
     setIsLoading(true);
     setError('');
 
     try {
-      const data = await apiGet('/pois');
+      let query = '/pois';
+      // Shop Manager chỉ thấy POIs của mình
+      if (isShopManager && currentUser?.id) {
+        query = `/pois?managerId=${currentUser.id}`;
+      }
+
+      const data = await apiGet(query);
       setPoiData(Array.isArray(data) ? data : []);
     } catch (loadError) {
       setError(loadError.message || 'Không thể tải dữ liệu POI từ backend.');
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [isShopManager, currentUser?.id]);
+
+  // Load POIs cho Shop Manager từ API mới
+  useEffect(() => {
+    async function loadOwnerPois() {
+      if (isShopManager && currentUser?.id) {
+        try {
+          const data = await apiGetWithUser('/users/me/pois', currentUser.id);
+          setOwnerInfo(data);
+          if (data.pois) {
+            setPoiData(data.pois);
+          }
+        } catch {
+          setOwnerInfo({ hasPois: false });
+        }
+      }
+    }
+    loadOwnerPois();
+  }, [isShopManager, currentUser?.id]);
 
   useEffect(() => {
-    loadPois().catch(() => undefined);
-  }, [loadPois]);
+    loadOwners();
+  }, [loadOwners]);
+
+  useEffect(() => {
+    if (isAdmin) {
+      loadPois().catch(() => undefined);
+    }
+  }, [loadPois, isAdmin]);
 
   useEffect(() => {
     if (!showCreateForm) {
@@ -61,7 +118,11 @@ export default function PoiList() {
     }
 
     setEditingPoiId('');
-  }, [showCreateForm]);
+    // Reset owner selection for Admin when opening create form
+    if (isAdmin) {
+      setCreateForm((current) => ({ ...current, ownerId: '' }));
+    }
+  }, [showCreateForm, isAdmin]);
 
   function startEdit(poi) {
     setShowCreateForm(false);
@@ -102,7 +163,7 @@ export default function PoiList() {
     setIsSaving(true);
 
     try {
-      await apiPost('/pois', {
+      const payload = {
         code: createForm.code.trim(),
         name: createForm.name.trim(),
         latitude: Number(createForm.latitude),
@@ -113,7 +174,14 @@ export default function PoiList() {
         mapLink: normalizeNullableText(createForm.mapLink),
         description: normalizeNullableText(createForm.description),
         triggerRadiusMeters: Number(createForm.triggerRadiusMeters)
-      });
+      };
+
+      // Admin có thể chọn Owner cho POI mới
+      if (isAdmin && createForm.ownerId) {
+        payload.managerUserId = createForm.ownerId;
+      }
+
+      await apiPost('/pois', payload);
 
       setShowCreateForm(false);
       setCreateForm({
@@ -126,13 +194,38 @@ export default function PoiList() {
         imageUrl: '',
         mapLink: '',
         description: '',
-        triggerRadiusMeters: '60'
+        triggerRadiusMeters: '60',
+        ownerId: ''
       });
       await loadPois();
+      await loadOwners();
     } catch (saveError) {
       setError(saveError.message || 'Không thể tạo POI mới.');
     } finally {
       setIsSaving(false);
+    }
+  }
+
+  async function handleCreateShopManager(event) {
+    event.preventDefault();
+    setError('');
+    setIsCreatingShopManager(true);
+
+    try {
+      const userPayload = {
+        username: shopManagerForm.username.trim(),
+        preferredLanguage: 'vi',
+        password: shopManagerForm.password.trim()
+      };
+      await apiPostWithUser('/users/create-shop-manager', userPayload, currentUser.id);
+
+      setShowShopManagerModal(false);
+      setShopManagerForm({ username: '', password: '' });
+      await loadOwners();
+    } catch (saveError) {
+      setError(saveError.message || 'Không thể tạo Shop Manager.');
+    } finally {
+      setIsCreatingShopManager(false);
     }
   }
 
@@ -204,14 +297,102 @@ export default function PoiList() {
 
   return (
     <div className='space-y-6 max-w-7xl mx-auto'>
+      {/* Shop Manager Creation Modal */}
+      {showShopManagerModal && (
+        <div className='fixed inset-0 bg-black/50 flex items-center justify-center z-50'>
+          <div className='bg-white rounded-2xl p-6 w-full max-w-md shadow-xl'>
+            <div className='flex justify-between items-center mb-4'>
+              <h2 className='text-xl font-bold text-gray-800'>Tạo Shop Manager mới</h2>
+              <button
+                type='button'
+                onClick={() => setShowShopManagerModal(false)}
+                className='p-2 hover:bg-gray-100 rounded-lg'
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateShopManager} className='space-y-4'>
+              {error && (
+                <div className='rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700'>
+                  {error}
+                </div>
+              )}
+
+              <label className='block'>
+                <span className='text-sm font-medium text-gray-700'>Tên đăng nhập</span>
+                <input
+                  className='mt-1 w-full rounded-lg border border-pink-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400'
+                  placeholder='VD: owner1'
+                  value={shopManagerForm.username}
+                  onChange={(event) => setShopManagerForm((current) => ({ ...current, username: event.target.value }))}
+                  required
+                />
+              </label>
+
+              <label className='block'>
+                <span className='text-sm font-medium text-gray-700'>Mật khẩu</span>
+                <input
+                  type='password'
+                  className='mt-1 w-full rounded-lg border border-pink-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400'
+                  placeholder='VD: 123'
+                  value={shopManagerForm.password}
+                  onChange={(event) => setShopManagerForm((current) => ({ ...current, password: event.target.value }))}
+                  required
+                />
+              </label>
+
+              <div className='flex gap-3 pt-2'>
+                <button
+                  type='button'
+                  onClick={() => setShowShopManagerModal(false)}
+                  className='flex-1 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50'
+                >
+                  Hủy
+                </button>
+                <button
+                  type='submit'
+                  disabled={isCreatingShopManager}
+                  className='flex-1 rounded-lg bg-pink-500 px-4 py-2 text-sm font-medium text-white hover:bg-pink-600 disabled:opacity-60'
+                >
+                  {isCreatingShopManager ? 'Đang tạo...' : 'Tạo Shop Manager'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-5 rounded-2xl shadow-sm border border-pink-100">
         <div>
-          <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-linear-to-r from-pink-600 to-purple-500">Quản lý Điểm POI</h1>
-          <p className='text-sm text-pink-400/90 mt-1'>Thiết lập tọa độ, bán kính và nội dung cho các điểm thuyết minh</p>
+          <h1 className="text-2xl font-bold text-gray-800">Quản lý Điểm POI</h1>
+          {isShopManager && ownerInfo?.hasPois && (
+            <div className='mt-2 text-sm text-gray-600'>
+              <Building2 size={14} className="inline mr-1" />
+              Bạn đang quản lý <strong>{ownerInfo.totalCount}</strong> cửa hàng (POIs)
+            </div>
+          )}
+          {isShopManager && !ownerInfo?.hasPois && (
+            <p className='text-sm text-orange-500 mt-1'>Bạn chưa có cửa hàng nào. Liên hệ Admin để được cấp quyền quản lý.</p>
+          )}
+          {isAdmin && (
+            <div className='flex flex-wrap gap-2 mt-2'>
+              <button
+                type='button'
+                onClick={() => setShowShopManagerModal(true)}
+                className='flex items-center gap-1.5 text-xs font-medium text-pink-600 hover:text-pink-700 hover:bg-pink-50 px-3 py-1.5 rounded-lg transition-colors'
+              >
+                <Users size={14} />
+                Tạo Shop Manager
+              </button>
+            </div>
+          )}
+          <p className='text-sm text-gray-400 mt-1'>Thiết lập tọa độ, bán kính và nội dung cho các điểm thuyết minh</p>
         </div>
+        {isAdmin && (
         <button
           type='button'
-          className='bg-linear-to-r from-pink-500 to-rose-500 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 shadow-md'
+          className='bg-pink-500 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 shadow-md hover:bg-pink-600 transition-colors'
           onClick={() => {
             setShowCreateForm((current) => !current);
             cancelEdit();
@@ -220,6 +401,7 @@ export default function PoiList() {
           <Plus size={20} />
           <span className='font-semibold'>{showCreateForm ? 'Đóng form tạo' : 'Thêm POI mới'}</span>
         </button>
+        )}
       </div>
 
       {showCreateForm && (
@@ -227,6 +409,24 @@ export default function PoiList() {
           onSubmit={handleCreatePoi}
           className='bg-white p-4 rounded-xl shadow-sm border border-pink-100 grid grid-cols-1 md:grid-cols-2 gap-4'
         >
+          {isAdmin && (
+            <label className='md:col-span-2'>
+              <span className='text-sm font-medium text-gray-700'>Chủ cửa hàng (Shop Manager)</span>
+              <select
+                className='mt-1 w-full rounded-lg border border-pink-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400'
+                value={createForm.ownerId}
+                onChange={(event) => setCreateForm((current) => ({ ...current, ownerId: event.target.value }))}
+              >
+                <option value=''>-- Chọn chủ cửa hàng --</option>
+                {allOwners.map((owner) => (
+                  <option key={owner.id} value={owner.id}>
+                    {owner.username} ({owner.hasShop ? 'Đã có cửa hàng' : 'Chưa có cửa hàng'})
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+
           <InputField
             label='Mã POI'
             value={createForm.code}
@@ -288,10 +488,10 @@ export default function PoiList() {
             onChange={(value) => setCreateForm((current) => ({ ...current, mapLink: value }))}
             placeholder='https://maps.google.com/?q=...'
           />
-          <label className='md:col-span-2 text-sm font-medium text-pink-700'>
-            Mô tả
+          <label className='md:col-span-2'>
+            <span className='text-sm font-medium text-gray-700'>Mô tả</span>
             <textarea
-              className='mt-1 w-full rounded-lg border border-pink-100 px-3 py-2 text-sm text-gray-700'
+              className='mt-1 w-full rounded-lg border border-pink-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400'
               rows={3}
               value={createForm.description}
               onChange={(event) => setCreateForm((current) => ({ ...current, description: event.target.value }))}
@@ -301,7 +501,7 @@ export default function PoiList() {
             <button
               type='submit'
               disabled={isSaving}
-              className='rounded-lg bg-pink-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60'
+              className='rounded-lg bg-pink-500 px-4 py-2 text-sm font-medium text-white hover:bg-pink-600 disabled:opacity-60'
             >
               {isSaving ? 'Đang lưu...' : 'Lưu POI mới'}
             </button>
@@ -310,17 +510,17 @@ export default function PoiList() {
       )}
 
       <div className="bg-white p-4 rounded-xl shadow-sm border border-pink-100 flex gap-4">
-        <div className="relative flex-1 group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-pink-300 group-focus-within:text-pink-500 transition-colors" size={20} />
+        <div className="relative flex-1">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
           <input
             type="text"
             placeholder='Tìm theo tên, mã POI, quận/phường...'
-            className="w-full pl-12 pr-4 py-3 bg-pink-50/50 border border-pink-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-400 focus:bg-white transition-all text-gray-700 placeholder-pink-300"
+            className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-pink-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-400 text-gray-700"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <div className="bg-pink-50/50 border border-pink-100 rounded-xl px-5 py-3 text-pink-700 font-medium">
+        <div className="bg-gray-50 border border-pink-100 rounded-xl px-5 py-3 text-gray-700 font-medium">
           {isLoading ? 'Đang tải...' : `Tổng: ${filteredData.length} POI`}
         </div>
       </div>
@@ -334,7 +534,7 @@ export default function PoiList() {
       <div className="bg-white rounded-2xl shadow-sm border border-pink-100 overflow-hidden">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-pink-50/80 text-pink-600 text-sm border-b border-pink-100 uppercase tracking-wider">
+            <tr className="bg-gray-50 text-gray-600 text-sm border-b border-pink-100 uppercase tracking-wider">
               <th className="px-6 py-5 font-bold">Tên địa điểm (POI)</th>
               <th className="px-6 py-5 font-bold">Mã</th>
               <th className="px-6 py-5 font-bold">Tọa độ (Lat/Lng)</th>
@@ -345,13 +545,13 @@ export default function PoiList() {
               <th className="px-6 py-5 font-bold text-right">Thao tác</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-pink-50">
+          <tbody className="divide-y divide-gray-100">
             {filteredData.map((poi) => (
-              <tr key={poi.id} className='hover:bg-pink-50/60 transition-all duration-200 group'>
+              <tr key={poi.id} className='hover:bg-gray-50 transition-all'>
                 <td className="px-6 py-5">
                   <div className="flex items-center gap-4">
-                    <div className="p-2.5 bg-linear-to-br from-pink-100 to-rose-50 text-pink-600 rounded-xl shadow-sm group-hover:scale-110 transition-transform">
-                      <MapPin size={20} className="fill-pink-100/50" />
+                    <div className="p-2.5 bg-pink-100 text-pink-600 rounded-xl">
+                      <MapPin size={20} />
                     </div>
                     <span className="font-bold text-gray-700">{poi.name}</span>
                   </div>
@@ -402,10 +602,10 @@ export default function PoiList() {
                           required
                         />
                       </div>
-                      <label className='text-sm font-medium text-pink-700'>
+                      <label className='text-sm font-medium text-gray-700'>
                         Mô tả
                         <textarea
-                          className='mt-1 w-full rounded-lg border border-pink-100 px-3 py-2 text-sm text-gray-700'
+                          className='mt-1 w-full rounded-lg border border-pink-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400'
                           rows={2}
                           value={editForm.description}
                           onChange={(event) => setEditForm((current) => ({ ...current, description: event.target.value }))}
@@ -435,14 +635,14 @@ export default function PoiList() {
                         <button
                           type='button'
                           onClick={cancelEdit}
-                          className='rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600'
+                          className='rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50'
                         >
                           Hủy
                         </button>
                         <button
                           type='submit'
                           disabled={isSaving}
-                          className='rounded-lg bg-pink-600 px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60'
+                          className='rounded-lg bg-pink-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-pink-600 disabled:opacity-60'
                         >
                           {isSaving ? 'Đang lưu...' : 'Lưu chỉnh sửa'}
                         </button>
@@ -453,16 +653,16 @@ export default function PoiList() {
                 <td className="px-6 py-5 text-sm font-semibold text-pink-600">
                   {poi.code}
                 </td>
-                <td className="px-6 py-5 text-sm font-medium text-pink-500/80">
-                  <span className="bg-pink-50 px-2 py-1 rounded-md">{poi.latitude}</span>
-                  <span className="mx-1 text-gray-300">,</span>
-                  <span className="bg-pink-50 px-2 py-1 rounded-md">{poi.longitude}</span>
+                <td className="px-6 py-5 text-sm font-medium text-gray-600">
+                  <span className="bg-gray-100 px-2 py-1 rounded">{poi.latitude}</span>
+                  <span className="mx-1">,</span>
+                  <span className="bg-gray-100 px-2 py-1 rounded">{poi.longitude}</span>
                 </td>
-                <td className="px-6 py-5 text-center text-sm font-semibold text-violet-700">
+                <td className="px-6 py-5 text-center text-sm font-semibold text-gray-700">
                   {poi.priority ?? 0}
                 </td>
                 <td className="px-6 py-5 text-center">
-                  <span className='inline-block bg-linear-to-r from-pink-50 to-rose-100 border border-pink-200 text-pink-700 font-bold px-3 py-1.5 rounded-lg text-xs shadow-sm'>
+                  <span className='inline-block bg-pink-100 text-pink-700 font-bold px-3 py-1.5 rounded-lg text-xs'>
                     {poi.triggerRadiusMeters}m
                   </span>
                 </td>
@@ -472,7 +672,7 @@ export default function PoiList() {
                 <td className="px-6 py-5 text-xs text-gray-600 align-top">
                   <div className='space-y-2'>
                     {poi.imageUrl ? (
-                      <a href={poi.imageUrl} target='_blank' rel='noreferrer' className='text-pink-600 hover:underline'>
+                      <a href={poi.imageUrl} target='_blank' rel='noreferrer' className='text-pink-600 hover:underline block'>
                         Ảnh
                       </a>
                     ) : (
@@ -480,11 +680,11 @@ export default function PoiList() {
                     )}
                     <div>
                       {poi.mapLink ? (
-                        <a href={poi.mapLink} target='_blank' rel='noreferrer' className='text-emerald-600 hover:underline'>
+                        <a href={poi.mapLink} target='_blank' rel='noreferrer' className='text-emerald-600 hover:underline block'>
                           Mở bản đồ
                         </a>
                       ) : (
-                        <span className='text-gray-400'>Chưa có map link</span>
+                        <span className='text-gray-400'>Chưa có map</span>
                       )}
                     </div>
                   </div>
@@ -493,7 +693,7 @@ export default function PoiList() {
                   <div className="flex justify-end gap-2">
                     <button
                       type='button'
-                      className='p-2 text-pink-300 hover:text-pink-600 hover:bg-pink-50 rounded-lg transition-all'
+                      className='p-2 text-gray-400 hover:text-pink-600 hover:bg-pink-50 rounded-lg transition-all'
                       title='Chỉnh sửa'
                       onClick={() => startEdit(poi)}
                     >
@@ -501,7 +701,7 @@ export default function PoiList() {
                     </button>
                     <button
                       type='button'
-                      className='p-2 text-pink-300 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all'
+                      className='p-2 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all'
                       title='Xóa'
                       onClick={() => handleDeletePoi(poi)}
                     >
@@ -514,7 +714,7 @@ export default function PoiList() {
             {!isLoading && filteredData.length === 0 && (
               <tr>
                 <td colSpan={8} className="px-6 py-8 text-center text-gray-500">
-                  Không có POI phù hợp bộ lọc.
+                  Không có POI nào.
                 </td>
               </tr>
             )}
@@ -527,13 +727,13 @@ export default function PoiList() {
 
 function InputField({ label, value, onChange, type = 'text', ...props }) {
   return (
-    <label className='text-sm font-medium text-pink-700'>
+    <label className='text-sm font-medium text-gray-700'>
       {label}
       <input
         type={type}
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className='mt-1 w-full rounded-lg border border-pink-100 px-3 py-2 text-sm text-gray-700'
+        className='mt-1 w-full rounded-lg border border-pink-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400'
         {...props}
       />
     </label>

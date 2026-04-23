@@ -12,7 +12,6 @@ public static class MauiProgram
 		var builder = MauiApp.CreateBuilder();
 		builder
 			.UseMauiApp<App>()
-			.UseMauiMaps()
 			.UseMauiCommunityToolkit()
 			.UseMauiCommunityToolkitMediaElement()
 			.UseBarcodeReader()

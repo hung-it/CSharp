@@ -44,6 +44,26 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+		<TargetPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">36.1</TargetPlatformVersion>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+		<JavaSdkDirectory Condition="'$(JavaSdkDirectory)' == '' and Exists('C:\\Program Files\\Android\\Android Studio\\jbr\\bin\\java.exe')">C:\Program Files\Android\Android Studio\jbr</JavaSdkDirectory>
+		<JavaSdkDirectory Condition="'$(JavaSdkDirectory)' == '' and '$(ANDROID_JAVA_HOME)' != ''">$(ANDROID_JAVA_HOME)</JavaSdkDirectory>
+		<JavaSdkDirectory Condition="'$(JavaSdkDirectory)' == '' and '$(JAVA_HOME)' != ''">$(JAVA_HOME)</JavaSdkDirectory>
+		<JavaMaximumHeapSize Condition="'$(JavaMaximumHeapSize)' == ''">512M</JavaMaximumHeapSize>
+		<JavaOptions Condition="'$(JavaOptions)' == ''">-XX:+UseSerialGC</JavaOptions>
+		<!-- Disable Fast Deployment completely -->
+		<AndroidEnableFastInterpreter>false</AndroidEnableFastInterpreter>
+		<AndroidEnableFastDeployment>false</AndroidEnableFastDeployment>
+		<AndroidUseFastDev>false</AndroidUseFastDev>
+		<EmbedAssembliesInApk>true</EmbedAssembliesInApk>
+		<RunAOTCompilation>false</RunAOTCompilation>
+		<AndroidPackageFormat>apk</AndroidPackageFormat>
+		<!-- Use short file names to avoid path length issues -->
+		<UseShortFileNames>true</UseShortFileNames>
+		<!-- Disable linker to avoid assembly stripping -->
+		<AndroidLinkMode>None</AndroidLinkMode>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -66,7 +86,6 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
-		<PackageReference Include="Microsoft.Maui.Controls.Maps" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
 		<PackageReference Include="CommunityToolkit.Maui" Version="9.1.0" />

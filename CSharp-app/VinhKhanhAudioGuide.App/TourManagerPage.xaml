@@ -2,36 +2,157 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="VinhKhanhAudioGuide.App.TourManagerPage"
-             BackgroundColor="{StaticResource Pink50}">
+             BackgroundColor="#FFFBF5">
 
     <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="10">
-            <Label Text="Quản Lý Tour" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource Pink900}" HorizontalOptions="Center" />
-            <CollectionView x:Name="TourCollectionView"
-                             SelectionMode="Single"
-                             SelectionChanged="OnTourSelected">
+        <VerticalStackLayout Padding="16" Spacing="16">
+
+            <!-- Header -->
+            <VerticalStackLayout Spacing="4">
+                <Label Text="✈️ Tuyến Tour" FontSize="22" FontAttributes="Bold"
+                       TextColor="#1F2937" />
+                <Label Text="Chọn tour để khám phá Phố Ăn Vĩnh Khách"
+                       FontSize="13" TextColor="#6B7280" />
+            </VerticalStackLayout>
+
+            <!-- Tour Cards -->
+            <CollectionView x:Name="TourCollectionView" SelectionMode="Single"
+                           SelectionChanged="OnTourSelected">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
-                        <Border BackgroundColor="{StaticResource Pink100}" StrokeThickness="0" StrokeShape="RoundRectangle 10"
-                                Padding="14" Margin="0,0,0,4">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <VerticalStackLayout Grid.Column="0" Spacing="4">
-                                    <Label Text="{Binding Name}" FontSize="16"
-                                           FontAttributes="Bold"
-                                           TextColor="{StaticResource Pink800}" />
-                                    <Label Text="{Binding Description}" FontSize="12"
-                                           TextColor="{StaticResource Pink600}" />
-                                    <Label Text="{Binding StopCountText}" FontSize="11"
-                                           TextColor="{StaticResource Pink400}" />
-                                </VerticalStackLayout>
-                                <Label Grid.Column="1" Text="›" FontSize="22"
-                                       TextColor="{StaticResource Pink400}"
-                                       VerticalOptions="Center" />
-                            </Grid>
+                        <Border BackgroundColor="White" StrokeThickness="0"
+                                StrokeShape="RoundRectangle 16" Padding="16" Margin="0,0,0,12">
+                            <VerticalStackLayout Spacing="12">
+
+                                <!-- Tour Header -->
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                        <Label Text="{Binding Name}" FontSize="17"
+                                               FontAttributes="Bold" TextColor="#1F2937" />
+                                        <Label Text="{Binding Description}" FontSize="12"
+                                               TextColor="#6B7280" />
+                                    </VerticalStackLayout>
+                                    <Image Grid.Column="1" Source="tour_arrow.png"
+                                           WidthRequest="24" HeightRequest="24"
+                                           VerticalOptions="Center" />
+                                </Grid>
+
+                                <!-- Tour Stats -->
+                                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                                    <Border Grid.Column="0" BackgroundColor="#FDF2F8"
+                                            StrokeThickness="0" StrokeShape="RoundRectangle 8"
+                                            Padding="8">
+                                        <VerticalStackLayout HorizontalOptions="Center">
+                                            <Label Text="{Binding StopCount}" FontSize="16"
+                                                   FontAttributes="Bold" TextColor="#EC4899"
+                                                   HorizontalOptions="Center" />
+                                            <Label Text="điểm dừng" FontSize="9"
+                                                   TextColor="#9CA3AF" HorizontalOptions="Center" />
+                                        </VerticalStackLayout>
+                                    </Border>
+                                    <Border Grid.Column="1" BackgroundColor="#EFF6FF"
+                                            StrokeThickness="0" StrokeShape="RoundRectangle 8"
+                                            Padding="8">
+                                        <VerticalStackLayout HorizontalOptions="Center">
+                                            <Label Text="{Binding Duration}" FontSize="16"
+                                                   FontAttributes="Bold" TextColor="#3B82F6"
+                                                   HorizontalOptions="Center" />
+                                            <Label Text="thời gian" FontSize="9"
+                                                   TextColor="#9CA3AF" HorizontalOptions="Center" />
+                                        </VerticalStackLayout>
+                                    </Border>
+                                    <Border Grid.Column="2" BackgroundColor="#ECFDF5"
+                                            StrokeThickness="0" StrokeShape="RoundRectangle 8"
+                                            Padding="8">
+                                        <VerticalStackLayout HorizontalOptions="Center">
+                                            <Label Text="{Binding Difficulty}" FontSize="16"
+                                                   FontAttributes="Bold" TextColor="#10B981"
+                                                   HorizontalOptions="Center" />
+                                            <Label Text="độ khó" FontSize="9"
+                                                   TextColor="#9CA3AF" HorizontalOptions="Center" />
+                                        </VerticalStackLayout>
+                                    </Border>
+                                </Grid>
+
+                                <!-- Districts Badge -->
+                                <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
+                                    <HorizontalStackLayout Spacing="6">
+                                        <Border BackgroundColor="#FEF3C7" StrokeThickness="0"
+                                                StrokeShape="RoundRectangle 10" Padding="8,4">
+                                            <Label Text="🏘️ Xóm Chiếu" FontSize="11"
+                                                   TextColor="#B45309" />
+                                        </Border>
+                                        <Border BackgroundColor="#DBEAFE" StrokeThickness="0"
+                                                StrokeShape="RoundRectangle 10" Padding="8,4">
+                                            <Label Text="🏠 Vĩnh Hội" FontSize="11"
+                                                   TextColor="#1E40AF" />
+                                        </Border>
+                                        <Border BackgroundColor="#D1FAE5" StrokeThickness="0"
+                                                StrokeShape="RoundRectangle 10" Padding="8,4">
+                                            <Label Text="🏪 Khánh Hội" FontSize="11"
+                                                   TextColor="#047857" />
+                                        </Border>
+                                    </HorizontalStackLayout>
+                                </ScrollView>
+
+                                <!-- Start Button -->
+                                <Button Text="🚀 Bắt đầu tour" BackgroundColor="#EC4899"
+                                        TextColor="White" FontSize="14" FontAttributes="Bold"
+                                        CornerRadius="12" HeightRequest="46"
+                                        Clicked="OnStartTourClicked" />
+
+                            </VerticalStackLayout>
                         </Border>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
+
+            <!-- My Tours Section -->
+            <Border BackgroundColor="#F9FAFB" StrokeThickness="0"
+                    StrokeShape="RoundRectangle 16" Padding="16" Margin="0,8,0,0">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="📊 Tour của bạn" FontSize="15" FontAttributes="Bold"
+                           TextColor="#374151" />
+                    <Grid ColumnDefinitions="*,*,*">
+                        <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center">
+                            <Label x:Name="MyTourCount" Text="0" FontSize="24"
+                                   FontAttributes="Bold" TextColor="#EC4899"
+                                   HorizontalOptions="Center" />
+                            <Label Text="tour đã làm" FontSize="10" TextColor="#9CA3AF"
+                                   HorizontalOptions="Center" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" HorizontalOptions="Center">
+                            <Label x:Name="MyPoiCount" Text="0" FontSize="24"
+                                   FontAttributes="Bold" TextColor="#3B82F6"
+                                   HorizontalOptions="Center" />
+                            <Label Text="điểm đã ghé" FontSize="10" TextColor="#9CA3AF"
+                                   HorizontalOptions="Center" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="2" HorizontalOptions="Center">
+                            <Label x:Name="MyAudioCount" Text="0" FontSize="24"
+                                   FontAttributes="Bold" TextColor="#10B981"
+                                   HorizontalOptions="Center" />
+                            <Label Text="audio đã nghe" FontSize="10" TextColor="#9CA3AF"
+                                   HorizontalOptions="Center" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Info -->
+            <Border BackgroundColor="#FEF3C7" StrokeThickness="0"
+                    StrokeShape="RoundRectangle 12" Padding="14">
+                <HorizontalStackLayout Spacing="10">
+                    <Label Text="💡" FontSize="20" VerticalOptions="Center" />
+                    <VerticalStackLayout>
+                        <Label Text="Mẹo" FontSize="13" FontAttributes="Bold"
+                               TextColor="#92400E" />
+                        <Label Text="Đến gần điểm dừng và bấm nút nghe để trải nghiệm audio guide!"
+                               FontSize="12" TextColor="#B45309" />
+                    </VerticalStackLayout>
+                </HorizontalStackLayout>
+            </Border>
+
         </VerticalStackLayout>
     </ScrollView>
 

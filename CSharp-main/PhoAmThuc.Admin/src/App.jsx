@@ -5,6 +5,7 @@ import Layout from './components/Layout.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import PoiList from './pages/PoiList.jsx';
 import DashboardPage from './pages/DashboardPage.jsx';
+import AnalyticsPage from './pages/AnalyticsPage.jsx';
 import AudioManager from './pages/AudioManager.jsx';
 import TranslationManager from './pages/TranslationManager.jsx';
 import TourManager from './pages/TourManager.jsx';
@@ -31,6 +32,14 @@ function App() {
               element={
                 <ShopManagerRoute>
                   <DashboardPage />
+                </ShopManagerRoute>
+              }
+            />
+            <Route
+              path='analytics'
+              element={
+                <ShopManagerRoute>
+                  <AnalyticsPage />
                 </ShopManagerRoute>
               }
             />

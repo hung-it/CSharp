@@ -25,241 +25,322 @@ public sealed class DataSeeder(
     public async Task SeedAsync(CancellationToken cancellationToken = default)
     {
         await EnsureFeatureSegmentsAsync(cancellationToken);
-        await SeedPoisAsync(cancellationToken);
-        await SeedToursAsync(cancellationToken);
-        await SeedUsersAndSubscriptionsAsync(cancellationToken);
+        await SeedUsersAsync(cancellationToken);
+        await SeedPoisWithAudioAndTranslationsAsync(cancellationToken);
+        await SeedToursWithStopsAsync(cancellationToken);
+        await SeedQRCodesAsync(cancellationToken);
     }
 
     private async Task EnsureFeatureSegmentsAsync(CancellationToken cancellationToken)
     {
-        var existingSegments = await _dbContext.FeatureSegments.CountAsync(cancellationToken);
-        if (existingSegments > 0)
-        {
+        if (await _dbContext.FeatureSegments.AnyAsync(cancellationToken))
             return;
-        }
 
         _dbContext.FeatureSegments.AddRange(
             new FeatureSegment { Code = "basic.poi", Name = "Basic POI" },
             new FeatureSegment { Code = "premium.segment.tour", Name = "Premium Tour Segment" },
             new FeatureSegment { Code = "premium.segment.audio", Name = "Premium Audio Segment" },
-            new FeatureSegment { Code = "premium.segment.analytics", Name = "Premium Analytics Segment" });
-
+            new FeatureSegment { Code = "premium.segment.analytics", Name = "Premium Analytics Segment" }
+        );
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task SeedPoisAsync(CancellationToken cancellationToken)
+    private async Task SeedUsersAsync(CancellationToken cancellationToken)
     {
-        var existingCodes = await _dbContext.Pois
-            .Select(p => p.Code)
-            .ToListAsync(cancellationToken);
+        // Admin with password "1"
+        await EnsureUserAsync("admin", UserRole.Admin, "vi", "1", cancellationToken);
 
-        var seededCodeSet = new HashSet<string>(existingCodes, StringComparer.OrdinalIgnoreCase);
+        // Shop Owners (Chủ cửa hàng) with password "1"
+        // Mỗi owner quản lý 4 POIs (cửa hàng)
+        await EnsureUserAsync("owner1", UserRole.ShopManager, "vi", "1", cancellationToken);
+        await EnsureUserAsync("owner2", UserRole.ShopManager, "vi", "1", cancellationToken);
+        await EnsureUserAsync("owner3", UserRole.ShopManager, "vi", "1", cancellationToken);
 
-        var pois = new[]
-        {
-            // Xóm Chiếu
-            ("POI001", "Quán Bánh Mì Xóm Chiếu", 10.7530, 106.6878, "Quán bánh mì nổi tiếng", "Xóm Chiếu", 3),
-            ("POI002", "Chợ Xóm Chiếu", 10.7540, 106.6880, "Chợ truyền thống", "Xóm Chiếu", 2),
-            ("POI003", "Đình Xóm Chiếu", 10.7550, 106.6882, "Đình thờ cổ", "Xóm Chiếu", 1),
-            ("POI010", "Nhà Cổ Xóm Chiếu", 10.7524, 106.6869, "Nhà cổ mang kiến trúc Nam Bộ", "Xóm Chiếu", 2),
+        // End users - password = "1" for both
+        var demo = await EnsureUserAsync("demo", UserRole.EndUser, "vi", "1", cancellationToken);
+        var premium = await EnsureUserAsync("premium", UserRole.EndUser, "vi", "1", cancellationToken);
 
-            // Vĩnh Hội
-            ("POI004", "Nhà Thờ Vĩnh Hội", 10.7600, 106.6900, "Nhà thờ Công giáo", "Vĩnh Hội", 2),
-            ("POI005", "Khách Sạn Vĩnh Hội", 10.7610, 106.6910, "Khách sạn lịch sử", "Vĩnh Hội", 1),
-            ("POI006", "Cây Cổ Thụ Vĩnh Hội", 10.7620, 106.6920, "Cây cổ thụ hơn 100 năm", "Vĩnh Hội", 3),
-            ("POI011", "Hẻm Ẩm Thực Vĩnh Hội", 10.7617, 106.6896, "Khu hẻm ăn uống địa phương", "Vĩnh Hội", 3),
-            ("POI012", "Công Viên Bờ Kênh", 10.7632, 106.6931, "Không gian xanh ven kênh", "Vĩnh Hội", 2),
+        // Subscriptions
+        if (!await _dbContext.Subscriptions.AnyAsync(s => s.UserId == demo.Id, cancellationToken))
+            await _subscriptionService.ActivateSubscriptionAsync(demo.Id, PlanTier.Basic, 1m, cancellationToken);
 
-            // Khánh Hội
-            ("POI007", "Tiệm Cơm Khánh Hội", 10.7670, 106.6950, "Tiệm cơm nổi tiếng", "Khánh Hội", 3),
-            ("POI008", "Chùa Khánh Hội", 10.7680, 106.6960, "Chùa Phật giáo", "Khánh Hội", 1),
-            ("POI009", "Hồ Cá Khánh Hội", 10.7690, 106.6970, "Hồ cá tự nhiên", "Khánh Hội", 2),
-            ("POI013", "Bến Tàu Khánh Hội", 10.7661, 106.6984, "Bến tàu cũ gắn với lịch sử khu vực", "Khánh Hội", 1),
-            ("POI014", "Chợ Đêm Khánh Hội", 10.7702, 106.6968, "Khu chợ đêm sôi động", "Khánh Hội", 3),
-        };
-
-        foreach (var (code, name, lat, lon, desc, district, priority) in pois)
-        {
-            if (seededCodeSet.Contains(code))
-            {
-                continue;
-            }
-
-            var poi = await _poiService.CreatePoiAsync(
-                code,
-                name,
-                lat,
-                lon,
-                30,
-                desc,
-                district,
-                priority,
-                $"https://picsum.photos/seed/{code}/640/360",
-                $"https://maps.google.com/?q={lat},{lon}",
-                cancellationToken);
-
-            await _poiService.AssignAudioAsync(poi.Id, "vi", $"/audio/{code}-vi.mp3", 60, false, cancellationToken);
-            await _poiService.AssignAudioAsync(poi.Id, "en", $"/audio/{code}-en.mp3", 65, false, cancellationToken);
-            seededCodeSet.Add(code);
-        }
+        if (!await _dbContext.Subscriptions.AnyAsync(s => s.UserId == premium.Id, cancellationToken))
+            await _subscriptionService.ActivateSubscriptionAsync(premium.Id, PlanTier.PremiumSegmented, 10m, cancellationToken);
     }
 
-    private async Task SeedToursAsync(CancellationToken cancellationToken)
+    private async Task<User> EnsureUserAsync(string username, UserRole role, string language, string? password, CancellationToken ct)
     {
-        if (await _dbContext.Tours.AnyAsync(cancellationToken))
-        {
-            return;
-        }
-
-        var tour1 = await _tourService.CreateTourAsync(
-            "TOUR_CITY", "Vòng Quanh Phố",
-            "Tuyến du lịch quanh 3 quận Xóm Chiếu, Vĩnh Hội, Khánh Hội",
-            cancellationToken);
-
-        var tour2 = await _tourService.CreateTourAsync(
-            "TOUR_FOOD", "Tuyến Ẩm Thực",
-            "Khám phá những quán ăn nổi tiếng",
-            cancellationToken);
-
-        var pois = await _poiService.GetAllPoiAsync(cancellationToken);
-        var poiMap = pois.ToDictionary(p => p.Code, StringComparer.OrdinalIgnoreCase);
-
-        var cityStops = new (string Code, string Note)[]
-        {
-            ("POI002", "Qua chợ"),
-            ("POI003", "Tìm đình"),
-            ("POI010", "Ghé nhà cổ"),
-            ("POI004", "Sang Vĩnh Hội"),
-            ("POI006", "Lên cây cổ thụ"),
-            ("POI012", "Dạo công viên"),
-            ("POI007", "Sang Khánh Hội"),
-            ("POI008", "Viếng chùa"),
-            ("POI013", "Thăm bến tàu"),
-            ("POI009", "Kết thúc"),
-        };
-
-        var cityOrder = 1;
-        foreach (var (code, note) in cityStops)
-        {
-            if (!poiMap.TryGetValue(code, out var poi))
-            {
-                continue;
-            }
-
-            await _tourService.AddStopAsync(tour1.Id, poi.Id, cityOrder, note, cancellationToken);
-            cityOrder++;
-        }
-
-        var foodStops = new (string Code, string Note)[]
-        {
-            ("POI001", "Bắt đầu với bánh mì"),
-            ("POI011", "Ghé hẻm ẩm thực"),
-            ("POI007", "Sang quán cơm"),
-            ("POI014", "Dạo chợ đêm"),
-            ("POI009", "Kết thúc"),
-        };
-
-        var foodOrder = 1;
-        foreach (var (code, note) in foodStops)
-        {
-            if (!poiMap.TryGetValue(code, out var poi))
-            {
-                continue;
-            }
-
-            await _tourService.AddStopAsync(tour2.Id, poi.Id, foodOrder, note, cancellationToken);
-            foodOrder++;
-        }
-    }
-
-    private async Task SeedUsersAndSubscriptionsAsync(CancellationToken cancellationToken)
-    {
-        var user = await _dbContext.Users
-            .FirstOrDefaultAsync(u => u.ExternalRef == "USER_DEMO", cancellationToken);
-
+        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Username == username, ct);
         if (user is null)
         {
             user = new User
             {
-                ExternalRef = "USER_DEMO",
-                PreferredLanguage = "vi",
-                Role = UserRole.EndUser
+                Username = username,
+                ExternalRef = $"USER_{Guid.NewGuid():N}",
+                PreferredLanguage = language,
+                Role = role,
+                PasswordHash = !string.IsNullOrEmpty(password) ? HashPassword(password) : null
             };
             _dbContext.Users.Add(user);
-            await _dbContext.SaveChangesAsync(cancellationToken);
+            await _dbContext.SaveChangesAsync(ct);
         }
+        return user;
+    }
 
-        var hasBasicSub = await _dbContext.Subscriptions
-            .AnyAsync(s => s.UserId == user.Id, cancellationToken);
-        if (!hasBasicSub)
+    private static string HashPassword(string password)
+    {
+        using var sha256 = System.Security.Cryptography.SHA256.Create();
+        var bytes = System.Text.Encoding.UTF8.GetBytes(password + "VinhKhanhSalt2024");
+        var hash = sha256.ComputeHash(bytes);
+        return Convert.ToBase64String(hash);
+    }
+
+    private async Task SeedPoisWithAudioAndTranslationsAsync(CancellationToken cancellationToken)
+    {
+        var existingCodes = await _dbContext.Pois.Select(p => p.Code).ToListAsync(cancellationToken);
+        var seededCodes = new HashSet<string>(existingCodes, StringComparer.OrdinalIgnoreCase);
+
+        // Lấy user IDs
+        var owner1 = await _dbContext.Users.FirstAsync(u => u.Username == "owner1", cancellationToken);
+        var owner2 = await _dbContext.Users.FirstAsync(u => u.Username == "owner2", cancellationToken);
+        var owner3 = await _dbContext.Users.FirstAsync(u => u.Username == "owner3", cancellationToken);
+
+        // POI data: (Code, Name, Lat, Lon, Description, District, OwnerId)
+        // owner1: 4 POIs (POI001-004)
+        // owner2: 4 POIs (POI005-008)
+        // owner3: 4 POIs (POI009-012)
+        var pois = new[]
         {
-            await _subscriptionService.ActivateSubscriptionAsync(
-                user.Id, PlanTier.Basic, 1m, cancellationToken);
-        }
+            // Owner1's POIs (Cửa hàng 1-4)
+            ("POI001", "Quán Bánh Mì Đặc Biệt", 10.7530, 106.6878, "Quán bánh mì nổi tiếng nhất vùng với công thức gia truyền", "Xóm Chiếu", owner1.Id),
+            ("POI002", "Tiệm Cơm Gia Đình", 10.7670, 106.6950, "Tiệm cơm bình dân được yêu thích nhất khu vực", "Khánh Hội", owner1.Id),
+            ("POI003", "Hẻm Ăn Vĩnh Hội", 10.7617, 106.6896, "Khu hẻm ăn uống địa phương nổi tiếng với nhiều món ngon", "Vĩnh Hội", owner1.Id),
+            ("POI004", "Quán Cà Phê Sân Đình", 10.7548, 106.6875, "Quán cà phê sân đình view đẹp, nơi hội họp của người dân", "Xóm Chiếu", owner1.Id),
 
-        var premiumUser = await _dbContext.Users
-            .FirstOrDefaultAsync(u => u.ExternalRef == "USER_PREMIUM", cancellationToken);
+            // Owner2's POIs (Cửa hàng 5-8)
+            ("POI005", "Chợ Xóm Chiếu", 10.7540, 106.6880, "Chợ truyền thống với nhiều đặc sản địa phương", "Xóm Chiếu", owner2.Id),
+            ("POI006", "Nhà Thờ Vĩnh Hội", 10.7600, 106.6900, "Nhà thờ Công giáo với kiến trúc Pháp đẹp mắt", "Vĩnh Hội", owner2.Id),
+            ("POI007", "Hồ Cá Cảnh", 10.7695, 106.6970, "Hồ cá tự nhiên với cảnh quan đẹp", "Khánh Hội", owner2.Id),
+            ("POI008", "Cây Cổ Thụ", 10.7620, 106.6920, "Cây cổ thụ hơn 100 năm tuổi, biểu tượng của khu phố", "Vĩnh Hội", owner2.Id),
 
-        if (premiumUser is null)
-        {
-            premiumUser = new User
-            {
-                ExternalRef = "USER_PREMIUM",
-                PreferredLanguage = "vi",
-                Role = UserRole.EndUser
-            };
-            _dbContext.Users.Add(premiumUser);
-            await _dbContext.SaveChangesAsync(cancellationToken);
-        }
-
-        var hasPremiumSub = await _dbContext.Subscriptions
-            .AnyAsync(s => s.UserId == premiumUser.Id, cancellationToken);
-        if (!hasPremiumSub)
-        {
-            await _subscriptionService.ActivateSubscriptionAsync(
-                premiumUser.Id, PlanTier.PremiumSegmented, 10m, cancellationToken);
-        }
-
-        // Seed Shop Manager users
-        var shopManagers = new[]
-        {
-            ("SHOP_MANAGER_01", "vi"),
-            ("SHOP_MANAGER_02", "vi"),
-            ("SHOP_MANAGER_03", "vi"),
+            // Owner3's POIs (Cửa hàng 9-12)
+            ("POI009", "Đình Xóm Chiếu", 10.7550, 106.6882, "Đình thờ cổ có lịch sử hơn 100 năm", "Xóm Chiếu", owner3.Id),
+            ("POI010", "Chùa An Lạc", 10.7680, 106.6960, "Chùa Phật giáo với kiến trúc đẹp và không gian yên bình", "Khánh Hội", owner3.Id),
+            ("POI011", "Khách Sạn Vĩnh Hội", 10.7610, 106.6910, "Khách sạn lịch sử từ thời Pháp thuộc", "Vĩnh Hội", owner3.Id),
+            ("POI012", "Chợ Đêm Khánh Hội", 10.7702, 106.6968, "Khu chợ đêm sôi động về đêm với nhiều món ăn đường phố", "Khánh Hội", owner3.Id),
         };
 
-        foreach (var (externalRef, language) in shopManagers)
+        foreach (var (code, name, lat, lon, desc, district, managerId) in pois)
         {
-            var shopManager = await _dbContext.Users
-                .FirstOrDefaultAsync(u => u.ExternalRef == externalRef, cancellationToken);
+            if (seededCodes.Contains(code)) continue;
 
-            if (shopManager is null)
+            // Tạo POI với ManagerUserId trực tiếp (không qua Shop)
+            var poi = new Poi
             {
-                shopManager = new User
+                Id = Guid.NewGuid(),
+                Code = code,
+                Name = name,
+                Description = desc,
+                Latitude = lat,
+                Longitude = lon,
+                District = district,
+                Priority = 2,
+                ImageUrl = $"https://picsum.photos/seed/{code}/640/360",
+                MapLink = $"https://maps.google.com/?q={lat},{lon}",
+                TriggerRadiusMeters = 30,
+                ManagerUserId = managerId
+            };
+
+            _dbContext.Pois.Add(poi);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+
+            // Audio files (2 languages: Vietnamese and English only)
+            await _poiService.AssignAudioAsync(poi.Id, "vi", $"/audio/{code}-vi.mp3", 45, false, cancellationToken);
+            await _poiService.AssignAudioAsync(poi.Id, "en", $"/audio/{code}-en.mp3", 50, false, cancellationToken);
+
+            // Translations (Vietnamese and English only)
+            await AddTranslationAsync(poi.Id, "vi", "name", name, cancellationToken);
+            await AddTranslationAsync(poi.Id, "vi", "description", desc, cancellationToken);
+            await AddTranslationAsync(poi.Id, "en", "name", $"English: {name}", cancellationToken);
+            await AddTranslationAsync(poi.Id, "en", "description", $"English: {desc}", cancellationToken);
+
+            seededCodes.Add(code);
+        }
+    }
+
+    private async Task AddTranslationAsync(Guid poiId, string language, string field, string value, CancellationToken ct)
+    {
+        var key = $"poi.{poiId}.{field}";
+        var existing = await _dbContext.ContentTranslations
+            .AnyAsync(t => t.ContentKey == key && t.LanguageCode == language, ct);
+
+        if (!existing)
+        {
+            _dbContext.ContentTranslations.Add(new ContentTranslation
+            {
+                ContentKey = key,
+                LanguageCode = language,
+                Value = value
+            });
+            await _dbContext.SaveChangesAsync(ct);
+        }
+    }
+
+    private async Task SeedToursWithStopsAsync(CancellationToken cancellationToken)
+    {
+        if (await _dbContext.Tours.AnyAsync(cancellationToken))
+            return;
+
+        var pois = await _dbContext.Pois.AsNoTracking().ToListAsync(cancellationToken);
+        if (pois.Count == 0) return;
+
+        // Dictionary để tra cứu POI theo code
+        var poiByCode = pois.ToDictionary(p => p.Code, p => p);
+
+        // Tour 1: Khám Phá Phố Ăn Vĩnh Khách (tất cả 12 POIs)
+        var tour1 = new Tour
+        {
+            Id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
+            Code = "TOUR001",
+            Name = "Khám Phá Phố Ăn Vĩnh Khách",
+            Description = "Hành trình khám phá toàn bộ 12 điểm ẩm thực và di sản văn hóa đặc sắc tại Phố Cổ Vĩnh Khách. Phù hợp cho du khách muốn trải nghiệm trọn vẹn văn hóa ẩm thực Sài Gòn."
+        };
+        _dbContext.Tours.Add(tour1);
+
+        // Tour 2: Tuyến Ẩm Thực Đường Phố (6 POIs đặc trưng)
+        var tour2 = new Tour
+        {
+            Id = Guid.Parse("22222222-2222-2222-2222-222222222222"),
+            Code = "TOUR002",
+            Name = "Tuyến Ăn Uống Đường Phố",
+            Description = "Tập trung vào các điểm ăn uống đặc sản: bánh mì, cơm, hẻm ăn và chợ đêm. Phù hợp cho ai yêu thích ẩm thực đường phố Việt Nam."
+        };
+        _dbContext.Tours.Add(tour2);
+
+        // Tour 3: Khám Phá Di Sản Văn Hóa (6 POIs di sản)
+        var tour3 = new Tour
+        {
+            Id = Guid.Parse("33333333-3333-3333-3333-333333333333"),
+            Code = "TOUR003",
+            Name = "Hành Trình Di Sản Văn Hóa",
+            Description = "Khám phá các điểm di sản lịch sử: đình, chùa, nhà thờ, nhà cổ. Phù hợp cho du khách yêu thích lịch sử và kiến trúc."
+        };
+        _dbContext.Tours.Add(tour3);
+        
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        // Thêm stops cho Tour 1 (tất cả 12 POIs, theo thứ tự địa lý)
+        var tour1Stops = new[]
+        {
+            (Code: "POI001", Seq: 1, Hint: "Rẽ phải vào hẻm để tìm quán bánh mì"),
+            (Code: "POI004", Seq: 2, Hint: "Đi bộ 200m về hướng đình"),
+            (Code: "POI005", Seq: 3, Hint: "Qua ngã tư, chợ ngay trước mặt"),
+            (Code: "POI009", Seq: 4, Hint: "Đi dọc theo đường chính"),
+            (Code: "POI003", Seq: 5, Hint: "Hẻm nằm giữa khu dân cư"),
+            (Code: "POI006", Seq: 6, Hint: "Nhìn tháp chuông từ xa"),
+            (Code: "POI008", Seq: 7, Hint: "Cây cổ thụ ngay cạnh nhà thờ"),
+            (Code: "POI011", Seq: 8, Hint: "Đi dọc đường Vĩnh Hội"),
+            (Code: "POI002", Seq: 9, Hint: "Rẽ trái vào hẻm nhỏ"),
+            (Code: "POI007", Seq: 10, Hint: "Đi tiếp 300m về phía nam"),
+            (Code: "POI010", Seq: 11, Hint: "Nằm trên đường chính Khánh Hội"),
+            (Code: "POI012", Seq: 12, Hint: "Chợ đêm mở từ 18h-22h"),
+        };
+
+        foreach (var (code, seq, hint) in tour1Stops)
+        {
+            if (poiByCode.TryGetValue(code, out var poi))
+            {
+                _dbContext.TourStops.Add(new TourStop
                 {
-                    ExternalRef = externalRef,
-                    PreferredLanguage = language,
-                    Role = UserRole.ShopManager
-                };
-                _dbContext.Users.Add(shopManager);
-                await _dbContext.SaveChangesAsync(cancellationToken);
+                    TourId = tour1.Id,
+                    PoiId = poi.Id,
+                    Sequence = seq,
+                    NextStopHint = hint
+                });
             }
         }
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
-        // Seed Admin user
-        var adminUser = await _dbContext.Users
-            .FirstOrDefaultAsync(u => u.ExternalRef == "ADMIN_USER", cancellationToken);
-
-        if (adminUser is null)
+        // Thêm stops cho Tour 2 (tuyến ẩm thực - 6 POIs)
+        var tour2Stops = new[]
         {
-            adminUser = new User
+            (Code: "POI001", Seq: 1, Hint: "Bánh mì đặc biệt giòn rụm"),
+            (Code: "POI003", Seq: 2, Hint: "Hẻm có nhiều quán ăn ngon"),
+            (Code: "POI002", Seq: 3, Hint: "Tiệm cơm với món đặc sản Nam Bộ"),
+            (Code: "POI007", Seq: 4, Hint: "Khu vực hồ cá yên tĩnh"),
+            (Code: "POI010", Seq: 5, Hint: "Gần chùa, không gian thoáng mát"),
+            (Code: "POI012", Seq: 6, Hint: "Chợ đêm bắt đầu từ 18h"),
+        };
+
+        foreach (var (code, seq, hint) in tour2Stops)
+        {
+            if (poiByCode.TryGetValue(code, out var poi))
             {
-                ExternalRef = "ADMIN_USER",
-                PreferredLanguage = "vi",
-                Role = UserRole.Admin
-            };
-            _dbContext.Users.Add(adminUser);
+                _dbContext.TourStops.Add(new TourStop
+                {
+                    TourId = tour2.Id,
+                    PoiId = poi.Id,
+                    Sequence = seq,
+                    NextStopHint = hint
+                });
+            }
+        }
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        // Thêm stops cho Tour 3 (di sản văn hóa - 6 POIs)
+        var tour3Stops = new[]
+        {
+            (Code: "POI009", Seq: 1, Hint: "Đình thờ cổ có từ thế kỷ 19"),
+            (Code: "POI004", Seq: 2, Hint: "Quán cà phê sân đình view đẹp"),
+            (Code: "POI006", Seq: 3, Hint: "Nhà thờ kiến trúc Pháp colonial"),
+            (Code: "POI008", Seq: 4, Hint: "Cây cổ thụ hơn 100 năm tuổi"),
+            (Code: "POI011", Seq: 5, Hint: "Khách sạn lịch sử từ thời Pháp"),
+            (Code: "POI010", Seq: 6, Hint: "Chùa yên bình, thích hợp nghỉ ngơi"),
+        };
+
+        foreach (var (code, seq, hint) in tour3Stops)
+        {
+            if (poiByCode.TryGetValue(code, out var poi))
+            {
+                _dbContext.TourStops.Add(new TourStop
+                {
+                    TourId = tour3.Id,
+                    PoiId = poi.Id,
+                    Sequence = seq,
+                    NextStopHint = hint
+                });
+            }
+        }
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task SeedQRCodesAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            if (await _dbContext.ShopQRCodes.AnyAsync(cancellationToken))
+                return;
+
+            var pois = await _dbContext.Pois.ToListAsync(cancellationToken);
+
+            foreach (var poi in pois)
+            {
+                // Create QR code with PoiId (ShopId might not have ShopProfile)
+                _dbContext.ShopQRCodes.Add(new ShopQRCode
+                {
+                    ShopId = poi.Id,  // Use poi.Id as shopId since POIs are self-managed
+                    PoiId = poi.Id,
+                    QRPayload = $"vk://poi/{poi.Code}",
+                    QRImageUrl = $"https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=vk://poi/{poi.Code}"
+                });
+            }
+
             await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"SeedQRCodesAsync error (non-fatal): {ex.Message}");
+            // Continue without QR codes - not critical
         }
     }
 }

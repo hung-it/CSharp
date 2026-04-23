@@ -1,7 +1,7 @@
 {
   "version": 3,
   "targets": {
-    "net10.0-android36.0": {
+    "net10.0-android36.1": {
       "CommunityToolkit.Maui/9.1.0": {
         "type": "package",
         "dependencies": {
@@ -465,22 +465,6 @@
           }
         }
       },
-      "Microsoft.Maui.Controls.Maps/10.0.0": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Maui.Maps": "10.0.0"
-        },
-        "compile": {
-          "lib/net10.0-android36.0/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-android36.0/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
       "Microsoft.Maui.Controls.Xaml/10.0.0": {
         "type": "package",
         "dependencies": {
@@ -562,23 +546,6 @@
         },
         "runtime": {
           "lib/net10.0-android36.0/Microsoft.Maui.Graphics.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
-      "Microsoft.Maui.Maps/10.0.0": {
-        "type": "package",
-        "dependencies": {
-          "Xamarin.AndroidX.Transition": "1.6.0.1",
-          "Xamarin.GooglePlayServices.Maps": "119.2.0.3"
-        },
-        "compile": {
-          "lib/net10.0-android36.0/Microsoft.Maui.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-android36.0/Microsoft.Maui.Maps.dll": {
             "related": ".pdb;.xml"
           }
         }
@@ -2754,13 +2721,6 @@
           "buildTransitive/net10.0-android35.0/Xamarin.AndroidX.Window.WindowCore.Jvm.targets": {}
         }
       },
-      "Xamarin.Build.Download/0.11.4": {
-        "type": "package",
-        "build": {
-          "buildTransitive/Xamarin.Build.Download.props": {},
-          "buildTransitive/Xamarin.Build.Download.targets": {}
-        }
-      },
       "Xamarin.CheckerFramework.CheckerQual/3.22.1.1": {
         "type": "package",
         "build": {
@@ -2918,96 +2878,6 @@
         "type": "package",
         "build": {
           "buildTransitive/net6.0-android31.0/Xamarin.Google.J2Objc.Annotations.targets": {}
-        }
-      },
-      "Xamarin.GooglePlayServices.Base/118.7.2.1": {
-        "type": "package",
-        "dependencies": {
-          "Xamarin.AndroidX.Collection": "1.5.0.3",
-          "Xamarin.AndroidX.Core": "1.16.0.3",
-          "Xamarin.AndroidX.Fragment": "1.8.8.1",
-          "Xamarin.Build.Download": "0.11.4",
-          "Xamarin.GooglePlayServices.Basement": "118.7.1.1",
-          "Xamarin.GooglePlayServices.Tasks": "118.3.2.1"
-        },
-        "compile": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Base.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Base.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "build": {
-          "buildTransitive/net10.0-android35.0/Xamarin.GooglePlayServices.Base.targets": {}
-        }
-      },
-      "Xamarin.GooglePlayServices.Basement/118.7.1.1": {
-        "type": "package",
-        "dependencies": {
-          "Xamarin.AndroidX.Collection": "1.5.0.3",
-          "Xamarin.AndroidX.Core": "1.16.0.3",
-          "Xamarin.AndroidX.Fragment": "1.8.8.1",
-          "Xamarin.Build.Download": "0.11.4"
-        },
-        "compile": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Basement.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Basement.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "build": {
-          "buildTransitive/net10.0-android35.0/Xamarin.GooglePlayServices.Basement.targets": {}
-        }
-      },
-      "Xamarin.GooglePlayServices.Maps/119.2.0.3": {
-        "type": "package",
-        "dependencies": {
-          "Xamarin.AndroidX.Collection": "1.5.0.3",
-          "Xamarin.AndroidX.Fragment": "1.8.8.1",
-          "Xamarin.Build.Download": "0.11.4",
-          "Xamarin.GooglePlayServices.Base": "118.7.2.1",
-          "Xamarin.GooglePlayServices.Basement": "118.7.1.1",
-          "Xamarin.GooglePlayServices.Tasks": "118.3.2.1"
-        },
-        "compile": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "build": {
-          "buildTransitive/net10.0-android35.0/Xamarin.GooglePlayServices.Maps.targets": {}
-        }
-      },
-      "Xamarin.GooglePlayServices.Tasks/118.3.2.1": {
-        "type": "package",
-        "dependencies": {
-          "Xamarin.Build.Download": "0.11.4",
-          "Xamarin.GooglePlayServices.Basement": "118.7.1.1"
-        },
-        "compile": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Tasks.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Tasks.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "build": {
-          "buildTransitive/net10.0-android35.0/Xamarin.GooglePlayServices.Tasks.targets": {}
         }
       },
       "Xamarin.Jetbrains.Annotations/26.0.2.3": {
@@ -3184,7 +3054,7 @@
         }
       }
     },
-    "net10.0-android36.0/android-arm64": {
+    "net10.0-android36.1/android-arm64": {
       "CommunityToolkit.Maui/9.1.0": {
         "type": "package",
         "dependencies": {
@@ -3648,22 +3518,6 @@
           }
         }
       },
-      "Microsoft.Maui.Controls.Maps/10.0.0": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Maui.Maps": "10.0.0"
-        },
-        "compile": {
-          "lib/net10.0-android36.0/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-android36.0/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
       "Microsoft.Maui.Controls.Xaml/10.0.0": {
         "type": "package",
         "dependencies": {
@@ -3745,23 +3599,6 @@
         },
         "runtime": {
           "lib/net10.0-android36.0/Microsoft.Maui.Graphics.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
-      "Microsoft.Maui.Maps/10.0.0": {
-        "type": "package",
-        "dependencies": {
-          "Xamarin.AndroidX.Transition": "1.6.0.1",
-          "Xamarin.GooglePlayServices.Maps": "119.2.0.3"
-        },
-        "compile": {
-          "lib/net10.0-android36.0/Microsoft.Maui.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-android36.0/Microsoft.Maui.Maps.dll": {
             "related": ".pdb;.xml"
           }
         }
@@ -5937,13 +5774,6 @@
           "buildTransitive/net10.0-android35.0/Xamarin.AndroidX.Window.WindowCore.Jvm.targets": {}
         }
       },
-      "Xamarin.Build.Download/0.11.4": {
-        "type": "package",
-        "build": {
-          "buildTransitive/Xamarin.Build.Download.props": {},
-          "buildTransitive/Xamarin.Build.Download.targets": {}
-        }
-      },
       "Xamarin.CheckerFramework.CheckerQual/3.22.1.1": {
         "type": "package",
         "build": {
@@ -6101,96 +5931,6 @@
         "type": "package",
         "build": {
           "buildTransitive/net6.0-android31.0/Xamarin.Google.J2Objc.Annotations.targets": {}
-        }
-      },
-      "Xamarin.GooglePlayServices.Base/118.7.2.1": {
-        "type": "package",
-        "dependencies": {
-          "Xamarin.AndroidX.Collection": "1.5.0.3",
-          "Xamarin.AndroidX.Core": "1.16.0.3",
-          "Xamarin.AndroidX.Fragment": "1.8.8.1",
-          "Xamarin.Build.Download": "0.11.4",
-          "Xamarin.GooglePlayServices.Basement": "118.7.1.1",
-          "Xamarin.GooglePlayServices.Tasks": "118.3.2.1"
-        },
-        "compile": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Base.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Base.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "build": {
-          "buildTransitive/net10.0-android35.0/Xamarin.GooglePlayServices.Base.targets": {}
-        }
-      },
-      "Xamarin.GooglePlayServices.Basement/118.7.1.1": {
-        "type": "package",
-        "dependencies": {
-          "Xamarin.AndroidX.Collection": "1.5.0.3",
-          "Xamarin.AndroidX.Core": "1.16.0.3",
-          "Xamarin.AndroidX.Fragment": "1.8.8.1",
-          "Xamarin.Build.Download": "0.11.4"
-        },
-        "compile": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Basement.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Basement.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "build": {
-          "buildTransitive/net10.0-android35.0/Xamarin.GooglePlayServices.Basement.targets": {}
-        }
-      },
-      "Xamarin.GooglePlayServices.Maps/119.2.0.3": {
-        "type": "package",
-        "dependencies": {
-          "Xamarin.AndroidX.Collection": "1.5.0.3",
-          "Xamarin.AndroidX.Fragment": "1.8.8.1",
-          "Xamarin.Build.Download": "0.11.4",
-          "Xamarin.GooglePlayServices.Base": "118.7.2.1",
-          "Xamarin.GooglePlayServices.Basement": "118.7.1.1",
-          "Xamarin.GooglePlayServices.Tasks": "118.3.2.1"
-        },
-        "compile": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "build": {
-          "buildTransitive/net10.0-android35.0/Xamarin.GooglePlayServices.Maps.targets": {}
-        }
-      },
-      "Xamarin.GooglePlayServices.Tasks/118.3.2.1": {
-        "type": "package",
-        "dependencies": {
-          "Xamarin.Build.Download": "0.11.4",
-          "Xamarin.GooglePlayServices.Basement": "118.7.1.1"
-        },
-        "compile": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Tasks.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Tasks.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "build": {
-          "buildTransitive/net10.0-android35.0/Xamarin.GooglePlayServices.Tasks.targets": {}
         }
       },
       "Xamarin.Jetbrains.Annotations/26.0.2.3": {
@@ -6367,7 +6107,7 @@
         }
       }
     },
-    "net10.0-android36.0/android-x64": {
+    "net10.0-android36.1/android-x64": {
       "CommunityToolkit.Maui/9.1.0": {
         "type": "package",
         "dependencies": {
@@ -6831,22 +6571,6 @@
           }
         }
       },
-      "Microsoft.Maui.Controls.Maps/10.0.0": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Maui.Maps": "10.0.0"
-        },
-        "compile": {
-          "lib/net10.0-android36.0/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-android36.0/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
       "Microsoft.Maui.Controls.Xaml/10.0.0": {
         "type": "package",
         "dependencies": {
@@ -6928,23 +6652,6 @@
         },
         "runtime": {
           "lib/net10.0-android36.0/Microsoft.Maui.Graphics.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
-      "Microsoft.Maui.Maps/10.0.0": {
-        "type": "package",
-        "dependencies": {
-          "Xamarin.AndroidX.Transition": "1.6.0.1",
-          "Xamarin.GooglePlayServices.Maps": "119.2.0.3"
-        },
-        "compile": {
-          "lib/net10.0-android36.0/Microsoft.Maui.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-android36.0/Microsoft.Maui.Maps.dll": {
             "related": ".pdb;.xml"
           }
         }
@@ -9120,13 +8827,6 @@
           "buildTransitive/net10.0-android35.0/Xamarin.AndroidX.Window.WindowCore.Jvm.targets": {}
         }
       },
-      "Xamarin.Build.Download/0.11.4": {
-        "type": "package",
-        "build": {
-          "buildTransitive/Xamarin.Build.Download.props": {},
-          "buildTransitive/Xamarin.Build.Download.targets": {}
-        }
-      },
       "Xamarin.CheckerFramework.CheckerQual/3.22.1.1": {
         "type": "package",
         "build": {
@@ -9284,96 +8984,6 @@
         "type": "package",
         "build": {
           "buildTransitive/net6.0-android31.0/Xamarin.Google.J2Objc.Annotations.targets": {}
-        }
-      },
-      "Xamarin.GooglePlayServices.Base/118.7.2.1": {
-        "type": "package",
-        "dependencies": {
-          "Xamarin.AndroidX.Collection": "1.5.0.3",
-          "Xamarin.AndroidX.Core": "1.16.0.3",
-          "Xamarin.AndroidX.Fragment": "1.8.8.1",
-          "Xamarin.Build.Download": "0.11.4",
-          "Xamarin.GooglePlayServices.Basement": "118.7.1.1",
-          "Xamarin.GooglePlayServices.Tasks": "118.3.2.1"
-        },
-        "compile": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Base.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Base.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "build": {
-          "buildTransitive/net10.0-android35.0/Xamarin.GooglePlayServices.Base.targets": {}
-        }
-      },
-      "Xamarin.GooglePlayServices.Basement/118.7.1.1": {
-        "type": "package",
-        "dependencies": {
-          "Xamarin.AndroidX.Collection": "1.5.0.3",
-          "Xamarin.AndroidX.Core": "1.16.0.3",
-          "Xamarin.AndroidX.Fragment": "1.8.8.1",
-          "Xamarin.Build.Download": "0.11.4"
-        },
-        "compile": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Basement.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Basement.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "build": {
-          "buildTransitive/net10.0-android35.0/Xamarin.GooglePlayServices.Basement.targets": {}
-        }
-      },
-      "Xamarin.GooglePlayServices.Maps/119.2.0.3": {
-        "type": "package",
-        "dependencies": {
-          "Xamarin.AndroidX.Collection": "1.5.0.3",
-          "Xamarin.AndroidX.Fragment": "1.8.8.1",
-          "Xamarin.Build.Download": "0.11.4",
-          "Xamarin.GooglePlayServices.Base": "118.7.2.1",
-          "Xamarin.GooglePlayServices.Basement": "118.7.1.1",
-          "Xamarin.GooglePlayServices.Tasks": "118.3.2.1"
-        },
-        "compile": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "build": {
-          "buildTransitive/net10.0-android35.0/Xamarin.GooglePlayServices.Maps.targets": {}
-        }
-      },
-      "Xamarin.GooglePlayServices.Tasks/118.3.2.1": {
-        "type": "package",
-        "dependencies": {
-          "Xamarin.Build.Download": "0.11.4",
-          "Xamarin.GooglePlayServices.Basement": "118.7.1.1"
-        },
-        "compile": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Tasks.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Tasks.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "build": {
-          "buildTransitive/net10.0-android35.0/Xamarin.GooglePlayServices.Tasks.targets": {}
         }
       },
       "Xamarin.Jetbrains.Annotations/26.0.2.3": {
@@ -9550,7 +9160,7 @@
         }
       }
     },
-    "net10.0-android36.0/iossimulator-x64": {
+    "net10.0-android36.1/iossimulator-x64": {
       "CommunityToolkit.Maui/9.1.0": {
         "type": "package",
         "dependencies": {
@@ -10014,22 +9624,6 @@
           }
         }
       },
-      "Microsoft.Maui.Controls.Maps/10.0.0": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Maui.Maps": "10.0.0"
-        },
-        "compile": {
-          "lib/net10.0-android36.0/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-android36.0/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
       "Microsoft.Maui.Controls.Xaml/10.0.0": {
         "type": "package",
         "dependencies": {
@@ -10111,23 +9705,6 @@
         },
         "runtime": {
           "lib/net10.0-android36.0/Microsoft.Maui.Graphics.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
-      "Microsoft.Maui.Maps/10.0.0": {
-        "type": "package",
-        "dependencies": {
-          "Xamarin.AndroidX.Transition": "1.6.0.1",
-          "Xamarin.GooglePlayServices.Maps": "119.2.0.3"
-        },
-        "compile": {
-          "lib/net10.0-android36.0/Microsoft.Maui.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-android36.0/Microsoft.Maui.Maps.dll": {
             "related": ".pdb;.xml"
           }
         }
@@ -12303,13 +11880,6 @@
           "buildTransitive/net10.0-android35.0/Xamarin.AndroidX.Window.WindowCore.Jvm.targets": {}
         }
       },
-      "Xamarin.Build.Download/0.11.4": {
-        "type": "package",
-        "build": {
-          "buildTransitive/Xamarin.Build.Download.props": {},
-          "buildTransitive/Xamarin.Build.Download.targets": {}
-        }
-      },
       "Xamarin.CheckerFramework.CheckerQual/3.22.1.1": {
         "type": "package",
         "build": {
@@ -12467,96 +12037,6 @@
         "type": "package",
         "build": {
           "buildTransitive/net6.0-android31.0/Xamarin.Google.J2Objc.Annotations.targets": {}
-        }
-      },
-      "Xamarin.GooglePlayServices.Base/118.7.2.1": {
-        "type": "package",
-        "dependencies": {
-          "Xamarin.AndroidX.Collection": "1.5.0.3",
-          "Xamarin.AndroidX.Core": "1.16.0.3",
-          "Xamarin.AndroidX.Fragment": "1.8.8.1",
-          "Xamarin.Build.Download": "0.11.4",
-          "Xamarin.GooglePlayServices.Basement": "118.7.1.1",
-          "Xamarin.GooglePlayServices.Tasks": "118.3.2.1"
-        },
-        "compile": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Base.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Base.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "build": {
-          "buildTransitive/net10.0-android35.0/Xamarin.GooglePlayServices.Base.targets": {}
-        }
-      },
-      "Xamarin.GooglePlayServices.Basement/118.7.1.1": {
-        "type": "package",
-        "dependencies": {
-          "Xamarin.AndroidX.Collection": "1.5.0.3",
-          "Xamarin.AndroidX.Core": "1.16.0.3",
-          "Xamarin.AndroidX.Fragment": "1.8.8.1",
-          "Xamarin.Build.Download": "0.11.4"
-        },
-        "compile": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Basement.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Basement.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "build": {
-          "buildTransitive/net10.0-android35.0/Xamarin.GooglePlayServices.Basement.targets": {}
-        }
-      },
-      "Xamarin.GooglePlayServices.Maps/119.2.0.3": {
-        "type": "package",
-        "dependencies": {
-          "Xamarin.AndroidX.Collection": "1.5.0.3",
-          "Xamarin.AndroidX.Fragment": "1.8.8.1",
-          "Xamarin.Build.Download": "0.11.4",
-          "Xamarin.GooglePlayServices.Base": "118.7.2.1",
-          "Xamarin.GooglePlayServices.Basement": "118.7.1.1",
-          "Xamarin.GooglePlayServices.Tasks": "118.3.2.1"
-        },
-        "compile": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "build": {
-          "buildTransitive/net10.0-android35.0/Xamarin.GooglePlayServices.Maps.targets": {}
-        }
-      },
-      "Xamarin.GooglePlayServices.Tasks/118.3.2.1": {
-        "type": "package",
-        "dependencies": {
-          "Xamarin.Build.Download": "0.11.4",
-          "Xamarin.GooglePlayServices.Basement": "118.7.1.1"
-        },
-        "compile": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Tasks.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Tasks.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "build": {
-          "buildTransitive/net10.0-android35.0/Xamarin.GooglePlayServices.Tasks.targets": {}
         }
       },
       "Xamarin.Jetbrains.Annotations/26.0.2.3": {
@@ -12733,7 +12213,7 @@
         }
       }
     },
-    "net10.0-android36.0/maccatalyst-x64": {
+    "net10.0-android36.1/maccatalyst-x64": {
       "CommunityToolkit.Maui/9.1.0": {
         "type": "package",
         "dependencies": {
@@ -13197,22 +12677,6 @@
           }
         }
       },
-      "Microsoft.Maui.Controls.Maps/10.0.0": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Maui.Maps": "10.0.0"
-        },
-        "compile": {
-          "lib/net10.0-android36.0/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-android36.0/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
       "Microsoft.Maui.Controls.Xaml/10.0.0": {
         "type": "package",
         "dependencies": {
@@ -13294,23 +12758,6 @@
         },
         "runtime": {
           "lib/net10.0-android36.0/Microsoft.Maui.Graphics.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
-      "Microsoft.Maui.Maps/10.0.0": {
-        "type": "package",
-        "dependencies": {
-          "Xamarin.AndroidX.Transition": "1.6.0.1",
-          "Xamarin.GooglePlayServices.Maps": "119.2.0.3"
-        },
-        "compile": {
-          "lib/net10.0-android36.0/Microsoft.Maui.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-android36.0/Microsoft.Maui.Maps.dll": {
             "related": ".pdb;.xml"
           }
         }
@@ -15486,13 +14933,6 @@
           "buildTransitive/net10.0-android35.0/Xamarin.AndroidX.Window.WindowCore.Jvm.targets": {}
         }
       },
-      "Xamarin.Build.Download/0.11.4": {
-        "type": "package",
-        "build": {
-          "buildTransitive/Xamarin.Build.Download.props": {},
-          "buildTransitive/Xamarin.Build.Download.targets": {}
-        }
-      },
       "Xamarin.CheckerFramework.CheckerQual/3.22.1.1": {
         "type": "package",
         "build": {
@@ -15650,96 +15090,6 @@
         "type": "package",
         "build": {
           "buildTransitive/net6.0-android31.0/Xamarin.Google.J2Objc.Annotations.targets": {}
-        }
-      },
-      "Xamarin.GooglePlayServices.Base/118.7.2.1": {
-        "type": "package",
-        "dependencies": {
-          "Xamarin.AndroidX.Collection": "1.5.0.3",
-          "Xamarin.AndroidX.Core": "1.16.0.3",
-          "Xamarin.AndroidX.Fragment": "1.8.8.1",
-          "Xamarin.Build.Download": "0.11.4",
-          "Xamarin.GooglePlayServices.Basement": "118.7.1.1",
-          "Xamarin.GooglePlayServices.Tasks": "118.3.2.1"
-        },
-        "compile": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Base.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Base.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "build": {
-          "buildTransitive/net10.0-android35.0/Xamarin.GooglePlayServices.Base.targets": {}
-        }
-      },
-      "Xamarin.GooglePlayServices.Basement/118.7.1.1": {
-        "type": "package",
-        "dependencies": {
-          "Xamarin.AndroidX.Collection": "1.5.0.3",
-          "Xamarin.AndroidX.Core": "1.16.0.3",
-          "Xamarin.AndroidX.Fragment": "1.8.8.1",
-          "Xamarin.Build.Download": "0.11.4"
-        },
-        "compile": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Basement.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Basement.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "build": {
-          "buildTransitive/net10.0-android35.0/Xamarin.GooglePlayServices.Basement.targets": {}
-        }
-      },
-      "Xamarin.GooglePlayServices.Maps/119.2.0.3": {
-        "type": "package",
-        "dependencies": {
-          "Xamarin.AndroidX.Collection": "1.5.0.3",
-          "Xamarin.AndroidX.Fragment": "1.8.8.1",
-          "Xamarin.Build.Download": "0.11.4",
-          "Xamarin.GooglePlayServices.Base": "118.7.2.1",
-          "Xamarin.GooglePlayServices.Basement": "118.7.1.1",
-          "Xamarin.GooglePlayServices.Tasks": "118.3.2.1"
-        },
-        "compile": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "build": {
-          "buildTransitive/net10.0-android35.0/Xamarin.GooglePlayServices.Maps.targets": {}
-        }
-      },
-      "Xamarin.GooglePlayServices.Tasks/118.3.2.1": {
-        "type": "package",
-        "dependencies": {
-          "Xamarin.Build.Download": "0.11.4",
-          "Xamarin.GooglePlayServices.Basement": "118.7.1.1"
-        },
-        "compile": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Tasks.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Tasks.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "build": {
-          "buildTransitive/net10.0-android35.0/Xamarin.GooglePlayServices.Tasks.targets": {}
         }
       },
       "Xamarin.Jetbrains.Annotations/26.0.2.3": {
@@ -15916,7 +15266,7 @@
         }
       }
     },
-    "net10.0-android36.0/win-x64": {
+    "net10.0-android36.1/win-x64": {
       "CommunityToolkit.Maui/9.1.0": {
         "type": "package",
         "dependencies": {
@@ -16380,22 +15730,6 @@
           }
         }
       },
-      "Microsoft.Maui.Controls.Maps/10.0.0": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Maui.Maps": "10.0.0"
-        },
-        "compile": {
-          "lib/net10.0-android36.0/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-android36.0/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
       "Microsoft.Maui.Controls.Xaml/10.0.0": {
         "type": "package",
         "dependencies": {
@@ -16477,23 +15811,6 @@
         },
         "runtime": {
           "lib/net10.0-android36.0/Microsoft.Maui.Graphics.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
-      "Microsoft.Maui.Maps/10.0.0": {
-        "type": "package",
-        "dependencies": {
-          "Xamarin.AndroidX.Transition": "1.6.0.1",
-          "Xamarin.GooglePlayServices.Maps": "119.2.0.3"
-        },
-        "compile": {
-          "lib/net10.0-android36.0/Microsoft.Maui.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-android36.0/Microsoft.Maui.Maps.dll": {
             "related": ".pdb;.xml"
           }
         }
@@ -18669,13 +17986,6 @@
           "buildTransitive/net10.0-android35.0/Xamarin.AndroidX.Window.WindowCore.Jvm.targets": {}
         }
       },
-      "Xamarin.Build.Download/0.11.4": {
-        "type": "package",
-        "build": {
-          "buildTransitive/Xamarin.Build.Download.props": {},
-          "buildTransitive/Xamarin.Build.Download.targets": {}
-        }
-      },
       "Xamarin.CheckerFramework.CheckerQual/3.22.1.1": {
         "type": "package",
         "build": {
@@ -18833,96 +18143,6 @@
         "type": "package",
         "build": {
           "buildTransitive/net6.0-android31.0/Xamarin.Google.J2Objc.Annotations.targets": {}
-        }
-      },
-      "Xamarin.GooglePlayServices.Base/118.7.2.1": {
-        "type": "package",
-        "dependencies": {
-          "Xamarin.AndroidX.Collection": "1.5.0.3",
-          "Xamarin.AndroidX.Core": "1.16.0.3",
-          "Xamarin.AndroidX.Fragment": "1.8.8.1",
-          "Xamarin.Build.Download": "0.11.4",
-          "Xamarin.GooglePlayServices.Basement": "118.7.1.1",
-          "Xamarin.GooglePlayServices.Tasks": "118.3.2.1"
-        },
-        "compile": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Base.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Base.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "build": {
-          "buildTransitive/net10.0-android35.0/Xamarin.GooglePlayServices.Base.targets": {}
-        }
-      },
-      "Xamarin.GooglePlayServices.Basement/118.7.1.1": {
-        "type": "package",
-        "dependencies": {
-          "Xamarin.AndroidX.Collection": "1.5.0.3",
-          "Xamarin.AndroidX.Core": "1.16.0.3",
-          "Xamarin.AndroidX.Fragment": "1.8.8.1",
-          "Xamarin.Build.Download": "0.11.4"
-        },
-        "compile": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Basement.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Basement.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "build": {
-          "buildTransitive/net10.0-android35.0/Xamarin.GooglePlayServices.Basement.targets": {}
-        }
-      },
-      "Xamarin.GooglePlayServices.Maps/119.2.0.3": {
-        "type": "package",
-        "dependencies": {
-          "Xamarin.AndroidX.Collection": "1.5.0.3",
-          "Xamarin.AndroidX.Fragment": "1.8.8.1",
-          "Xamarin.Build.Download": "0.11.4",
-          "Xamarin.GooglePlayServices.Base": "118.7.2.1",
-          "Xamarin.GooglePlayServices.Basement": "118.7.1.1",
-          "Xamarin.GooglePlayServices.Tasks": "118.3.2.1"
-        },
-        "compile": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "build": {
-          "buildTransitive/net10.0-android35.0/Xamarin.GooglePlayServices.Maps.targets": {}
-        }
-      },
-      "Xamarin.GooglePlayServices.Tasks/118.3.2.1": {
-        "type": "package",
-        "dependencies": {
-          "Xamarin.Build.Download": "0.11.4",
-          "Xamarin.GooglePlayServices.Basement": "118.7.1.1"
-        },
-        "compile": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Tasks.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Tasks.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "build": {
-          "buildTransitive/net10.0-android35.0/Xamarin.GooglePlayServices.Tasks.targets": {}
         }
       },
       "Xamarin.Jetbrains.Annotations/26.0.2.3": {
@@ -19543,22 +18763,6 @@
           }
         }
       },
-      "Microsoft.Maui.Controls.Maps/10.0.0": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Maui.Maps": "10.0.0"
-        },
-        "compile": {
-          "lib/net10.0-ios26.0/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-ios26.0/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
       "Microsoft.Maui.Controls.Xaml/10.0.0": {
         "type": "package",
         "dependencies": {
@@ -19628,19 +18832,6 @@
         },
         "runtime": {
           "lib/net10.0-ios26.0/Microsoft.Maui.Graphics.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
-      "Microsoft.Maui.Maps/10.0.0": {
-        "type": "package",
-        "compile": {
-          "lib/net10.0-ios26.0/Microsoft.Maui.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-ios26.0/Microsoft.Maui.Maps.dll": {
             "related": ".pdb;.xml"
           }
         }
@@ -20141,22 +19332,6 @@
           }
         }
       },
-      "Microsoft.Maui.Controls.Maps/10.0.0": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Maui.Maps": "10.0.0"
-        },
-        "compile": {
-          "lib/net10.0-ios26.0/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-ios26.0/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
       "Microsoft.Maui.Controls.Xaml/10.0.0": {
         "type": "package",
         "dependencies": {
@@ -20226,19 +19401,6 @@
         },
         "runtime": {
           "lib/net10.0-ios26.0/Microsoft.Maui.Graphics.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
-      "Microsoft.Maui.Maps/10.0.0": {
-        "type": "package",
-        "compile": {
-          "lib/net10.0-ios26.0/Microsoft.Maui.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-ios26.0/Microsoft.Maui.Maps.dll": {
             "related": ".pdb;.xml"
           }
         }
@@ -20739,22 +19901,6 @@
           }
         }
       },
-      "Microsoft.Maui.Controls.Maps/10.0.0": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Maui.Maps": "10.0.0"
-        },
-        "compile": {
-          "lib/net10.0-ios26.0/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-ios26.0/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
       "Microsoft.Maui.Controls.Xaml/10.0.0": {
         "type": "package",
         "dependencies": {
@@ -20824,19 +19970,6 @@
         },
         "runtime": {
           "lib/net10.0-ios26.0/Microsoft.Maui.Graphics.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
-      "Microsoft.Maui.Maps/10.0.0": {
-        "type": "package",
-        "compile": {
-          "lib/net10.0-ios26.0/Microsoft.Maui.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-ios26.0/Microsoft.Maui.Maps.dll": {
             "related": ".pdb;.xml"
           }
         }
@@ -21337,22 +20470,6 @@
           }
         }
       },
-      "Microsoft.Maui.Controls.Maps/10.0.0": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Maui.Maps": "10.0.0"
-        },
-        "compile": {
-          "lib/net10.0-ios26.0/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-ios26.0/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
       "Microsoft.Maui.Controls.Xaml/10.0.0": {
         "type": "package",
         "dependencies": {
@@ -21422,19 +20539,6 @@
         },
         "runtime": {
           "lib/net10.0-ios26.0/Microsoft.Maui.Graphics.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
-      "Microsoft.Maui.Maps/10.0.0": {
-        "type": "package",
-        "compile": {
-          "lib/net10.0-ios26.0/Microsoft.Maui.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-ios26.0/Microsoft.Maui.Maps.dll": {
             "related": ".pdb;.xml"
           }
         }
@@ -21935,22 +21039,6 @@
           }
         }
       },
-      "Microsoft.Maui.Controls.Maps/10.0.0": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Maui.Maps": "10.0.0"
-        },
-        "compile": {
-          "lib/net10.0-ios26.0/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-ios26.0/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
       "Microsoft.Maui.Controls.Xaml/10.0.0": {
         "type": "package",
         "dependencies": {
@@ -22020,19 +21108,6 @@
         },
         "runtime": {
           "lib/net10.0-ios26.0/Microsoft.Maui.Graphics.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
-      "Microsoft.Maui.Maps/10.0.0": {
-        "type": "package",
-        "compile": {
-          "lib/net10.0-ios26.0/Microsoft.Maui.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-ios26.0/Microsoft.Maui.Maps.dll": {
             "related": ".pdb;.xml"
           }
         }
@@ -22533,22 +21608,6 @@
           }
         }
       },
-      "Microsoft.Maui.Controls.Maps/10.0.0": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Maui.Maps": "10.0.0"
-        },
-        "compile": {
-          "lib/net10.0-ios26.0/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-ios26.0/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
       "Microsoft.Maui.Controls.Xaml/10.0.0": {
         "type": "package",
         "dependencies": {
@@ -22618,19 +21677,6 @@
         },
         "runtime": {
           "lib/net10.0-ios26.0/Microsoft.Maui.Graphics.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
-      "Microsoft.Maui.Maps/10.0.0": {
-        "type": "package",
-        "compile": {
-          "lib/net10.0-ios26.0/Microsoft.Maui.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-ios26.0/Microsoft.Maui.Maps.dll": {
             "related": ".pdb;.xml"
           }
         }
@@ -23131,22 +22177,6 @@
           }
         }
       },
-      "Microsoft.Maui.Controls.Maps/10.0.0": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Maui.Maps": "10.0.0"
-        },
-        "compile": {
-          "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
       "Microsoft.Maui.Controls.Xaml/10.0.0": {
         "type": "package",
         "dependencies": {
@@ -23216,19 +22246,6 @@
         },
         "runtime": {
           "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Graphics.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
-      "Microsoft.Maui.Maps/10.0.0": {
-        "type": "package",
-        "compile": {
-          "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Maps.dll": {
             "related": ".pdb;.xml"
           }
         }
@@ -23729,22 +22746,6 @@
           }
         }
       },
-      "Microsoft.Maui.Controls.Maps/10.0.0": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Maui.Maps": "10.0.0"
-        },
-        "compile": {
-          "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
       "Microsoft.Maui.Controls.Xaml/10.0.0": {
         "type": "package",
         "dependencies": {
@@ -23814,19 +22815,6 @@
         },
         "runtime": {
           "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Graphics.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
-      "Microsoft.Maui.Maps/10.0.0": {
-        "type": "package",
-        "compile": {
-          "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Maps.dll": {
             "related": ".pdb;.xml"
           }
         }
@@ -24327,22 +23315,6 @@
           }
         }
       },
-      "Microsoft.Maui.Controls.Maps/10.0.0": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Maui.Maps": "10.0.0"
-        },
-        "compile": {
-          "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
       "Microsoft.Maui.Controls.Xaml/10.0.0": {
         "type": "package",
         "dependencies": {
@@ -24412,19 +23384,6 @@
         },
         "runtime": {
           "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Graphics.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
-      "Microsoft.Maui.Maps/10.0.0": {
-        "type": "package",
-        "compile": {
-          "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Maps.dll": {
             "related": ".pdb;.xml"
           }
         }
@@ -24925,22 +23884,6 @@
           }
         }
       },
-      "Microsoft.Maui.Controls.Maps/10.0.0": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Maui.Maps": "10.0.0"
-        },
-        "compile": {
-          "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
       "Microsoft.Maui.Controls.Xaml/10.0.0": {
         "type": "package",
         "dependencies": {
@@ -25010,19 +23953,6 @@
         },
         "runtime": {
           "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Graphics.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
-      "Microsoft.Maui.Maps/10.0.0": {
-        "type": "package",
-        "compile": {
-          "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Maps.dll": {
             "related": ".pdb;.xml"
           }
         }
@@ -25523,22 +24453,6 @@
           }
         }
       },
-      "Microsoft.Maui.Controls.Maps/10.0.0": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Maui.Maps": "10.0.0"
-        },
-        "compile": {
-          "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
       "Microsoft.Maui.Controls.Xaml/10.0.0": {
         "type": "package",
         "dependencies": {
@@ -25608,19 +24522,6 @@
         },
         "runtime": {
           "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Graphics.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
-      "Microsoft.Maui.Maps/10.0.0": {
-        "type": "package",
-        "compile": {
-          "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Maps.dll": {
             "related": ".pdb;.xml"
           }
         }
@@ -26121,22 +25022,6 @@
           }
         }
       },
-      "Microsoft.Maui.Controls.Maps/10.0.0": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Maui.Maps": "10.0.0"
-        },
-        "compile": {
-          "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
       "Microsoft.Maui.Controls.Xaml/10.0.0": {
         "type": "package",
         "dependencies": {
@@ -26206,19 +25091,6 @@
         },
         "runtime": {
           "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Graphics.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
-      "Microsoft.Maui.Maps/10.0.0": {
-        "type": "package",
-        "compile": {
-          "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Maps.dll": {
             "related": ".pdb;.xml"
           }
         }
@@ -26763,22 +25635,6 @@
           }
         }
       },
-      "Microsoft.Maui.Controls.Maps/10.0.0": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Maui.Maps": "10.0.0"
-        },
-        "compile": {
-          "lib/net10.0-windows10.0.19041/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-windows10.0.19041/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
       "Microsoft.Maui.Controls.Xaml/10.0.0": {
         "type": "package",
         "dependencies": {
@@ -26877,19 +25733,6 @@
         "runtime": {
           "lib/net10.0-windows10.0.19041/Microsoft.Maui.Graphics.Win2D.WinUI.Desktop.dll": {
             "related": ".pdb"
-          }
-        }
-      },
-      "Microsoft.Maui.Maps/10.0.0": {
-        "type": "package",
-        "compile": {
-          "lib/net10.0-windows10.0.19041/Microsoft.Maui.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-windows10.0.19041/Microsoft.Maui.Maps.dll": {
-            "related": ".pdb;.xml"
           }
         }
       },
@@ -27617,22 +26460,6 @@
           }
         }
       },
-      "Microsoft.Maui.Controls.Maps/10.0.0": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Maui.Maps": "10.0.0"
-        },
-        "compile": {
-          "lib/net10.0-windows10.0.19041/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-windows10.0.19041/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
       "Microsoft.Maui.Controls.Xaml/10.0.0": {
         "type": "package",
         "dependencies": {
@@ -27731,19 +26558,6 @@
         "runtime": {
           "lib/net10.0-windows10.0.19041/Microsoft.Maui.Graphics.Win2D.WinUI.Desktop.dll": {
             "related": ".pdb"
-          }
-        }
-      },
-      "Microsoft.Maui.Maps/10.0.0": {
-        "type": "package",
-        "compile": {
-          "lib/net10.0-windows10.0.19041/Microsoft.Maui.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-windows10.0.19041/Microsoft.Maui.Maps.dll": {
-            "related": ".pdb;.xml"
           }
         }
       },
@@ -28417,22 +27231,6 @@
           }
         }
       },
-      "Microsoft.Maui.Controls.Maps/10.0.0": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Maui.Maps": "10.0.0"
-        },
-        "compile": {
-          "lib/net10.0-windows10.0.19041/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-windows10.0.19041/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
       "Microsoft.Maui.Controls.Xaml/10.0.0": {
         "type": "package",
         "dependencies": {
@@ -28531,19 +27329,6 @@
         "runtime": {
           "lib/net10.0-windows10.0.19041/Microsoft.Maui.Graphics.Win2D.WinUI.Desktop.dll": {
             "related": ".pdb"
-          }
-        }
-      },
-      "Microsoft.Maui.Maps/10.0.0": {
-        "type": "package",
-        "compile": {
-          "lib/net10.0-windows10.0.19041/Microsoft.Maui.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-windows10.0.19041/Microsoft.Maui.Maps.dll": {
-            "related": ".pdb;.xml"
           }
         }
       },
@@ -29217,22 +28002,6 @@
           }
         }
       },
-      "Microsoft.Maui.Controls.Maps/10.0.0": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Maui.Maps": "10.0.0"
-        },
-        "compile": {
-          "lib/net10.0-windows10.0.19041/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-windows10.0.19041/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
       "Microsoft.Maui.Controls.Xaml/10.0.0": {
         "type": "package",
         "dependencies": {
@@ -29331,19 +28100,6 @@
         "runtime": {
           "lib/net10.0-windows10.0.19041/Microsoft.Maui.Graphics.Win2D.WinUI.Desktop.dll": {
             "related": ".pdb"
-          }
-        }
-      },
-      "Microsoft.Maui.Maps/10.0.0": {
-        "type": "package",
-        "compile": {
-          "lib/net10.0-windows10.0.19041/Microsoft.Maui.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-windows10.0.19041/Microsoft.Maui.Maps.dll": {
-            "related": ".pdb;.xml"
           }
         }
       },
@@ -30017,22 +28773,6 @@
           }
         }
       },
-      "Microsoft.Maui.Controls.Maps/10.0.0": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Maui.Maps": "10.0.0"
-        },
-        "compile": {
-          "lib/net10.0-windows10.0.19041/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-windows10.0.19041/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
       "Microsoft.Maui.Controls.Xaml/10.0.0": {
         "type": "package",
         "dependencies": {
@@ -30131,19 +28871,6 @@
         "runtime": {
           "lib/net10.0-windows10.0.19041/Microsoft.Maui.Graphics.Win2D.WinUI.Desktop.dll": {
             "related": ".pdb"
-          }
-        }
-      },
-      "Microsoft.Maui.Maps/10.0.0": {
-        "type": "package",
-        "compile": {
-          "lib/net10.0-windows10.0.19041/Microsoft.Maui.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-windows10.0.19041/Microsoft.Maui.Maps.dll": {
-            "related": ".pdb;.xml"
           }
         }
       },
@@ -30820,22 +29547,6 @@
           }
         }
       },
-      "Microsoft.Maui.Controls.Maps/10.0.0": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Maui.Maps": "10.0.0"
-        },
-        "compile": {
-          "lib/net10.0-windows10.0.19041/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-windows10.0.19041/Microsoft.Maui.Controls.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
       "Microsoft.Maui.Controls.Xaml/10.0.0": {
         "type": "package",
         "dependencies": {
@@ -30934,19 +29645,6 @@
         "runtime": {
           "lib/net10.0-windows10.0.19041/Microsoft.Maui.Graphics.Win2D.WinUI.Desktop.dll": {
             "related": ".pdb"
-          }
-        }
-      },
-      "Microsoft.Maui.Maps/10.0.0": {
-        "type": "package",
-        "compile": {
-          "lib/net10.0-windows10.0.19041/Microsoft.Maui.Maps.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net10.0-windows10.0.19041/Microsoft.Maui.Maps.dll": {
-            "related": ".pdb;.xml"
           }
         }
       },
@@ -32198,45 +30896,6 @@
         "microsoft.maui.controls.core.nuspec"
       ]
     },
-    "Microsoft.Maui.Controls.Maps/10.0.0": {
-      "sha512": "1ldjXrNwmE1uCmx490fBz4HLNM7DyI0tqGZO7sKuEIeAVe3L3iVJZ+uHBZuNkdVIh7CmuiMt/lt5JZCVBh8wvg==",
-      "type": "package",
-      "path": "microsoft.maui.controls.maps/10.0.0",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "Icon.png",
-        "LICENSE.TXT",
-        "README.md",
-        "THIRD-PARTY-NOTICES.TXT",
-        "lib/net10.0-android36.0/Microsoft.Maui.Controls.Maps.dll",
-        "lib/net10.0-android36.0/Microsoft.Maui.Controls.Maps.pdb",
-        "lib/net10.0-android36.0/Microsoft.Maui.Controls.Maps.xml",
-        "lib/net10.0-ios26.0/Microsoft.Maui.Controls.Maps.dll",
-        "lib/net10.0-ios26.0/Microsoft.Maui.Controls.Maps.pdb",
-        "lib/net10.0-ios26.0/Microsoft.Maui.Controls.Maps.xml",
-        "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Controls.Maps.dll",
-        "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Controls.Maps.pdb",
-        "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Controls.Maps.xml",
-        "lib/net10.0-windows10.0.19041/Microsoft.Maui.Controls.Maps.dll",
-        "lib/net10.0-windows10.0.19041/Microsoft.Maui.Controls.Maps.pdb",
-        "lib/net10.0-windows10.0.19041/Microsoft.Maui.Controls.Maps.xml",
-        "lib/net10.0-windows10.0.20348/Microsoft.Maui.Controls.Maps.dll",
-        "lib/net10.0-windows10.0.20348/Microsoft.Maui.Controls.Maps.pdb",
-        "lib/net10.0-windows10.0.20348/Microsoft.Maui.Controls.Maps.xml",
-        "lib/net10.0/Microsoft.Maui.Controls.Maps.dll",
-        "lib/net10.0/Microsoft.Maui.Controls.Maps.pdb",
-        "lib/net10.0/Microsoft.Maui.Controls.Maps.xml",
-        "lib/netstandard2.0/Microsoft.Maui.Controls.Maps.dll",
-        "lib/netstandard2.0/Microsoft.Maui.Controls.Maps.pdb",
-        "lib/netstandard2.0/Microsoft.Maui.Controls.Maps.xml",
-        "lib/netstandard2.1/Microsoft.Maui.Controls.Maps.dll",
-        "lib/netstandard2.1/Microsoft.Maui.Controls.Maps.pdb",
-        "lib/netstandard2.1/Microsoft.Maui.Controls.Maps.xml",
-        "microsoft.maui.controls.maps.10.0.0.nupkg.sha512",
-        "microsoft.maui.controls.maps.nuspec"
-      ]
-    },
     "Microsoft.Maui.Controls.Xaml/10.0.0": {
       "sha512": "oLOGV0OWETnEl0iKLodBqDFT06Se+y7aP5HWhDyNcdW9wDhOz0wuOf1Jamj0HiBpP7fL7JT5N6o+hxdH1BtKtA==",
       "type": "package",
@@ -32442,45 +31101,6 @@
         "lib/net10.0-windows10.0.20348/Microsoft.Maui.Graphics.Win2D.WinUI.Desktop.pdb",
         "microsoft.maui.graphics.win2d.winui.desktop.10.0.0.nupkg.sha512",
         "microsoft.maui.graphics.win2d.winui.desktop.nuspec"
-      ]
-    },
-    "Microsoft.Maui.Maps/10.0.0": {
-      "sha512": "Ql+WUK8RHpHAYlgwSkYSeGwVhHaqr+EW29vURcQ1qB81Uq6SSWcWj/jqnAbKN0Qf+ier4Xi2pY6cEDT35/qlRQ==",
-      "type": "package",
-      "path": "microsoft.maui.maps/10.0.0",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "Icon.png",
-        "LICENSE.TXT",
-        "README.md",
-        "THIRD-PARTY-NOTICES.TXT",
-        "lib/net10.0-android36.0/Microsoft.Maui.Maps.dll",
-        "lib/net10.0-android36.0/Microsoft.Maui.Maps.pdb",
-        "lib/net10.0-android36.0/Microsoft.Maui.Maps.xml",
-        "lib/net10.0-ios26.0/Microsoft.Maui.Maps.dll",
-        "lib/net10.0-ios26.0/Microsoft.Maui.Maps.pdb",
-        "lib/net10.0-ios26.0/Microsoft.Maui.Maps.xml",
-        "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Maps.dll",
-        "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Maps.pdb",
-        "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Maps.xml",
-        "lib/net10.0-windows10.0.19041/Microsoft.Maui.Maps.dll",
-        "lib/net10.0-windows10.0.19041/Microsoft.Maui.Maps.pdb",
-        "lib/net10.0-windows10.0.19041/Microsoft.Maui.Maps.xml",
-        "lib/net10.0-windows10.0.20348/Microsoft.Maui.Maps.dll",
-        "lib/net10.0-windows10.0.20348/Microsoft.Maui.Maps.pdb",
-        "lib/net10.0-windows10.0.20348/Microsoft.Maui.Maps.xml",
-        "lib/net10.0/Microsoft.Maui.Maps.dll",
-        "lib/net10.0/Microsoft.Maui.Maps.pdb",
-        "lib/net10.0/Microsoft.Maui.Maps.xml",
-        "lib/netstandard2.0/Microsoft.Maui.Maps.dll",
-        "lib/netstandard2.0/Microsoft.Maui.Maps.pdb",
-        "lib/netstandard2.0/Microsoft.Maui.Maps.xml",
-        "lib/netstandard2.1/Microsoft.Maui.Maps.dll",
-        "lib/netstandard2.1/Microsoft.Maui.Maps.pdb",
-        "lib/netstandard2.1/Microsoft.Maui.Maps.xml",
-        "microsoft.maui.maps.10.0.0.nupkg.sha512",
-        "microsoft.maui.maps.nuspec"
       ]
     },
     "Microsoft.Maui.Resizetizer/10.0.0": {
@@ -36034,28 +34654,6 @@
         "xamarin.androidx.window.windowcore.jvm.nuspec"
       ]
     },
-    "Xamarin.Build.Download/0.11.4": {
-      "sha512": "u2ROt0h6P7mfs0jbmgvmTrqU/YEpEZcf16xcHa78GSEp7fOZunNtJLCZxooeI1V5p+lrr9kYdg3Pa8FoTbgcXQ==",
-      "type": "package",
-      "path": "xamarin.build.download/0.11.4",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "THIRD-PARTY-NOTICE.txt",
-        "build/Microsoft.Win32.Registry.dll",
-        "build/Newtonsoft.Json.dll",
-        "build/Xamarin.Build.Download.dll",
-        "build/Xamarin.Build.Download.props",
-        "build/Xamarin.Build.Download.targets",
-        "buildTransitive/Microsoft.Win32.Registry.dll",
-        "buildTransitive/Newtonsoft.Json.dll",
-        "buildTransitive/Xamarin.Build.Download.dll",
-        "buildTransitive/Xamarin.Build.Download.props",
-        "buildTransitive/Xamarin.Build.Download.targets",
-        "xamarin.build.download.0.11.4.nupkg.sha512",
-        "xamarin.build.download.nuspec"
-      ]
-    },
     "Xamarin.CheckerFramework.CheckerQual/3.22.1.1": {
       "sha512": "clQdIf7kNkQw5U1c/R8qWcc7ZW+jId+PRMG7alNEqcLHDRiv2W8uIygSGijHrM2gM0ZKa8ksZJciPm46q8yNxw==",
       "type": "package",
@@ -36264,122 +34862,6 @@
         "jar/j2objc-annotations.jar",
         "xamarin.google.j2objc.annotations.1.3.0.1.nupkg.sha512",
         "xamarin.google.j2objc.annotations.nuspec"
-      ]
-    },
-    "Xamarin.GooglePlayServices.Base/118.7.2.1": {
-      "sha512": "Blkxt5/2XXsYHEg9k71TMQpFFduNPGCBFLj/65GoIht4h+GDbmDbIOuM3Ye/fknYWoiyanEAJ23J931/0Q3hOw==",
-      "type": "package",
-      "path": "xamarin.googleplayservices.base/118.7.2.1",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "LICENSE.md",
-        "THIRD-PARTY-NOTICES.txt",
-        "build/net10.0-android35.0/Xamarin.GooglePlayServices.Base.targets",
-        "build/net8.0-android34.0/Xamarin.GooglePlayServices.Base.targets",
-        "buildTransitive/net10.0-android35.0/Xamarin.GooglePlayServices.Base.targets",
-        "buildTransitive/net8.0-android34.0/Xamarin.GooglePlayServices.Base.targets",
-        "icon.png",
-        "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Base.dll",
-        "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Base.pdb",
-        "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Base.xml",
-        "lib/net10.0-android36.0/play-services-base.aar",
-        "lib/net8.0-android34.0/Xamarin.GooglePlayServices.Base.dll",
-        "lib/net8.0-android34.0/Xamarin.GooglePlayServices.Base.pdb",
-        "lib/net8.0-android34.0/Xamarin.GooglePlayServices.Base.xml",
-        "lib/net8.0-android34.0/play-services-base.aar",
-        "proguard/proguard.txt",
-        "readme.md",
-        "xamarin.googleplayservices.base.118.7.2.1.nupkg.sha512",
-        "xamarin.googleplayservices.base.nuspec"
-      ]
-    },
-    "Xamarin.GooglePlayServices.Basement/118.7.1.1": {
-      "sha512": "VQ93Zw1tpGOMn9qROmS8n/tPVesJFgtqNMbru70lt01NVmUfHw5rdBGXnIOhkIGz/5FIwVvfGjnuuKtzvrJosw==",
-      "type": "package",
-      "path": "xamarin.googleplayservices.basement/118.7.1.1",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "LICENSE.md",
-        "THIRD-PARTY-NOTICES.txt",
-        "build/net10.0-android35.0/Xamarin.GooglePlayServices.Basement.targets",
-        "build/net10.0-android35.0/Xamarin.GooglePlayServices.Tasks.dll",
-        "build/net8.0-android34.0/Xamarin.GooglePlayServices.Basement.targets",
-        "build/net8.0-android34.0/Xamarin.GooglePlayServices.Tasks.dll",
-        "buildTransitive/net10.0-android35.0/Xamarin.GooglePlayServices.Basement.targets",
-        "buildTransitive/net10.0-android35.0/Xamarin.GooglePlayServices.Tasks.dll",
-        "buildTransitive/net8.0-android34.0/Xamarin.GooglePlayServices.Basement.targets",
-        "buildTransitive/net8.0-android34.0/Xamarin.GooglePlayServices.Tasks.dll",
-        "icon.png",
-        "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Basement.dll",
-        "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Basement.pdb",
-        "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Basement.xml",
-        "lib/net10.0-android36.0/play-services-basement.aar",
-        "lib/net8.0-android34.0/Xamarin.GooglePlayServices.Basement.dll",
-        "lib/net8.0-android34.0/Xamarin.GooglePlayServices.Basement.pdb",
-        "lib/net8.0-android34.0/Xamarin.GooglePlayServices.Basement.xml",
-        "lib/net8.0-android34.0/play-services-basement.aar",
-        "proguard/proguard.txt",
-        "readme.md",
-        "xamarin.googleplayservices.basement.118.7.1.1.nupkg.sha512",
-        "xamarin.googleplayservices.basement.nuspec"
-      ]
-    },
-    "Xamarin.GooglePlayServices.Maps/119.2.0.3": {
-      "sha512": "mkn8kpqbgfMFg36oCL2k3n0/ZvgjZXEdnw+tVJ+Ii1DoFFyOoZg5Cqn5uISI7Z10BY1OIF51DOVvxUruK6ubwQ==",
-      "type": "package",
-      "path": "xamarin.googleplayservices.maps/119.2.0.3",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "LICENSE.md",
-        "THIRD-PARTY-NOTICES.txt",
-        "build/net10.0-android35.0/Xamarin.GooglePlayServices.Maps.targets",
-        "build/net8.0-android34.0/Xamarin.GooglePlayServices.Maps.targets",
-        "buildTransitive/net10.0-android35.0/Xamarin.GooglePlayServices.Maps.targets",
-        "buildTransitive/net8.0-android34.0/Xamarin.GooglePlayServices.Maps.targets",
-        "icon.png",
-        "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Maps.dll",
-        "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Maps.pdb",
-        "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Maps.xml",
-        "lib/net10.0-android36.0/play-services-maps.aar",
-        "lib/net8.0-android34.0/Xamarin.GooglePlayServices.Maps.dll",
-        "lib/net8.0-android34.0/Xamarin.GooglePlayServices.Maps.pdb",
-        "lib/net8.0-android34.0/Xamarin.GooglePlayServices.Maps.xml",
-        "lib/net8.0-android34.0/play-services-maps.aar",
-        "proguard/proguard.txt",
-        "readme.md",
-        "xamarin.googleplayservices.maps.119.2.0.3.nupkg.sha512",
-        "xamarin.googleplayservices.maps.nuspec"
-      ]
-    },
-    "Xamarin.GooglePlayServices.Tasks/118.3.2.1": {
-      "sha512": "oS2mM4/xxq1cw/jjt1pr5hGpnPkW8NoL+orJKz3qrFb2K44lqmmn0jp5GAC8PQQkR0QM/cl4W3T/RwVSKNrZug==",
-      "type": "package",
-      "path": "xamarin.googleplayservices.tasks/118.3.2.1",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "LICENSE.md",
-        "THIRD-PARTY-NOTICES.txt",
-        "build/net10.0-android35.0/Xamarin.GooglePlayServices.Tasks.targets",
-        "build/net8.0-android34.0/Xamarin.GooglePlayServices.Tasks.targets",
-        "buildTransitive/net10.0-android35.0/Xamarin.GooglePlayServices.Tasks.targets",
-        "buildTransitive/net8.0-android34.0/Xamarin.GooglePlayServices.Tasks.targets",
-        "icon.png",
-        "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Tasks.dll",
-        "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Tasks.pdb",
-        "lib/net10.0-android36.0/Xamarin.GooglePlayServices.Tasks.xml",
-        "lib/net10.0-android36.0/play-services-tasks.aar",
-        "lib/net8.0-android34.0/Xamarin.GooglePlayServices.Tasks.dll",
-        "lib/net8.0-android34.0/Xamarin.GooglePlayServices.Tasks.pdb",
-        "lib/net8.0-android34.0/Xamarin.GooglePlayServices.Tasks.xml",
-        "lib/net8.0-android34.0/play-services-tasks.aar",
-        "proguard/proguard.txt",
-        "readme.md",
-        "xamarin.googleplayservices.tasks.118.3.2.1.nupkg.sha512",
-        "xamarin.googleplayservices.tasks.nuspec"
       ]
     },
     "Xamarin.Jetbrains.Annotations/26.0.2.3": {
@@ -36687,13 +35169,12 @@
     }
   },
   "projectFileDependencyGroups": {
-    "net10.0-android36.0": [
+    "net10.0-android36.1": [
       "CommunityToolkit.Maui >= 9.1.0",
       "CommunityToolkit.Maui.MediaElement >= 4.1.2",
       "CommunityToolkit.Mvvm >= 8.3.2",
       "Microsoft.Extensions.Logging.Debug >= 10.0.0",
       "Microsoft.Maui.Controls >= 10.0.0",
-      "Microsoft.Maui.Controls.Maps >= 10.0.0",
       "Microsoft.NET.ILLink.Tasks >= 10.0.5",
       "ZXing.Net.Maui.Controls >= 0.4.0"
     ],
@@ -36703,7 +35184,6 @@
       "CommunityToolkit.Mvvm >= 8.3.2",
       "Microsoft.Extensions.Logging.Debug >= 10.0.0",
       "Microsoft.Maui.Controls >= 10.0.0",
-      "Microsoft.Maui.Controls.Maps >= 10.0.0",
       "Microsoft.NET.ILLink.Tasks >= 10.0.5",
       "ZXing.Net.Maui.Controls >= 0.4.0"
     ],
@@ -36713,7 +35193,6 @@
       "CommunityToolkit.Mvvm >= 8.3.2",
       "Microsoft.Extensions.Logging.Debug >= 10.0.0",
       "Microsoft.Maui.Controls >= 10.0.0",
-      "Microsoft.Maui.Controls.Maps >= 10.0.0",
       "Microsoft.NET.ILLink.Tasks >= 10.0.5",
       "ZXing.Net.Maui.Controls >= 0.4.0"
     ],
@@ -36723,7 +35202,6 @@
       "CommunityToolkit.Mvvm >= 8.3.2",
       "Microsoft.Extensions.Logging.Debug >= 10.0.0",
       "Microsoft.Maui.Controls >= 10.0.0",
-      "Microsoft.Maui.Controls.Maps >= 10.0.0",
       "ZXing.Net.Maui.Controls >= 0.4.0"
     ]
   },
@@ -36754,7 +35232,7 @@
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
-        "net10.0-android36.0": {
+        "net10.0-android36.1": {
           "targetAlias": "net10.0-android",
           "projectReferences": {}
         },
@@ -36784,7 +35262,7 @@
       "SdkAnalysisLevel": "10.0.200"
     },
     "frameworks": {
-      "net10.0-android36.0": {
+      "net10.0-android36.1": {
         "targetAlias": "net10.0-android",
         "dependencies": {
           "CommunityToolkit.Maui": {
@@ -36804,10 +35282,6 @@
             "version": "[10.0.0, )"
           },
           "Microsoft.Maui.Controls": {
-            "target": "Package",
-            "version": "[10.0.0, )"
-          },
-          "Microsoft.Maui.Controls.Maps": {
             "target": "Package",
             "version": "[10.0.0, )"
           },
@@ -36833,6 +35307,16 @@
         ],
         "assetTargetFallback": true,
         "warn": true,
+        "downloadDependencies": [
+          {
+            "name": "Microsoft.Android.Ref.36.1",
+            "version": "[36.1.2, 36.1.2]"
+          },
+          {
+            "name": "Microsoft.Android.Runtime.36.1.android",
+            "version": "[36.1.2, 36.1.2]"
+          }
+        ],
         "frameworkReferences": {
           "Microsoft.Android": {
             "privateAssets": "all"
@@ -37140,10 +35624,6 @@
             "version": "[10.0.0, )"
           },
           "Microsoft.Maui.Controls": {
-            "target": "Package",
-            "version": "[10.0.0, )"
-          },
-          "Microsoft.Maui.Controls.Maps": {
             "target": "Package",
             "version": "[10.0.0, )"
           },
@@ -37479,10 +35959,6 @@
             "target": "Package",
             "version": "[10.0.0, )"
           },
-          "Microsoft.Maui.Controls.Maps": {
-            "target": "Package",
-            "version": "[10.0.0, )"
-          },
           "Microsoft.NET.ILLink.Tasks": {
             "suppressParent": "All",
             "target": "Package",
@@ -37813,10 +36289,6 @@
             "version": "[10.0.0, )"
           },
           "Microsoft.Maui.Controls": {
-            "target": "Package",
-            "version": "[10.0.0, )"
-          },
-          "Microsoft.Maui.Controls.Maps": {
             "target": "Package",
             "version": "[10.0.0, )"
           },

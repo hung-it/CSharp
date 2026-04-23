@@ -1,0 +1,28 @@
+Yêu cầu đề bài: Tạo một app tự động đa ngôn ngữ cho phố ẩm thực Vĩnh Khánh (khi nạp 1USD -> chỉ mở 1 số tính năng cơ bản, 10USD -> mở tính năng theo phân khúc)
+Hệ thống quản trị nôi dung gồm: 
+•	POI
+•	Audio
+•	Bản dịch
+•	Lịch sử sử dụng
+•	Quản lý tour(data phức tạp do quản lý theo lược đồ)
+Phân tích dữ liệu: 
+•	Lưu tuyến di chuyển ẩn danh
+•	Top địa điểm được nghe nhiều nhất
+•	Thời gian trung bình nghe được POI
+•	Heatmap vị trí người dùng
+QR code hoạt động theo nội dung: dừng tại điểm dừng xe bus các phường Khánh Hội, Vĩnh Hội, Xóm Chiếu. Quét mã là nghe, không cần GPS.
+Kiến trúc gợi ý:
+•	Location + Geofencing: theo dọi GPS và tạo “điểm quan tâm” (POI)
+•	Geofence Engine: quyết định khi nào phát thuyết minh (vào vùng/ đến gần)
+•	Narration Engine: chọn TTS(Text to speech) hoặc phát file audio có sẵn, quản lý hàng đội, chống trùng lặp
+•	Content Layer: dữ liệu POI Offline (SQLite) + đồng bộ từ server khi có mạng
+•	UI/UX: bản đồ map, danh sách POI, cài đặt độ nhạy GPS/bán kính, chọn giọng TTS, tải gói offline
+Framework.NET MAUI (Android/IOS)
+GPS + Background:
+•	Android: FusedLocation provider client ( thông qua dependency service hoặc Essentials: Geolocation), Foreground server để trenking nền 
+•	IOS: CLLocation Manager với quyền always, region monitoring (geofence)
+Geofencing: Native API hoặc tự tính khoảng cách bằng Haversine rồi trigger theo ngưỡng
+TTS/Audio:
+•	TTS bản địa: (Android TTS, IOS Speech Synthesizer) hoặc Azure Cognitive Services ( nếu cần giọng tự nhiên, lưu ý offline + online)
+•	Map: Microsoft.Maul.Controls.Maps (MAUI Maps) hoặc Google Maps SDK/MapKit binding nếu cần tính năng nâng cao
+•	Offline: SQLite(EF core/ SQLite-net) + file âm thanh tải trước. Bản đồ offline có thể cần SDK bên thứ 3 (VD: Mapbox, Here) nếu muốn cache/ offline mapping thật sự

@@ -1,13 +1,30 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Download, Printer, Copy, QrCode, RefreshCw } from 'lucide-react';
+import { Download, Printer, Copy, QrCode, RefreshCw, Loader2 } from 'lucide-react';
 import { QRCodeCanvas } from 'qrcode.react';
-import { apiGet } from '../services/apiClient';
+import { apiGet, apiGetWithUser } from '../services/apiClient';
+import { useUser } from '../contexts/UserContext.jsx';
+
+const LANGUAGE_NAMES = {
+  'vi': 'Tiếng Việt',
+  'en': 'English',
+  'ko': '한국어',
+  'zh': '中文',
+  'ja': '日本語',
+  'fr': 'Français',
+  'es': 'Español',
+  'de': 'Deutsch',
+};
 
 export default function QrManager() {
   const qrRef = useRef(null);
+  const { currentUser } = useUser();
+  const isShopManager = currentUser?.role === 'ShopManager';
+  const [shopInfo, setShopInfo] = useState(null);
   const [pois, setPois] = useState([]);
   const [selectedPoiId, setSelectedPoiId] = useState('');
   const [languageCode, setLanguageCode] = useState('vi');
+  const [availableLanguages, setAvailableLanguages] = useState([]);
+  const [isLoadingLanguages, setIsLoadingLanguages] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
@@ -17,18 +34,27 @@ export default function QrManager() {
     async function loadPois() {
       setIsLoading(true);
       setError('');
+
       try {
-        const poiData = await apiGet('/pois');
-        if (!active) {
-          return;
+        let poiData;
+        if (isShopManager && currentUser?.id) {
+          const shopData = await apiGetWithUser('/users/me/pois', currentUser.id);
+          poiData = shopData?.pois || [];
+        } else {
+          poiData = await apiGet('/pois');
         }
+
+        if (!active) return;
 
         const safePois = Array.isArray(poiData) ? poiData : [];
         setPois(safePois);
-        setSelectedPoiId(safePois[0]?.id || '');
+        if (safePois.length > 0 && !safePois.find(p => p.id === selectedPoiId)) {
+          setSelectedPoiId(safePois[0].id);
+        }
       } catch (loadError) {
         if (active) {
           setError(loadError.message || 'Không thể tải danh sách POI.');
+          setPois([]);
         }
       } finally {
         if (active) {
@@ -37,12 +63,54 @@ export default function QrManager() {
       }
     }
 
-    loadPois();
+    if (currentUser?.id) {
+      loadPois();
+    }
 
     return () => {
       active = false;
     };
-  }, []);
+  }, [isShopManager, currentUser?.id]);
+
+  // Load available languages when POI changes
+  useEffect(() => {
+    let active = true;
+
+    async function loadLanguages() {
+      if (!selectedPoiId) {
+        setAvailableLanguages([]);
+        return;
+      }
+
+      setIsLoadingLanguages(true);
+      try {
+        const audios = await apiGet(`/pois/${selectedPoiId}/audios`);
+        if (!active) return;
+
+        if (Array.isArray(audios) && audios.length > 0) {
+          setAvailableLanguages(audios.map(a => a.languageCode));
+          // Set to first available language if current one is not available
+          if (!audios.find(a => a.languageCode === languageCode)) {
+            setLanguageCode(audios[0].languageCode);
+          }
+        } else {
+          setAvailableLanguages([]);
+          setLanguageCode('vi');
+        }
+      } catch {
+        if (active) {
+          setAvailableLanguages([]);
+        }
+      } finally {
+        if (active) {
+          setIsLoadingLanguages(false);
+        }
+      }
+    }
+
+    loadLanguages();
+    return () => { active = false; };
+  }, [selectedPoiId]);
 
   const selectedPoi = useMemo(
     () => pois.find((poi) => poi.id === selectedPoiId) || null,
@@ -108,7 +176,7 @@ export default function QrManager() {
           <h2>QR điểm dừng ${selectedPoi.name}</h2>
           <img src="${imageData}" alt="QR ${selectedPoi.code}" />
           <div class="meta">Payload: ${qrPayload}</div>
-          <div class="meta">Ngôn ngữ gợi ý: ${languageCode}</div>
+          <div class="meta">Ngôn ngữ gợi ý: ${LANGUAGE_NAMES[languageCode] || languageCode}</div>
         </body>
       </html>
     `);
@@ -171,12 +239,28 @@ export default function QrManager() {
 
             <label className='text-sm text-gray-600'>
               Ngôn ngữ gợi ý
-              <input
-                className='mt-1 w-full rounded-xl border border-pink-100 px-3 py-2'
-                value={languageCode}
-                onChange={(event) => setLanguageCode(event.target.value)}
-                placeholder='vi / en / ko...'
-              />
+              {isLoadingLanguages ? (
+                <div className='mt-1 flex items-center gap-2 text-gray-400'>
+                  <Loader2 size={14} className='animate-spin' />
+                  Đang tải...
+                </div>
+              ) : availableLanguages.length > 0 ? (
+                <select
+                  className='mt-1 w-full rounded-xl border border-pink-100 bg-pink-50/60 px-3 py-2'
+                  value={languageCode}
+                  onChange={(event) => setLanguageCode(event.target.value)}
+                >
+                  {availableLanguages.map((lang) => (
+                    <option key={lang} value={lang}>
+                      {LANGUAGE_NAMES[lang] || lang} ({lang})
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <div className='mt-1 rounded-xl border border-gray-200 bg-gray-100 px-3 py-2 text-gray-500 text-sm'>
+                  POI này chưa có audio
+                </div>
+              )}
             </label>
           </div>
 
@@ -185,6 +269,11 @@ export default function QrManager() {
             <div className='font-mono text-sm text-gray-800 mt-1 break-all'>
               {qrPayload || 'Chưa chọn POI'}
             </div>
+            {selectedPoi && availableLanguages.length > 0 && (
+              <div className='text-xs text-gray-500 mt-2'>
+                Khi quét: Gợi ý nghe <strong>{LANGUAGE_NAMES[languageCode] || languageCode}</strong>
+              </div>
+            )}
           </div>
 
           <div className='flex flex-wrap gap-2'>

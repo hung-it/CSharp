@@ -12,6 +12,7 @@ public static class ApplicationServiceCollectionExtensions
         services.AddScoped<IPoiAuthorizationService, PoiAuthorizationService>();
         services.AddScoped<ITourService, TourService>();
         services.AddScoped<IListeningSessionService, ListeningSessionService>();
+        services.AddScoped<IVisitTrackingService, VisitTrackingService>();
         services.AddScoped<IAnalyticsService, AnalyticsService>();
         services.AddScoped<IContentTranslationService, ContentTranslationService>();
         services.AddScoped<IRouteTrackingService, RouteTrackingService>();

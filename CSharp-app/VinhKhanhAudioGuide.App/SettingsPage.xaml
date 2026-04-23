@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="VinhKhanhAudioGuide.App.SettingsPage"
+             BackgroundColor="#FFFBF5"
+             Title="Tài khoản">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="16">
+
+            <!-- Account Info Section -->
+            <Border BackgroundColor="#EC4899" StrokeThickness="0"
+                    StrokeShape="RoundRectangle 16" Padding="20">
+                <VerticalStackLayout Spacing="12">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                        <Border Grid.Column="0" BackgroundColor="White"
+                                StrokeThickness="0" StrokeShape="RoundRectangle 30"
+                                WidthRequest="60" HeightRequest="60">
+                            <Label Text="👤" FontSize="28" HorizontalOptions="Center"
+                                   VerticalOptions="Center" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
+                            <Label x:Name="UsernameLabel" Text="Khách" FontSize="18"
+                                   FontAttributes="Bold" TextColor="White" />
+                            <Label x:Name="PlanBadgeLabel" Text="Chưa đăng nhập"
+                                   FontSize="12" TextColor="#FDF2F8" />
+                        </VerticalStackLayout>
+                        <Button Grid.Column="2" x:Name="LoginLogoutBtn" Text="Đăng nhập"
+                                BackgroundColor="White" TextColor="#EC4899"
+                                FontSize="12" CornerRadius="20" Padding="16,8"
+                                Clicked="OnLoginLogoutClicked" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Login Status -->
+            <Label x:Name="LoginStatusLabel" Text="Vui lòng đăng nhập để sử dụng đầy đủ tính năng"
+                   FontSize="12" TextColor="#6B7280" HorizontalOptions="Center"
+                   IsVisible="True" />
+
+            <!-- Language Section -->
+            <Border BackgroundColor="White" StrokeThickness="0"
+                    StrokeShape="RoundRectangle 12" Padding="16">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="🌐 Ngôn ngữ" FontSize="15" FontAttributes="Bold"
+                           TextColor="#374151" />
+                    <HorizontalStackLayout Spacing="10">
+                        <Button x:Name="LangViBtn" Text="🇻🇳 Tiếng Việt" BackgroundColor="#EC4899"
+                                TextColor="White" CornerRadius="20" FontSize="13" Padding="16,10"
+                                Clicked="OnLanguageViClicked" />
+                        <Button x:Name="LangEnBtn" Text="🇬🇧 English" BackgroundColor="#E5E7EB"
+                                TextColor="#374151" CornerRadius="20" FontSize="13" Padding="16,10"
+                                Clicked="OnLanguageEnClicked" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- GPS Settings -->
+            <Border BackgroundColor="White" StrokeThickness="0"
+                    StrokeShape="RoundRectangle 12" Padding="16">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="📍 GPS Và Vị trí" FontSize="15" FontAttributes="Bold"
+                           TextColor="#374151" />
+                    
+                    <Grid ColumnDefinitions="*,Auto">
+                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                            <Label Text="Độ nhạy GPS" FontSize="13" TextColor="#1F2937" />
+                            <Label Text="Khoảng cách để kích hoạt thuyết minh" FontSize="11" TextColor="#6B7280" />
+                        </VerticalStackLayout>
+                        <Label Grid.Column="1" x:Name="GpsSensitivityLabel" Text="50m" FontSize="13"
+                               TextColor="#EC4899" VerticalOptions="Center" />
+                    </Grid>
+                    
+                    <Slider x:Name="GpsSensitivitySlider" Minimum="20" Maximum="100"
+                            Value="50" ValueChanged="OnGpsSensitivityChanged"
+                            MinimumTrackColor="#EC4899" MaximumTrackColor="#E5E7EB" />
+                    
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="Tự động phát audio" FontSize="13" TextColor="#1F2937" />
+                        <Switch x:Name="AutoPlaySwitch" IsToggled="True"
+                                OnColor="#EC4899" ThumbColor="White" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Audio Settings -->
+            <Border BackgroundColor="White" StrokeThickness="0"
+                    StrokeShape="RoundRectangle 12" Padding="16">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="🎧 Audio" FontSize="15" FontAttributes="Bold"
+                           TextColor="#374151" />
+                    
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="Loại audio ưu tiên" FontSize="13" TextColor="#1F2937" />
+                        <Picker x:Name="AudioTypePicker" FontSize="12" WidthRequest="150"
+                                SelectedIndexChanged="OnAudioTypeChanged">
+                            <Picker.Items>
+                                <x:String>Ghi âm sẵn</x:String>
+                                <x:String>Text-to-Speech</x:String>
+                                <x:String>Ưu tiên ghi âm</x:String>
+                            </Picker.Items>
+                        </Picker>
+                    </Grid>
+                    
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="Âm lượng" FontSize="13" TextColor="#1F2937" />
+                        <Label Grid.Column="1" x:Name="VolumeLabel" Text="80%" FontSize="13"
+                               TextColor="#EC4899" VerticalOptions="Center" />
+                    </Grid>
+                    
+                    <Slider x:Name="VolumeSlider" Minimum="0" Maximum="100"
+                            Value="80" ValueChanged="OnVolumeChanged"
+                            MinimumTrackColor="#EC4899" MaximumTrackColor="#E5E7EB" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Data & Sync -->
+            <Border BackgroundColor="White" StrokeThickness="0"
+                    StrokeShape="RoundRectangle 12" Padding="16">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="📡 Dữ liệu Và Đồng bộ" FontSize="15" FontAttributes="Bold"
+                           TextColor="#374151" />
+                    
+                    <Grid ColumnDefinitions="*,Auto">
+                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                            <Label Text="Chế độ offline" FontSize="13" TextColor="#1F2937" />
+                            <Label Text="Tải POI và audio khi có wifi" FontSize="11" TextColor="#6B7280" />
+                        </VerticalStackLayout>
+                        <Switch x:Name="OfflineModeSwitch" IsToggled="False"
+                                OnColor="#EC4899" ThumbColor="White" Toggled="OnOfflineModeToggled" />
+                    </Grid>
+                    
+                    <Button Text="📥 Tải dữ liệu offline" BackgroundColor="#EFF6FF"
+                            TextColor="#2563EB" FontSize="13" CornerRadius="10"
+                            HeightRequest="44" Clicked="OnDownloadOfflineClicked" />
+                    
+                    <Button Text="🗑️ Xóa dữ liệu cache" BackgroundColor="#FEF2F2"
+                            TextColor="#DC2626" FontSize="13" CornerRadius="10"
+                            HeightRequest="44" Clicked="OnClearCacheClicked" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- About -->
+            <Border BackgroundColor="White" StrokeThickness="0"
+                    StrokeShape="RoundRectangle 12" Padding="16">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="ℹ️ Thông tin" FontSize="15" FontAttributes="Bold"
+                           TextColor="#374151" />
+                    
+                    <Grid ColumnDefinitions="*,*">
+                        <Label Grid.Column="0" Text="Phiên bản" FontSize="13" TextColor="#6B7280" />
+                        <Label Grid.Column="1" Text="1.0.0" FontSize="13" TextColor="#1F2937"
+                               HorizontalOptions="End" />
+                    </Grid>
+                    
+                    <Grid ColumnDefinitions="*,*">
+                        <Label Grid.Column="0" Text="User ID" FontSize="13" TextColor="#6B7280" />
+                        <Label Grid.Column="1" x:Name="UserIdLabel" Text="Đang tải..." FontSize="11"
+                               TextColor="#1F2937" HorizontalOptions="End" />
+                    </Grid>
+                    
+                    <Button Text="🌐 Mở Web Admin" BackgroundColor="#F3F4F6"
+                            TextColor="#374151" FontSize="13" CornerRadius="10"
+                            HeightRequest="44" Clicked="OnOpenAdminWebClicked" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Support -->
+            <Border BackgroundColor="#FEF3C7" StrokeThickness="0"
+                    StrokeShape="RoundRectangle 12" Padding="16">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="💬 Hỗ trợ" FontSize="13" FontAttributes="Bold"
+                           TextColor="#92400E" />
+                    <Label Text="Nếu bạn gặp vấn đề, hãy liên hệ: support@vinhkhanh.vn"
+                           FontSize="12" TextColor="#B45309" />
+                </VerticalStackLayout>
+            </Border>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

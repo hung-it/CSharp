@@ -3,6 +3,19 @@ const DEFAULT_API_BASE_URL = 'http://localhost:5140/api/v1';
 export const API_BASE_URL =
   (import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL).replace(/\/$/, '');
 
+function getUserId() {
+  try {
+    const stored = localStorage.getItem('currentUser');
+    if (stored) {
+      const user = JSON.parse(stored);
+      return user?.id || null;
+    }
+  } catch {
+    // Ignore errors
+  }
+  return null;
+}
+
 export function buildQuery(params = {}) {
   const search = new URLSearchParams();
 
@@ -19,12 +32,19 @@ export function buildQuery(params = {}) {
 }
 
 async function apiRequest(path, method, options = {}) {
+  const userId = options.userId || getUserId();
+  const headers = {
+    Accept: 'application/json',
+    ...options.headers,
+  };
+
+  if (userId) {
+    headers['X-User-Id'] = userId;
+  }
+
   const response = await fetch(`${API_BASE_URL}${path}`, {
     method,
-    headers: {
-      Accept: 'application/json',
-      ...options.headers,
-    },
+    headers,
     ...options,
   });
 
@@ -49,9 +69,25 @@ export function apiGet(path, options = {}) {
   return apiRequest(path, 'GET', options);
 }
 
+export function apiGetWithUser(path, userId, options = {}) {
+  return apiRequest(path, 'GET', { ...options, userId });
+}
+
 export function apiPost(path, body, options = {}) {
   return apiRequest(path, 'POST', {
     ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+    body: JSON.stringify(body),
+  });
+}
+
+export function apiPostWithUser(path, body, userId, options = {}) {
+  return apiRequest(path, 'POST', {
+    ...options,
+    userId,
     headers: {
       'Content-Type': 'application/json',
       ...options.headers,

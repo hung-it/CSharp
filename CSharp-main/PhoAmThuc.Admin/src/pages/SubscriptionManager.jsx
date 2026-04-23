@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { apiDelete, apiGet, apiPatch, apiPost, buildQuery } from '../services/apiClient';
 
 export default function SubscriptionManager() {
-  const [externalRef, setExternalRef] = useState('');
+  const [username, setUsername] = useState('');
   const [resolvedUser, setResolvedUser] = useState(null);
   const [demoUsers, setDemoUsers] = useState([]);
   const [featureSegments, setFeatureSegments] = useState([]);
@@ -63,7 +63,7 @@ export default function SubscriptionManager() {
 
     try {
       const user = await apiPost('/users/resolve', {
-        externalRef: externalRef.trim(),
+        username: username.trim(),
         preferredLanguage: 'vi',
       });
       setResolvedUser(user);
@@ -199,7 +199,7 @@ export default function SubscriptionManager() {
       setDemoUsers(safeUsers);
       if (safeUsers.length > 0) {
         const seeded = Array.isArray(result?.users) ? result.users : [];
-        setExternalRef((seeded[0]?.externalRef || safeUsers[0].externalRef));
+        setUsername((seeded[0]?.username || safeUsers[0].username));
       }
     } catch (seedError) {
       setError(seedError.message || 'Không thể tạo user demo.');
@@ -251,13 +251,13 @@ export default function SubscriptionManager() {
           </button>
           <select
             className='rounded-xl border border-pink-100 px-3 py-2 md:col-span-2'
-            value={externalRef}
-            onChange={(event) => setExternalRef(event.target.value)}
+            value={username}
+            onChange={(event) => setUsername(event.target.value)}
           >
             <option value=''>Chọn user demo</option>
             {demoUsers.map((user) => (
-              <option key={user.id} value={user.externalRef}>
-                {user.externalRef}
+              <option key={user.id} value={user.username}>
+                {user.username}
               </option>
             ))}
           </select>
@@ -270,9 +270,9 @@ export default function SubscriptionManager() {
       >
         <input
           className='rounded-xl border border-pink-100 px-3 py-2'
-          placeholder='External ref user'
-          value={externalRef}
-          onChange={(event) => setExternalRef(event.target.value)}
+          placeholder='Tên đăng nhập'
+          value={username}
+          onChange={(event) => setUsername(event.target.value)}
           required
         />
         <div className='rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800'>
@@ -290,7 +290,7 @@ export default function SubscriptionManager() {
       {resolvedUser && (
         <div className='bg-white rounded-2xl border border-pink-100 p-5 shadow-sm space-y-3'>
           <div className='text-sm text-gray-700'>
-            Người dùng: <span className='font-semibold'>{resolvedUser.externalRef}</span> ({resolvedUser.id})
+            Người dùng: <span className='font-semibold'>{resolvedUser.username}</span> ({resolvedUser.id})
           </div>
 
           <form className='grid grid-cols-1 md:grid-cols-2 gap-3' onSubmit={handleCreateSubscription}>
@@ -375,7 +375,7 @@ export default function SubscriptionManager() {
           <tbody>
             {visibleSubscriptions.map((item) => (
               <tr key={item.id} className='border-b border-pink-50'>
-                <td className='py-2'>{item.userExternalRef || item.userId}</td>
+                <td className='py-2'>{item.username || item.userExternalRef || item.userId}</td>
                 <td className='py-2'>
                   {editingSubscriptionId === item.id ? (
                     <select
