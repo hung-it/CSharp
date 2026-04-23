@@ -2,6 +2,7 @@ using Microsoft.Maui.Controls;
 using Microsoft.Maui.Devices.Sensors;
 using Microsoft.Maui.Controls.Shapes;
 using Microsoft.Maui.ApplicationModel;
+using Microsoft.Maui.Storage;
 using System.Net.Http.Json;
 
 namespace VinhKhanhAudioGuide.App;
@@ -15,6 +16,13 @@ public partial class MapPage : ContentPage
     private double _currentLng = 106.6602;
     private bool _isTracking = false;
     private string _anonymousRef = $"ANON_{Guid.NewGuid():N}";
+
+    // Geofence tracking - prevent repeated triggers for same POI in session
+    private readonly HashSet<string> _visitedPoiCodes = new();
+
+    // Auto-play state
+    private bool AutoPlayEnabled => Preferences.Default.Get("autoPlayEnabled", false);
+    private double GpsSensitivityMeters => Preferences.Default.Get("gpsSensitivity", 50);
 
     public MapPage()
     {
@@ -57,6 +65,36 @@ public partial class MapPage : ContentPage
         .poi-popup { font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
         .poi-popup h4 { margin: 0 0 4px; color: #1F2937; }
         .poi-popup p { margin: 0; font-size: 12px; color: #6B7280; }
+        .user-marker {
+            background: white;
+            border: 3px solid #3B82F6;
+            border-radius: 50%;
+            width: 18px !important;
+            height: 18px !important;
+            margin-left: -9px !important;
+            margin-top: -9px !important;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+        .user-marker-inner {
+            background: #3B82F6;
+            border-radius: 50%;
+            width: 8px;
+            height: 8px;
+            margin: 3px auto;
+        }
+        .user-pulse {
+            background: rgba(59, 130, 246, 0.2);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            margin-left: -9px;
+            margin-top: -9px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(0.8); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
     </style>
 </head>
 <body>
@@ -67,10 +105,53 @@ public partial class MapPage : ContentPage
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
         window.map = map;
+        window.userMarker = null;
+        window.userPulse = null;
     </script>
 </body>
 </html>";
         mapWebView.Source = new HtmlWebViewSource { Html = html };
+    }
+
+    private async Task UpdateUserLocationMarkerAsync()
+    {
+        if (mapWebView == null) return;
+        try
+        {
+            var js = $@"
+(function() {{
+    var lat = {_currentLat};
+    var lng = {_currentLng};
+
+    if (window.userMarker) {{
+        window.userMarker.setLatLng([lat, lng]);
+    }} else {{
+        // Pulse circle
+        var pulseIcon = L.divIcon({{
+            className: 'user-pulse-container',
+            html: '<div class=""user-pulse""></div>',
+            iconSize: [36, 36],
+            iconAnchor: [18, 18]
+        }});
+        window.userPulse = L.marker([lat, lng], {{ icon: pulseIcon }}).addTo(window.map);
+
+        // Blue dot marker
+        var userIcon = L.divIcon({{
+            className: 'user-marker',
+            html: '<div class=""user-marker-inner""></div>',
+            iconSize: [18, 18],
+            iconAnchor: [9, 9]
+        }});
+        window.userMarker = L.marker([lat, lng], {{
+            icon: userIcon,
+            zIndexOffset: 1000
+        }}).addTo(window.map);
+    }}
+}})();
+";
+            await mapWebView.EvaluateJavaScriptAsync(js);
+        }
+        catch { }
     }
 
     private async Task UpdateMapMarkersAsync()
@@ -246,52 +327,51 @@ window.map.fitBounds(bounds, {{ padding: [50, 50] }});
             var status = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
             
             if (status != PermissionStatus.Granted)
-            {
-                LocationStatusLabel.Text = "Cần cấp quyền GPS";
-                return;
-            }
+        {
+            LocationStatusLabel.Text = "⚠️ Cần cấp quyền GPS";
+            return;
+        }
 
-            // Get current location with accuracy
-            var location = await Geolocation.Default.GetLocationAsync(new GeolocationRequest(
-                GeolocationAccuracy.High,
-                TimeSpan.FromSeconds(10)));
+        var location = await Geolocation.Default.GetLocationAsync(new GeolocationRequest(
+            GeolocationAccuracy.High,
+            TimeSpan.FromSeconds(10)));
 
-            if (location != null)
+        if (location != null)
+        {
+            _currentLat = location.Latitude;
+            _currentLng = location.Longitude;
+            LocationStatusLabel.Text = $"📍 {_currentLat:F4}, {_currentLng:F4}";
+            UpdateNearbyList();
+            await LogRoutePointAsync();
+            await CheckGeofenceAsync();
+            await UpdateMapCenterAsync();
+            await UpdateUserLocationMarkerAsync();
+        }
+        else
+        {
+            var lastLocation = await Geolocation.Default.GetLastKnownLocationAsync();
+            if (lastLocation != null)
             {
-                _currentLat = location.Latitude;
-                _currentLng = location.Longitude;
-                LocationStatusLabel.Text = $"📍 {_currentLat:F4}, {_currentLng:F4}";
+                _currentLat = lastLocation.Latitude;
+                _currentLng = lastLocation.Longitude;
+                LocationStatusLabel.Text = $"📍 {_currentLat:F4}, {_currentLng:F4} (cache)";
                 UpdateNearbyList();
-                await LogRoutePointAsync();
-                await CheckGeofenceAsync();
                 await UpdateMapCenterAsync();
             }
             else
             {
-                // Try GetLastKnownLocationAsync as fallback
-                var lastLocation = await Geolocation.Default.GetLastKnownLocationAsync();
-                if (lastLocation != null)
-                {
-                    _currentLat = lastLocation.Latitude;
-                    _currentLng = lastLocation.Longitude;
-                    LocationStatusLabel.Text = $"📍 {_currentLat:F4}, {_currentLng:F4} (cache)";
-                    UpdateNearbyList();
-                    await UpdateMapCenterAsync();
-                }
-                else
-                {
-                    LocationStatusLabel.Text = "Không tìm được GPS";
-                }
+                LocationStatusLabel.Text = "❌ Không tìm được GPS";
             }
         }
-        catch (FeatureNotSupportedException ex)
-        {
-            LocationStatusLabel.Text = "GPS không hỗ trợ: " + ex.Message;
+    }
+    catch (FeatureNotSupportedException ex)
+    {
+        LocationStatusLabel.Text = "❌ GPS không hỗ trợ: " + ex.Message;
             System.Diagnostics.Debug.WriteLine($"Location error: {ex.Message}");
         }
         catch (Exception ex)
         {
-            LocationStatusLabel.Text = "GPS không khả dụng";
+            LocationStatusLabel.Text = "⚠️ GPS không khả dụng";
             System.Diagnostics.Debug.WriteLine($"Location error: {ex.Message}");
         }
         finally
@@ -307,14 +387,14 @@ window.map.fitBounds(bounds, {{ padding: [50, 50] }});
         
         if (status != PermissionStatus.Granted)
         {
-            await DisplayAlertAsync("Quyền GPS", "Vui lòng cấp quyền truy cập vị trí để sử dụng tính năng này.", "OK");
+            await DisplayAlertAsync("🔑 Quyền GPS", "Vui lòng cấp quyền truy cập vị trí để sử dụng tính năng này.", "OK");
             return;
         }
 
         try
         {
-            LocationStatusLabel.Text = "Đang định vị...";
-            
+            LocationStatusLabel.Text = "⏳ Đang định vị...";
+
             var location = await Geolocation.Default.GetLocationAsync(new GeolocationRequest(
                 GeolocationAccuracy.High,
                 TimeSpan.FromSeconds(10)));
@@ -328,21 +408,22 @@ window.map.fitBounds(bounds, {{ padding: [50, 50] }});
                 await UpdateMapCenterAsync();
                 await LogRoutePointAsync();
                 await CheckGeofenceAsync();
+                await UpdateUserLocationMarkerAsync();
             }
             else
             {
-                LocationStatusLabel.Text = "Không lấy được vị trí";
+                LocationStatusLabel.Text = "❌ Không lấy được vị trí";
             }
         }
         catch (FeatureNotSupportedException ex)
         {
-            await DisplayAlertAsync("Lỗi GPS", $"GPS không hỗ trợ: {ex.Message}", "OK");
-            LocationStatusLabel.Text = "GPS không hỗ trợ";
+            await DisplayAlertAsync("❌ Lỗi GPS", $"GPS không hỗ trợ: {ex.Message}", "OK");
+            LocationStatusLabel.Text = "❌ GPS không hỗ trợ";
         }
         catch (Exception)
         {
-            await DisplayAlertAsync("Lỗi GPS", "Không thể lấy vị trí của bạn.", "OK");
-            LocationStatusLabel.Text = "Lỗi GPS";
+            await DisplayAlertAsync("❌ Lỗi GPS", "Không thể lấy vị trí của bạn.", "OK");
+            LocationStatusLabel.Text = "❌ Lỗi GPS";
         }
     }
 
@@ -369,17 +450,57 @@ window.map.fitBounds(bounds, {{ padding: [50, 50] }});
 
     private async Task CheckGeofenceAsync()
     {
+        // Check if auto-play is enabled (Premium feature)
+        if (!FeatureGate.IsPremium)
+            return;
+
+        var triggerRadius = GpsSensitivityMeters;
+
         foreach (var poi in _allPois)
         {
             var lat = poi.Latitude != 0 ? poi.Latitude : GetDefaultLatitude(poi.Name ?? "");
             var lng = poi.Longitude != 0 ? poi.Longitude : GetDefaultLongitude(poi.Name ?? "");
             var distance = CalculateDistanceMeters(lat, lng);
 
-            const double triggerRadius = 50;
             if (distance <= triggerRadius)
             {
                 await RecordGeofenceEventAsync(poi.Id, "enter", distance);
+
+                // Auto-play only once per POI per session
+                if (!_visitedPoiCodes.Contains(poi.Code ?? ""))
+                {
+                    _visitedPoiCodes.Add(poi.Code ?? "");
+                    await TriggerAutoPlayAsync(poi.Code ?? "", poi.Name ?? "");
+                }
             }
+        }
+    }
+
+    private async Task TriggerAutoPlayAsync(string poiCode, string poiName)
+    {
+        if (string.IsNullOrEmpty(poiCode))
+            return;
+
+        System.Diagnostics.Debug.WriteLine($"[Geofence] Auto-playing: {poiName} ({poiCode})");
+
+        // Resolve user if needed
+        if (string.IsNullOrEmpty(_userId) || _userId.StartsWith("ANON_"))
+        {
+            try { await ResolveUserAsync(); } catch { }
+        }
+
+        var finalUserId = string.IsNullOrEmpty(_userId) || _userId.StartsWith("ANON_")
+            ? _anonymousRef
+            : _userId;
+
+        try
+        {
+            // Navigate to audio page
+            await Shell.Current.GoToAsync($"audio?qr={Uri.EscapeDataString(poiCode)}&userId={Uri.EscapeDataString(finalUserId)}");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[Geofence] Auto-play navigation error: {ex.Message}");
         }
     }
 
@@ -416,7 +537,7 @@ window.map.fitBounds(bounds, {{ padding: [50, 50] }});
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Navigation error ({route}): {ex.Message}");
-            await DisplayAlertAsync("Lỗi điều hướng", "Không thể mở màn hình này. Vui lòng thử lại.", "OK");
+            await DisplayAlertAsync("❌ Lỗi điều hướng", "Không thể mở màn hình này. Vui lòng thử lại.", "OK");
         }
     }
 

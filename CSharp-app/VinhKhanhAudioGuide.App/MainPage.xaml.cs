@@ -18,7 +18,7 @@ public partial class MainPage : ContentPage
         InitializeComponent();
         _httpClient = AppConfig.CreateHttpClient();
         _anonymousRef = $"ANON_{Guid.NewGuid():N}";
-        
+
         _ = InitializeAsync();
     }
 
@@ -29,10 +29,8 @@ public partial class MainPage : ContentPage
             LoadingIndicator.IsRunning = true;
             LoadingIndicator.IsVisible = true;
 
-            // Resolve user
             await ResolveUserAsync();
-            
-            // Load all data in parallel
+
             await Task.WhenAll(
                 LoadStatsAsync(),
                 LoadNearbyPoisAsync(),
@@ -42,7 +40,7 @@ public partial class MainPage : ContentPage
         }
         catch (Exception ex)
         {
-            ConnectionStatusLabel.Text = "Chế độ offline";
+            ConnectionStatusLabel.Text = "⚠️ Chế độ offline";
             ConnectionStatusLabel.TextColor = Colors.Orange;
             System.Diagnostics.Debug.WriteLine($"Init error: {ex.Message}");
         }
@@ -70,7 +68,14 @@ public partial class MainPage : ContentPage
                 if (result?.Success == true)
                 {
                     _userId = result.Id.ToString();
-                    ConnectionStatusLabel.Text = "Đã kết nối";
+                    if (AppConfig.IsLoggedIn)
+                    {
+                        ConnectionStatusLabel.Text = "✅ Đã đăng nhập";
+                    }
+                    else
+                    {
+                        ConnectionStatusLabel.Text = "🔑 Đăng nhập nhanh (demo)";
+                    }
                     LastSyncLabel.Text = DateTime.Now.ToString("HH:mm");
                     System.Diagnostics.Debug.WriteLine($"User resolved: {_userId}");
                 }
@@ -86,7 +91,6 @@ public partial class MainPage : ContentPage
         }
         catch
         {
-            // Offline mode
             _userId = _anonymousRef;
         }
     }
@@ -95,18 +99,26 @@ public partial class MainPage : ContentPage
     {
         try
         {
-            // Just log stats
             System.Diagnostics.Debug.WriteLine("Stats loaded");
         }
-        catch
-        {
-            // Silent
-        }
+        catch { }
     }
 
     private async Task LoadMyStatsAsync()
     {
-        if (string.IsNullOrEmpty(_userId) || !Guid.TryParse(_userId, out var userGuid))
+        if (!AppConfig.IsLoggedIn)
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                MyPoiVisitCount.Text = "-";
+                MyListenCount.Text = "-";
+                MyListenTime.Text = "-";
+            });
+            return;
+        }
+
+        var userId = AppConfig.CurrentUserId;
+        if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid))
             return;
 
         try
@@ -130,17 +142,13 @@ public partial class MainPage : ContentPage
                 });
             }
         }
-        catch
-        {
-            // Silent fail
-        }
+        catch { }
     }
 
     private async Task LoadNearbyPoisAsync()
     {
         try
         {
-            // Try to get current location with permission request
             try
             {
                 var status = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
@@ -149,7 +157,7 @@ public partial class MainPage : ContentPage
                     var location = await Geolocation.Default.GetLocationAsync(new GeolocationRequest(
                         GeolocationAccuracy.High,
                         TimeSpan.FromSeconds(10)));
-                    
+
                     if (location != null)
                     {
                         _currentLat = location.Latitude;
@@ -157,7 +165,6 @@ public partial class MainPage : ContentPage
                     }
                     else
                     {
-                        // Try last known location
                         var lastLocation = await Geolocation.Default.GetLastKnownLocationAsync();
                         if (lastLocation != null)
                         {
@@ -167,18 +174,17 @@ public partial class MainPage : ContentPage
                     }
                 }
             }
-            catch { /* Use default location */ }
+            catch { }
 
             var pois = await _httpClient.GetFromJsonAsync<List<PoiData>>("pois");
-            
+
             if (pois != null && pois.Count > 0)
             {
-                // Calculate distances and sort
                 _nearbyPois = pois.Select(p => new NearbyPoiItem
                 {
                     Id = p.Id,
                     Code = p.Code ?? "",
-                    Name = p.Name ?? "Unknown",
+                    Name = p.Name ?? "Không tên",
                     DistanceText = CalculateDistance(p.Latitude, p.Longitude)
                 })
                 .OrderBy(p => p.DistanceMeters)
@@ -196,7 +202,7 @@ public partial class MainPage : ContentPage
         {
             MainThread.BeginInvokeOnMainThread(() =>
             {
-                NoNearbyLabel.Text = "Bật GPS để xem POI gần bạn";
+                NoNearbyLabel.Text = "⚠️ Bật GPS để xem POI gần bạn";
             });
         }
     }
@@ -205,16 +211,16 @@ public partial class MainPage : ContentPage
     {
         var distance = GetDistanceMeters(lat, lng);
         if (distance == double.MaxValue) return "?";
-        
-        return distance < 1000 
-            ? $"{distance:F0}m" 
+
+        return distance < 1000
+            ? $"{distance:F0}m"
             : $"{distance / 1000:F1}km";
     }
 
     private double GetDistanceMeters(double lat, double lng)
     {
         if (lat == 0 && lng == 0) return double.MaxValue;
-        
+
         const double R = 6371000;
         var dLat = ToRad(_currentLat - lat);
         var dLng = ToRad(_currentLng - lng);
@@ -232,7 +238,7 @@ public partial class MainPage : ContentPage
         try
         {
             var topPois = await _httpClient.GetFromJsonAsync<List<TopPoiItem>>("analytics/top?limit=5");
-            
+
             if (topPois != null && topPois.Count > 0)
             {
                 for (int i = 0; i < topPois.Count; i++)
@@ -246,10 +252,7 @@ public partial class MainPage : ContentPage
                 });
             }
         }
-        catch
-        {
-            // Silent fail
-        }
+        catch { }
     }
 
     private async Task NavigateSafeAsync(string route)
@@ -261,11 +264,9 @@ public partial class MainPage : ContentPage
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Navigation error ({route}): {ex.Message}");
-            await DisplayAlertAsync("Lỗi điều hướng", "Không thể mở màn hình này. Vui lòng thử lại.", "OK");
+            await DisplayAlertAsync("❌ Lỗi điều hướng", "Không thể mở màn hình này. Vui lòng thử lại.", "OK");
         }
     }
-
-    // ========== Event Handlers ==========
 
     private async void OnMapClicked(object? sender, EventArgs e)
     {
@@ -289,7 +290,6 @@ public partial class MainPage : ContentPage
 
     private async void OnAudioListClicked(object? sender, EventArgs e)
     {
-        // Navigate to POI list page instead of playing first POI
         await NavigateSafeAsync("//poi");
     }
 
@@ -303,13 +303,11 @@ public partial class MainPage : ContentPage
 
     private async Task PlayPoiAudioAsync(string poiCode)
     {
-        // Resolve user if not already done
         if (string.IsNullOrEmpty(_userId) || _userId.StartsWith("ANON_"))
         {
             await ResolveUserAsync();
         }
 
-        // If still empty, use anonymous
         if (string.IsNullOrEmpty(_userId))
         {
             _userId = _anonymousRef;
@@ -323,7 +321,7 @@ public partial class MainPage : ContentPage
         RefreshBtn.IsEnabled = false;
         LoadingIndicator.IsRunning = true;
         LoadingIndicator.IsVisible = true;
-        LastSyncLabel.Text = "đang cập nhật...";
+        LastSyncLabel.Text = "⏳ đang cập nhật...";
 
         try
         {
@@ -345,30 +343,35 @@ public partial class MainPage : ContentPage
         LangViBtn.TextColor = Colors.White;
         LangEnBtn.BackgroundColor = Color.FromArgb("#E5E7EB");
         LangEnBtn.TextColor = Color.FromArgb("#374151");
-        
-        await DisplayAlertAsync("Ngôn ngữ", "Đã chuyển sang Tiếng Việt", "OK");
+
+        await DisplayAlertAsync("🌐 Ngôn ngữ", "✅ Đã chuyển sang Tiếng Việt", "OK");
     }
 
     private async void OnLanguageEnClicked(object? sender, EventArgs e)
     {
+        if (!FeatureGate.IsPremium)
+        {
+            await DisplayAlertAsync("💎 Premium",
+                "🔒 Audio tiếng Anh là tính năng Premium.\n\n" +
+                "Vui lòng nâng cấp tài khoản để sử dụng.", "OK");
+            return;
+        }
+
         _currentLanguage = "en";
         LangEnBtn.BackgroundColor = Color.FromArgb("#EC4899");
         LangEnBtn.TextColor = Colors.White;
         LangViBtn.BackgroundColor = Color.FromArgb("#E5E7EB");
         LangViBtn.TextColor = Color.FromArgb("#374151");
-        
-        await DisplayAlertAsync("Ngôn ngữ", "Switched to English", "OK");
+
+        await DisplayAlertAsync("🌐 Ngôn ngữ", "✅ Switched to English 🇬🇧", "OK");
     }
 
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        // Refresh user stats when returning to dashboard
         await LoadMyStatsAsync();
     }
 }
-
-// ========== Data Models ==========
 
 public class UserResolveResult
 {
@@ -398,10 +401,9 @@ public class MySessionInfo
 
 public class TopPoiItem
 {
-    // API returns: poiName, district, listeningCount (camelCase)
-    public string? poiName { get; set; }  // Maps from API's "poiName"
-    public string? district { get; set; }  // Maps from API's "district"
-    public int listeningCount { get; set; }  // Maps from API's "listeningCount"
+    public string? poiName { get; set; }
+    public string? district { get; set; }
+    public int listeningCount { get; set; }
     public string PoiName => poiName ?? string.Empty;
     public string District => district ?? string.Empty;
     public int ListenCount => listeningCount;

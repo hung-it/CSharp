@@ -86,11 +86,26 @@ public sealed class QrPlaybackService(
 
         var payload = qrPayload.Trim();
 
+        // Handle "QR:" prefix (e.g., "QR:POI001")
         if (payload.StartsWith("QR:", StringComparison.OrdinalIgnoreCase))
         {
             return payload[3..].Trim();
         }
 
+        // Handle "vk://poi/" prefix (e.g., "vk://poi/POI001")
+        if (payload.StartsWith("vk://poi/", StringComparison.OrdinalIgnoreCase))
+        {
+            return payload["vk://poi/".Length..].Trim();
+        }
+
+        // Handle "vk://poi" prefix (e.g., "vk://poi/POI001")
+        if (payload.StartsWith("vk://poi", StringComparison.OrdinalIgnoreCase))
+        {
+            var afterPrefix = payload["vk://poi".Length..];
+            return afterPrefix.TrimStart('/').Trim();
+        }
+
+        // Return as-is if no known prefix
         return payload;
     }
 

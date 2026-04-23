@@ -20,7 +20,7 @@ public partial class LoginPage : ContentPage
 
         if (string.IsNullOrEmpty(username))
         {
-            ShowError("Vui lòng nhập tên đăng nhập");
+            ShowError("⚠️ Vui lòng nhập tên đăng nhập");
             return;
         }
 
@@ -43,17 +43,15 @@ public partial class LoginPage : ContentPage
 
     private async void OnRegisterTapped(object? sender, EventArgs e)
     {
-        // Navigate to register page (same page in demo mode, just clear fields)
         UsernameEntry.Text = "";
         PasswordEntry.Text = "";
-        ErrorLabel.Text = "Liên hệ quản trị viên để tạo tài khoản mới";
+        ErrorLabel.Text = "📧 Liên hệ quản trị viên để tạo tài khoản mới";
         ErrorLabel.IsVisible = true;
     }
 
     private async void OnSkipClicked(object? sender, EventArgs e)
     {
-        // Continue as guest - navigate to account page
-        await Shell.Current.GoToAsync("//account");
+        await Shell.Current.GoToAsync("//home");
     }
 
     private async Task PerformLoginAsync(string username, string password)
@@ -72,7 +70,7 @@ public partial class LoginPage : ContentPage
 
             if (!response.IsSuccessStatusCode)
             {
-                ShowError("Không thể kết nối server. Vui lòng thử lại.");
+                ShowError("❌ Không thể kết nối server. Vui lòng thử lại.");
                 return;
             }
 
@@ -80,26 +78,22 @@ public partial class LoginPage : ContentPage
 
             if (result?.Success == true)
             {
-                // Save user info to SecureStorage
                 await SaveUserSessionAsync(result);
-
-                // Navigate to account page after login and switch to that tab
-                await Shell.Current.GoToAsync("//account");
+                await Shell.Current.GoToAsync("//accountTab");
             }
             else
             {
-                ShowError(result?.Message ?? "Đăng nhập thất bại");
+                ShowError(result?.Message ?? "❌ Đăng nhập thất bại");
             }
         }
         catch (HttpRequestException)
         {
-            ShowError("Không thể kết nối server. Đang hoạt động offline.");
-            // In offline mode, allow guest access
+            ShowError("❌ Không thể kết nối server. Đang hoạt động offline.");
             await NavigateToMainPage();
         }
         catch (Exception ex)
         {
-            ShowError($"Lỗi: {ex.Message}");
+            ShowError($"❌ Lỗi: {ex.Message}");
         }
         finally
         {
@@ -115,7 +109,10 @@ public partial class LoginPage : ContentPage
             await SecureStorage.SetAsync("username", result.Username ?? "");
             await SecureStorage.SetAsync("role", result.Role ?? "EndUser");
             await SecureStorage.SetAsync("plan", result.Plan ?? "Basic");
-            System.Diagnostics.Debug.WriteLine($"Session saved: {result.Username}, Plan: {result.Plan}");
+            await SecureStorage.SetAsync("password", PasswordEntry.Text ?? "");
+
+            AppConfig.SetLoggedInUser(result.Id.ToString());
+            FeatureGate.SetPlan(result.Plan ?? "Basic");
         }
         catch (Exception ex)
         {
@@ -125,7 +122,7 @@ public partial class LoginPage : ContentPage
 
     private async Task NavigateToMainPage()
     {
-        await Shell.Current.GoToAsync("//home");
+        await Shell.Current.GoToAsync("home");
     }
 
     private void ShowError(string message)

@@ -22,7 +22,7 @@
             </Border>
 
             <!-- Stops list -->
-            <Label Text="📍 Các điểm dừng" FontSize="15" FontAttributes="Bold"
+            <Label Text="Cac diem dung" FontSize="15" FontAttributes="Bold"
                    TextColor="{StaticResource Pink800}" />
 
             <CollectionView x:Name="StopsCollectionView"

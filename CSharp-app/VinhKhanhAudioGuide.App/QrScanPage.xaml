@@ -4,10 +4,10 @@
              xmlns:zxing="clr-namespace:ZXing.Net.Maui.Controls;assembly=ZXing.Net.Maui.Controls"
              x:Class="VinhKhanhAudioGuide.App.QrScanPage"
              BackgroundColor="Black"
-             Title="Quét QR Code">
+             Title="📷 Quét QR Code">
 
     <Grid>
-        <!-- Camera view chiếm toàn màn hình -->
+        <!-- Camera view -->
         <zxing:CameraBarcodeReaderView
             x:Name="BarcodeReader"
             BarcodesDetected="OnBarcodesDetected"
@@ -47,14 +47,14 @@
                      TranslationX="78" TranslationY="60" />
 
             <!-- Hướng dẫn -->
-            <Label Text="Hướng camera vào mã QR tại điểm tham quan"
+            <Label Text="📷 Hướng camera vào mã QR tại điểm tham quan"
                    TextColor="White" FontSize="14" HorizontalTextAlignment="Center"
                    HorizontalOptions="Center" VerticalOptions="End"
                    Margin="20,0,20,60"
                    BackgroundColor="#80000000" Padding="12,8" />
 
             <!-- Nút đóng -->
-            <Button Text="✕ Đóng"
+            <Button Text="❌ Đóng"
                     BackgroundColor="#80000000"
                     TextColor="White"
                     CornerRadius="20"

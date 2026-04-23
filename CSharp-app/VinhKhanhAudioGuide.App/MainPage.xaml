@@ -7,12 +7,12 @@
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="16">
 
-            <!-- Welcome Header -->
+            <!-- 🎉 Chào mừng -->
             <Border BackgroundColor="#EC4899" StrokeThickness="0" StrokeShape="RoundRectangle 16" Padding="20">
                 <VerticalStackLayout Spacing="8">
-                    <Label Text="👋 Chào mừng đến Phố Ăn Vĩnh Khách!" FontSize="18"
+                    <Label Text="🎊 Chào mừng đến Phố Ăn Vĩnh Khách!" FontSize="18"
                            FontAttributes="Bold" TextColor="White" />
-                    <Label Text="Khám phá ẩm thực Sài Gòn với hướng dẫn audio đa ngôn ngữ"
+                    <Label Text="Khám phá ẩm thực Sài Gòn với hướng dẫn audio đa ngôn ngữ 🇻🇳"
                            FontSize="13" TextColor="#FDF2F8" />
                     <Button Text="📷 Quét QR Code để bắt đầu" BackgroundColor="White"
                             TextColor="#EC4899" FontSize="14" FontAttributes="Bold"
@@ -21,26 +21,26 @@
                 </VerticalStackLayout>
             </Border>
 
-            <!-- Connection Status -->
+            <!-- 🔗 Trạng thái kết nối -->
             <Border BackgroundColor="#F0FDF4" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="12">
                 <Grid ColumnDefinitions="Auto,*,Auto">
                     <Ellipse Grid.Column="0" WidthRequest="8" HeightRequest="8" Fill="#22C55E"
                              VerticalOptions="Center" />
-                    <Label Grid.Column="1" x:Name="ConnectionStatusLabel" Text="Đã kết nối server"
+                    <Label Grid.Column="1" x:Name="ConnectionStatusLabel" Text="✅ Đã kết nối server"
                            FontSize="12" TextColor="#16A34A" VerticalOptions="Center" Margin="8,0,0,0" />
                     <Label Grid.Column="2" x:Name="LastSyncLabel" Text="vừa xong" FontSize="11"
                            TextColor="#6B7280" VerticalOptions="Center" />
                 </Grid>
             </Border>
 
-            <!-- Quick Actions Grid -->
+            <!-- 🎯 Menu nhanh -->
             <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
-                <!-- Map -->
+
+                <!-- 🗺️ Bản đồ -->
                 <Border Grid.Column="0" Grid.Row="0" BackgroundColor="#DBEAFE" StrokeThickness="0"
                         StrokeShape="RoundRectangle 14" Padding="16">
                     <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
-                        <Image Source="map_icon.png" WidthRequest="40" HeightRequest="40"
-                               HorizontalOptions="Center" />
+                        <Label Text="🗺️" FontSize="32" HorizontalOptions="Center" />
                         <Label Text="Bản đồ" FontSize="13" TextColor="#1E40AF"
                                FontAttributes="Bold" HorizontalOptions="Center" />
                     </VerticalStackLayout>
@@ -49,12 +49,11 @@
                     </Border.GestureRecognizers>
                 </Border>
 
-                <!-- QR Scan -->
+                <!-- 📷 Quét QR -->
                 <Border Grid.Column="1" Grid.Row="0" BackgroundColor="#FCE7F3" StrokeThickness="0"
                         StrokeShape="RoundRectangle 14" Padding="16">
                     <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
-                        <Image Source="qr_icon.png" WidthRequest="40" HeightRequest="40"
-                               HorizontalOptions="Center" />
+                        <Label Text="📷" FontSize="32" HorizontalOptions="Center" />
                         <Label Text="Quét QR" FontSize="13" TextColor="#BE185D"
                                FontAttributes="Bold" HorizontalOptions="Center" />
                     </VerticalStackLayout>
@@ -63,12 +62,11 @@
                     </Border.GestureRecognizers>
                 </Border>
 
-                <!-- Tours -->
+                <!-- ✈️ Tour -->
                 <Border Grid.Column="2" Grid.Row="0" BackgroundColor="#ECFDF5" StrokeThickness="0"
                         StrokeShape="RoundRectangle 14" Padding="16">
                     <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
-                        <Image Source="tour_icon.png" WidthRequest="40" HeightRequest="40"
-                               HorizontalOptions="Center" />
+                        <Label Text="✈️" FontSize="32" HorizontalOptions="Center" />
                         <Label Text="Tour" FontSize="13" TextColor="#047857"
                                FontAttributes="Bold" HorizontalOptions="Center" />
                     </VerticalStackLayout>
@@ -77,28 +75,30 @@
                     </Border.GestureRecognizers>
                 </Border>
 
-                <!-- POI List -->
+                <!-- 📍 DS POI -->
                 <Border Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1"
                         BackgroundColor="#FEF3C7" StrokeThickness="0"
                         StrokeShape="RoundRectangle 14" Padding="16">
                     <VerticalStackLayout Spacing="8">
-                        <Image Source="poi_icon.png" WidthRequest="36" HeightRequest="36"
-                               HorizontalOptions="Start" />
-                        <Label Text="12 Điểm tham quan" FontSize="14" TextColor="#B45309"
-                               FontAttributes="Bold" />
-                        <Label Text="Xóm Chiếu • Vĩnh Hội • Khánh Hội" FontSize="11" TextColor="#92400E" />
+                        <HorizontalStackLayout Spacing="12">
+                            <Label Text="📍" FontSize="28" VerticalOptions="Center" />
+                            <VerticalStackLayout>
+                                <Label Text="12 Điểm tham quan" FontSize="14" TextColor="#B45309"
+                                       FontAttributes="Bold" />
+                                <Label Text="Xóm Chiếu - Vĩnh Hội - Khánh Hội" FontSize="11" TextColor="#92400E" />
+                            </VerticalStackLayout>
+                        </HorizontalStackLayout>
                     </VerticalStackLayout>
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnPoiListClicked" />
                     </Border.GestureRecognizers>
                 </Border>
 
-                <!-- Audio List -->
+                <!-- 🎧 Audio -->
                 <Border Grid.Column="2" Grid.Row="1" BackgroundColor="#F3E8FF" StrokeThickness="0"
                         StrokeShape="RoundRectangle 14" Padding="16">
                     <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
-                        <Image Source="audio_icon.png" WidthRequest="36" HeightRequest="36"
-                               HorizontalOptions="Center" />
+                        <Label Text="🎧" FontSize="28" HorizontalOptions="Center" />
                         <Label Text="Audio" FontSize="13" TextColor="#7C3AED"
                                FontAttributes="Bold" HorizontalOptions="Center" />
                     </VerticalStackLayout>
@@ -108,7 +108,7 @@
                 </Border>
             </Grid>
 
-            <!-- Stats for User (What they've done) -->
+            <!-- 📊 Thống kê cá nhân -->
             <Border BackgroundColor="White" StrokeThickness="0" StrokeShape="RoundRectangle 14" Padding="18">
                 <VerticalStackLayout Spacing="12">
                     <Label Text="📊 Hành trình của bạn" FontSize="15" FontAttributes="Bold"
@@ -139,13 +139,13 @@
                 </VerticalStackLayout>
             </Border>
 
-            <!-- Nearby POIs Section -->
+            <!-- 📍 Gần bạn -->
             <Border BackgroundColor="White" StrokeThickness="0" StrokeShape="RoundRectangle 14" Padding="18">
                 <VerticalStackLayout Spacing="12">
                     <Grid ColumnDefinitions="*,Auto">
                         <Label Grid.Column="0" Text="📍 Gần bạn" FontSize="15" FontAttributes="Bold"
                                TextColor="#1F2937" />
-                        <Button Grid.Column="1" Text="Bản đồ →" BackgroundColor="#EFF6FF"
+                        <Button Grid.Column="1" Text="🗺️ Bản đồ" BackgroundColor="#EFF6FF"
                                 TextColor="#2563EB" FontSize="12" CornerRadius="8"
                                 Padding="12,6" Clicked="OnMapClicked" />
                     </Grid>
@@ -170,19 +170,19 @@
                             </DataTemplate>
                         </CollectionView.ItemTemplate>
                     </CollectionView>
-                    <Label x:Name="NoNearbyLabel" Text="Đang tìm POI gần bạn..."
+                    <Label x:Name="NoNearbyLabel" Text="🔄 Đang tìm POI gần bạn..."
                            FontSize="12" TextColor="#9CA3AF" HorizontalOptions="Center"
                            IsVisible="True" />
                 </VerticalStackLayout>
             </Border>
 
-            <!-- Popular POIs -->
+            <!-- 🔥 Phổ biến -->
             <Border BackgroundColor="White" StrokeThickness="0" StrokeShape="RoundRectangle 14" Padding="18">
                 <VerticalStackLayout Spacing="12">
                     <Grid ColumnDefinitions="*,Auto">
-                        <Label Grid.Column="0" Text="🔥 Điểm phổ biến" FontSize="15"
+                        <Label Grid.Column="0" Text="🔥 Phổ biến nhất" FontSize="15"
                                FontAttributes="Bold" TextColor="#1F2937" />
-                        <Button Grid.Column="1" Text="Xem tất cả →" BackgroundColor="#FDF2F8"
+                        <Button Grid.Column="1" Text="📋 Xem tất cả" BackgroundColor="#FDF2F8"
                                 TextColor="#EC4899" FontSize="12" CornerRadius="8"
                                 Padding="12,6" Clicked="OnPoiListClicked" />
                     </Grid>
@@ -215,7 +215,7 @@
                 </VerticalStackLayout>
             </Border>
 
-            <!-- Language Selection -->
+            <!-- 🌐 Ngôn ngữ -->
             <Border BackgroundColor="#F9FAFB" StrokeThickness="0" StrokeShape="RoundRectangle 14" Padding="16">
                 <VerticalStackLayout Spacing="10">
                     <Label Text="🌐 Ngôn ngữ" FontSize="13" FontAttributes="Bold"
@@ -231,7 +231,7 @@
                 </VerticalStackLayout>
             </Border>
 
-            <!-- Sync Status -->
+            <!-- 🔄 Đồng bộ -->
             <Button x:Name="RefreshBtn" Text="🔄 Đồng bộ dữ liệu" BackgroundColor="#F3F4F6"
                     TextColor="#374151" FontSize="13" CornerRadius="10"
                     HeightRequest="44" Clicked="OnRefreshClicked" />
@@ -240,8 +240,8 @@
                                Color="#EC4899" HorizontalOptions="Center"
                                IsVisible="False" />
 
-            <!-- Footer -->
-            <Label Text="Phố Ăn Vĩnh Khách © 2024" FontSize="11"
+            <!-- 📌 Footer -->
+            <Label Text="🍜 Phố Ăn Vĩnh Khách - Audio Guide" FontSize="11"
                    TextColor="#9CA3AF" HorizontalOptions="Center" />
 
         </VerticalStackLayout>

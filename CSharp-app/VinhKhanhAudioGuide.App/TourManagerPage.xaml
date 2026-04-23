@@ -7,15 +7,15 @@
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="16">
 
-            <!-- Header -->
+            <!-- 🧭 Header -->
             <VerticalStackLayout Spacing="4">
                 <Label Text="✈️ Tuyến Tour" FontSize="22" FontAttributes="Bold"
                        TextColor="#1F2937" />
-                <Label Text="Chọn tour để khám phá Phố Ăn Vĩnh Khách"
+                <Label Text="Chọn tour để khám phá Phố Ăn Vĩnh Khách 🍜"
                        FontSize="13" TextColor="#6B7280" />
             </VerticalStackLayout>
 
-            <!-- Tour Cards -->
+            <!-- 🎫 Tour Cards -->
             <CollectionView x:Name="TourCollectionView" SelectionMode="Single"
                            SelectionChanged="OnTourSelected">
                 <CollectionView.ItemTemplate>
@@ -32,8 +32,8 @@
                                         <Label Text="{Binding Description}" FontSize="12"
                                                TextColor="#6B7280" />
                                     </VerticalStackLayout>
-                                    <Image Grid.Column="1" Source="tour_arrow.png"
-                                           WidthRequest="24" HeightRequest="24"
+                                    <Label Grid.Column="1" Text="›" FontSize="24"
+                                           FontAttributes="Bold" TextColor="#9CA3AF"
                                            VerticalOptions="Center" />
                                 </Grid>
 
@@ -107,7 +107,7 @@
                 </CollectionView.ItemTemplate>
             </CollectionView>
 
-            <!-- My Tours Section -->
+            <!-- 📊 Tour của bạn -->
             <Border BackgroundColor="#F9FAFB" StrokeThickness="0"
                     StrokeShape="RoundRectangle 16" Padding="16" Margin="0,8,0,0">
                 <VerticalStackLayout Spacing="12">
@@ -139,7 +139,7 @@
                 </VerticalStackLayout>
             </Border>
 
-            <!-- Info -->
+            <!-- 💡 Mẹo -->
             <Border BackgroundColor="#FEF3C7" StrokeThickness="0"
                     StrokeShape="RoundRectangle 12" Padding="14">
                 <HorizontalStackLayout Spacing="10">

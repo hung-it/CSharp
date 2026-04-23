@@ -19,8 +19,8 @@
         <Tab Title="Tour" Route="tour">
             <ShellContent ContentTemplate="{DataTemplate local:TourManagerPage}" />
         </Tab>
-        <Tab Title="Tài khoản" Route="account">
-            <ShellContent ContentTemplate="{DataTemplate local:SettingsPage}" />
+        <Tab Title="Tài khoản" Route="accountTab">
+            <ShellContent Route="account" ContentTemplate="{DataTemplate local:SettingsPage}" />
         </Tab>
     </TabBar>
 

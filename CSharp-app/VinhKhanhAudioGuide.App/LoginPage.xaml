@@ -8,36 +8,39 @@
     <ScrollView>
         <VerticalStackLayout Padding="24" Spacing="20">
 
-            <!-- Logo / Header -->
+            <!-- 👋 Logo / Header -->
             <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
-                <Image Source="app_logo.png" WidthRequest="80" HeightRequest="80"
-                       HorizontalOptions="Center" />
-                <Label Text="Phố Ăn Vĩnh Khách" FontSize="24" FontAttributes="Bold"
+                <Border BackgroundColor="#FCE7F3" StrokeThickness="0" StrokeShape="RoundRectangle 40"
+                       WidthRequest="80" HeightRequest="80">
+                    <Label Text="PK" FontSize="32" FontAttributes="Bold" TextColor="#EC4899"
+                           HorizontalOptions="Center" VerticalOptions="Center" />
+                </Border>
+                <Label Text="🍜 Phố Ăn Vĩnh Khách" FontSize="24" FontAttributes="Bold"
                        TextColor="#EC4899" HorizontalOptions="Center" />
-                <Label Text="Audio Guide Đa Ngôn Ngữ" FontSize="13"
+                <Label Text="🎧 Audio Guide Đa Ngôn Ngữ" FontSize="13"
                        TextColor="#6B7280" HorizontalOptions="Center" />
             </VerticalStackLayout>
 
-            <!-- Login Form -->
+            <!-- 🔐 Form Đăng nhập -->
             <Border BackgroundColor="White" StrokeThickness="0"
                     StrokeShape="RoundRectangle 16" Padding="20">
                 <VerticalStackLayout Spacing="16">
 
-                    <Label Text="Đăng nhập" FontSize="18" FontAttributes="Bold"
+                    <Label Text="🔑 Đăng nhập" FontSize="18" FontAttributes="Bold"
                            TextColor="#1F2937" />
 
-                    <!-- Username Entry -->
+                    <!-- Username -->
                     <VerticalStackLayout Spacing="6">
-                        <Label Text="Tên đăng nhập" FontSize="13" FontAttributes="Bold"
+                        <Label Text="👤 Tên đăng nhập" FontSize="13" FontAttributes="Bold"
                                TextColor="#374151" />
                         <Entry x:Name="UsernameEntry" Placeholder="Nhập tên đăng nhập"
                                FontSize="15" BackgroundColor="#F9FAFB"
                                TextColor="#1F2937" />
                     </VerticalStackLayout>
 
-                    <!-- Password Entry -->
+                    <!-- Password -->
                     <VerticalStackLayout Spacing="6">
-                        <Label Text="Mật khẩu" FontSize="13" FontAttributes="Bold"
+                        <Label Text="🔒 Mật khẩu" FontSize="13" FontAttributes="Bold"
                                TextColor="#374151" />
                         <Entry x:Name="PasswordEntry" Placeholder="Nhập mật khẩu"
                                FontSize="15" BackgroundColor="#F9FAFB"
@@ -49,7 +52,7 @@
                            TextColor="#EF4444" IsVisible="False" />
 
                     <!-- Login Button -->
-                    <Button x:Name="LoginBtn" Text="Đăng nhập" BackgroundColor="#EC4899"
+                    <Button x:Name="LoginBtn" Text="🔑 Đăng nhập" BackgroundColor="#EC4899"
                             TextColor="White" FontSize="15" FontAttributes="Bold"
                             CornerRadius="12" HeightRequest="48"
                             Clicked="OnLoginClicked" />
@@ -74,12 +77,12 @@
                 </VerticalStackLayout>
             </Border>
 
-            <!-- Demo Users Section -->
+            <!-- 🧪 Demo Users -->
             <Border BackgroundColor="#FEF3C7" StrokeThickness="0"
                     StrokeShape="RoundRectangle 12" Padding="16">
                 <VerticalStackLayout Spacing="12">
 
-                    <Label Text="🎯 Tài khoản Demo" FontSize="14" FontAttributes="Bold"
+                    <Label Text="🧪 Tài khoản Demo" FontSize="14" FontAttributes="Bold"
                            TextColor="#92400E" />
 
                     <!-- Basic Demo -->
@@ -87,14 +90,14 @@
                             StrokeShape="RoundRectangle 10" Padding="12">
                         <Grid ColumnDefinitions="*,Auto">
                             <VerticalStackLayout Grid.Column="0" Spacing="2">
-                                <Label Text="👤 demo" FontSize="13" FontAttributes="Bold"
+                                <Label Text="demo" FontSize="13" FontAttributes="Bold"
                                        TextColor="#1F2937" />
-                                <Label Text="Basic Plan (1USD) - Tính năng cơ bản"
+                                <Label Text="💰 Basic Plan (1USD) - Tính năng cơ bản"
                                        FontSize="11" TextColor="#6B7280" />
                                 <Label Text="Mật khẩu: (để trống)" FontSize="10"
                                        TextColor="#9CA3AF" />
                             </VerticalStackLayout>
-                            <Button Grid.Column="1" Text="Dùng thử" BackgroundColor="#E5E7EB"
+                            <Button Grid.Column="1" Text="🎮 Dùng thử" BackgroundColor="#E5E7EB"
                                     TextColor="#374151" FontSize="12" CornerRadius="8"
                                     Padding="12,6" Clicked="OnDemoBasicClicked" />
                         </Grid>
@@ -105,14 +108,14 @@
                             StrokeShape="RoundRectangle 10" Padding="12">
                         <Grid ColumnDefinitions="*,Auto">
                             <VerticalStackLayout Grid.Column="0" Spacing="2">
-                                <Label Text="👑 premium" FontSize="13" FontAttributes="Bold"
+                                <Label Text="💎 premium" FontSize="13" FontAttributes="Bold"
                                        TextColor="#059669" />
-                                <Label Text="Premium Segment (10USD) - Tất cả tính năng"
+                                <Label Text="🌟 Premium Segment (10USD) - Tất cả tính năng"
                                        FontSize="11" TextColor="#047857" />
                                 <Label Text="Mật khẩu: (để trống)" FontSize="10"
                                        TextColor="#6B7280" />
                             </VerticalStackLayout>
-                            <Button Grid.Column="1" Text="Dùng thử" BackgroundColor="#D1FAE5"
+                            <Button Grid.Column="1" Text="🎮 Dùng thử" BackgroundColor="#D1FAE5"
                                     TextColor="#059669" FontSize="12" CornerRadius="8"
                                     Padding="12,6" Clicked="OnDemoPremiumClicked" />
                         </Grid>
@@ -121,12 +124,12 @@
                 </VerticalStackLayout>
             </Border>
 
-            <!-- Plan Info -->
+            <!-- 📋 Plan Info -->
             <Border BackgroundColor="#F9FAFB" StrokeThickness="0"
                     StrokeShape="RoundRectangle 12" Padding="16">
                 <VerticalStackLayout Spacing="10">
 
-                    <Label Text="💳 Thông tin các gói dịch vụ" FontSize="14"
+                    <Label Text="📋 Thông tin các gói dịch vụ" FontSize="14"
                            FontAttributes="Bold" TextColor="#374151" />
 
                     <Grid ColumnDefinitions="*,*">
@@ -149,11 +152,11 @@
                                 StrokeThickness="0" StrokeShape="RoundRectangle 10"
                                 Padding="12" Margin="4,0,0,0">
                             <VerticalStackLayout Spacing="4">
-                                <Label Text="Premium" FontSize="14" FontAttributes="Bold"
+                                <Label Text="💎 Premium" FontSize="14" FontAttributes="Bold"
                                        TextColor="#059669" />
                                 <Label Text="10 USD" FontSize="20" FontAttributes="Bold"
                                        TextColor="#10B981" />
-                                <Label Text="• Tất cả POIs&#x0a;• 5 ngôn ngữ&#x0a;• Audio HD&#x0a;• Analytics"
+                                <Label Text="• Tất cả POIs&#x0a;• 5 ngôn ngữ&#x0a;• Audio HD&#x0a;• GPS thông minh"
                                        FontSize="10" TextColor="#065F46" LineHeight="1.4" />
                             </VerticalStackLayout>
                         </Border>
@@ -162,8 +165,8 @@
                 </VerticalStackLayout>
             </Border>
 
-            <!-- Skip / Continue as Guest -->
-            <Button x:Name="SkipBtn" Text="Tiếp tục không đăng nhập"
+            <!-- 🚶 Tiếp tục không đăng nhập -->
+            <Button x:Name="SkipBtn" Text="🚶 Tiếp tục không đăng nhập"
                     BackgroundColor="Transparent" TextColor="#9CA3AF"
                     FontSize="13" Clicked="OnSkipClicked" />
 

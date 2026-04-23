@@ -6,6 +6,7 @@ public partial class QrScanPage : ContentPage
 {
     private bool _isProcessing = false;
     private string _resolvedUserId = string.Empty;
+    private bool _cameraStarted = false;
 
     public QrScanPage()
     {
@@ -24,65 +25,92 @@ public partial class QrScanPage : ContentPage
         base.OnAppearing();
         _isProcessing = false;
 
-        // Resolve userId thực
-        _resolvedUserId = await AppConfig.ResolveDefaultUserIdAsync();
-        if (string.IsNullOrWhiteSpace(_resolvedUserId))
+        try
         {
-            await DisplayAlertAsync("Lỗi kết nối", "Không resolve được user từ backend. Vui lòng kiểm tra backend đang chạy.", "OK");
-            await Shell.Current.GoToAsync("..");
-            return;
+            _resolvedUserId = await AppConfig.ResolveDefaultUserIdAsync();
+        }
+        catch
+        {
+            _resolvedUserId = string.Empty;
         }
 
         var status = await Permissions.RequestAsync<Permissions.Camera>();
         if (status != PermissionStatus.Granted)
         {
-            await DisplayAlertAsync("Cần quyền camera",
-                "Vui lòng cấp quyền camera để quét mã QR.", "OK");
-            await Shell.Current.GoToAsync("..");
+            await DisplayAlertAsync("📷 Cần quyền camera",
+                "🔒 Vui lòng cấp quyền camera để quét mã QR.", "OK");
+            try { await Shell.Current.GoToAsync(".."); } catch { }
+            return;
+        }
+
+        await Task.Delay(300);
+
+        try
+        {
+            BarcodeReader.IsDetecting = true;
+            _cameraStarted = true;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Camera start error: {ex.Message}");
         }
     }
 
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
-        // Dừng camera khi rời trang
-        BarcodeReader.IsDetecting = false;
+
+        _cameraStarted = false;
+        try { BarcodeReader.IsDetecting = false; } catch { }
     }
 
-    private async void OnBarcodesDetected(object? sender, BarcodeDetectionEventArgs e)
+    private void OnBarcodesDetected(object? sender, BarcodeDetectionEventArgs e)
     {
-        // Chỉ xử lý 1 lần, tránh trigger nhiều lần liên tiếp
-        if (_isProcessing) return;
+        if (_isProcessing || !_cameraStarted)
+            return;
+
+        var result = e.Results?.FirstOrDefault();
+        if (result?.Value is null or "")
+            return;
+
         _isProcessing = true;
 
-        var result = e.Results.FirstOrDefault();
-        if (result is null)
-        {
-            _isProcessing = false;
-            return;
-        }
+        try { BarcodeReader.IsDetecting = false; } catch { }
 
-        var qrPayload = result.Value?.Trim();
-        if (string.IsNullOrEmpty(qrPayload))
+        MainThread.BeginInvokeOnMainThread(async () =>
         {
-            _isProcessing = false;
-            return;
-        }
+            var qrPayload = result!.Value!.Trim();
 
-        // Dừng camera ngay
-        BarcodeReader.IsDetecting = false;
+            if (string.IsNullOrWhiteSpace(_resolvedUserId) || !Guid.TryParse(_resolvedUserId, out _))
+            {
+                await DisplayAlertAsync("❌ Lỗi",
+                    "⚠️ Không thể xác thực người dùng. Vui lòng kiểm tra kết nối.", "OK");
+                try { await Shell.Current.GoToAsync(".."); } catch { }
+                return;
+            }
 
-        // Navigate phải chạy trên main thread
-        await MainThread.InvokeOnMainThreadAsync(async () =>
-        {
-            await Shell.Current.GoToAsync("..");
-            await Shell.Current.GoToAsync(
-                $"audio?qr={Uri.EscapeDataString(qrPayload)}&userId={_resolvedUserId}");
+            try
+            {
+                await Shell.Current.GoToAsync("..");
+                await Task.Delay(200);
+                await Shell.Current.GoToAsync(
+                    $"audio?qr={Uri.EscapeDataString(qrPayload)}&userId={Uri.EscapeDataString(_resolvedUserId)}");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Navigation error: {ex.Message}");
+                await DisplayAlertAsync("❌ Lỗi",
+                    $"⚠️ Không thể mở trình phát audio: {ex.Message}", "OK");
+            }
         });
     }
 
     private async void OnCloseClicked(object? sender, EventArgs e)
     {
-        await Shell.Current.GoToAsync("..");
+        try
+        {
+            await Shell.Current.GoToAsync("..");
+        }
+        catch { }
     }
 }

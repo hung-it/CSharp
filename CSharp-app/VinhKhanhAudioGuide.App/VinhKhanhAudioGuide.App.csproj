@@ -89,7 +89,7 @@
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
 		<PackageReference Include="CommunityToolkit.Maui" Version="9.1.0" />
-		<PackageReference Include="CommunityToolkit.Maui.MediaElement" Version="4.1.2" />
+		<PackageReference Include="Plugin.Maui.Audio" Version="4.0.0" />
 		<PackageReference Include="ZXing.Net.Maui.Controls" Version="0.4.0" />
 	</ItemGroup>
 

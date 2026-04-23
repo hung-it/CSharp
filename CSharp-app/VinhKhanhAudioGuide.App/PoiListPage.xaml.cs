@@ -95,7 +95,7 @@ public partial class PoiListPage : ContentPage
             {
                 Id = p.Id,
                 Code = p.Code ?? "",
-                Name = p.Name ?? "Unknown",
+                Name = p.Name ?? "Không tên",
                 Description = p.Description ?? "",
                 District = p.District ?? "",
                 Latitude = p.Latitude != 0 ? p.Latitude : GetDefaultLatitude(p.Name ?? ""),
@@ -116,7 +116,7 @@ public partial class PoiListPage : ContentPage
             {
                 Id = p.Id,
                 Code = p.Code,
-                Name = p.Name ?? "Unknown",
+                Name = p.Name ?? "Không tên",
                 Description = p.Description ?? "",
                 District = p.District ?? "",
                 Latitude = p.Latitude,

@@ -1,5 +1,7 @@
-using CommunityToolkit.Maui.Views;
+using Microsoft.Maui.Controls;
+using Plugin.Maui.Audio;
 using System.Net.Http.Json;
+using System.Timers;
 
 namespace VinhKhanhAudioGuide.App;
 
@@ -8,15 +10,21 @@ namespace VinhKhanhAudioGuide.App;
 public partial class AudioPlayerPage : ContentPage
 {
     private readonly HttpClient _httpClient;
+    private readonly IAudioManager _audioManager;
+    private IAudioPlayer? _audioPlayer;
+    private System.Timers.Timer? _progressTimer;
+
     private string _currentLanguage = "vi";
     private string _qrPayload = string.Empty;
     private string _userId = string.Empty;
-    private bool _isPlaying = false;
+    private string _currentAudioUrl = string.Empty;
+    private string _currentAudioFilePath = string.Empty;
     private Guid _sessionId = Guid.Empty;
-    private DateTime _playStartedAt = DateTime.MinValue;
     private int _totalPlayedSeconds = 0;
     private bool _sessionEnded = false;
     private bool _loadRequested = false;
+    private bool _isPlaying = false;
+    private CancellationTokenSource? _downloadCts;
 
     public string QrPayload
     {
@@ -41,31 +49,122 @@ public partial class AudioPlayerPage : ContentPage
         if (_loadRequested) return;
         if (string.IsNullOrEmpty(_qrPayload) || string.IsNullOrEmpty(_userId)) return;
         _loadRequested = true;
-        MainThread.BeginInvokeOnMainThread(() => _ = LoadAudioAsync());
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            try { await LoadAudioAsync(); }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"TryLoadAudio error: {ex.Message}");
+                UpdateStatus("❌ Lỗi tải audio");
+            }
+        });
     }
 
-    public AudioPlayerPage()
+    public AudioPlayerPage(IAudioManager audioManager)
     {
         InitializeComponent();
         _httpClient = AppConfig.CreateHttpClient();
+        _audioManager = audioManager;
+
+        _progressTimer = new System.Timers.Timer(500);
+        _progressTimer.Elapsed += OnProgressTimerElapsed;
+    }
+
+    private void OnProgressTimerElapsed(object? sender, ElapsedEventArgs e)
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            if (_audioPlayer != null && _audioPlayer.Duration > 0)
+            {
+                double progress = _audioPlayer.CurrentPosition / _audioPlayer.Duration * 100;
+                ProgressSlider.Value = progress;
+
+                var current = TimeSpan.FromSeconds(_audioPlayer.CurrentPosition);
+                var total = TimeSpan.FromSeconds(_audioPlayer.Duration);
+                DurationLabel.Text = $"{current:mm\\:ss} / {total:mm\\:ss}";
+            }
+        });
+    }
+
+    private async Task<string?> DownloadAudioToLocalAsync(string url, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var cacheDir = Path.Combine(FileSystem.CacheDirectory, "audio_cache");
+            if (!Directory.Exists(cacheDir))
+                Directory.CreateDirectory(cacheDir);
+
+            var fileName = Path.GetFileName(new Uri(url).LocalPath);
+            var filePath = Path.Combine(cacheDir, fileName);
+
+            if (File.Exists(filePath))
+            {
+                var info = new FileInfo(filePath);
+                if (info.Length > 1000)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Using cached audio: {filePath}");
+                    return filePath;
+                }
+            }
+
+            UpdateStatus("⏳ Đang tải audio...");
+
+            using var response = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            response.EnsureSuccessStatusCode();
+
+            var totalBytes = response.Content.Headers.ContentLength ?? -1L;
+            var canReportProgress = totalBytes != -1;
+
+            using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
+            using var fileStream = new FileStream(filePath, System.IO.FileMode.Create, FileAccess.Write, FileShare.None, 8192, true);
+
+            var buffer = new byte[8192];
+            long totalRead = 0;
+            int bytesRead;
+
+            while ((bytesRead = await contentStream.ReadAsync(buffer, cancellationToken)) > 0)
+            {
+                await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead), cancellationToken);
+                totalRead += bytesRead;
+
+                if (canReportProgress && totalBytes > 0)
+                {
+                    var percent = (int)((totalRead * 100) / totalBytes);
+                    UpdateStatus($"⏳ Đang tải... {percent}%");
+                }
+            }
+
+            System.Diagnostics.Debug.WriteLine($"Downloaded audio to: {filePath} ({totalRead} bytes)");
+            return filePath;
+        }
+        catch (OperationCanceledException)
+        {
+            System.Diagnostics.Debug.WriteLine("Audio download cancelled");
+            return null;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"DownloadAudioToLocal error: {ex.Message}");
+            return null;
+        }
     }
 
     private async Task LoadAudioAsync()
     {
         if (string.IsNullOrEmpty(_qrPayload) || string.IsNullOrEmpty(_userId))
         {
-            UpdateStatus("Lỗi: Thiếu thông tin");
+            UpdateStatus("❌ Lỗi: Thiếu thông tin");
             return;
         }
 
-        // Kết thúc session cũ nếu đang đổi ngôn ngữ
-        try
-        {
-            await EndSessionAsync();
-        }
-        catch { /* ignore */ }
+        _downloadCts?.Cancel();
+        _downloadCts = new CancellationTokenSource();
 
-        UpdateStatus("Đang tải...");
+        try { await EndSessionAsync(); }
+        catch { }
+
+        StopPlayback();
+        UpdateStatus("⏳ Đang tải...");
         SetControlsEnabled(false);
         _sessionEnded = false;
         _totalPlayedSeconds = 0;
@@ -74,8 +173,8 @@ public partial class AudioPlayerPage : ContentPage
         {
             if (!Guid.TryParse(_userId, out var userId))
             {
-                UpdateStatus("Lỗi: userId không hợp lệ");
-                await DisplayAlertAsync("Lỗi", "ID người dùng không hợp lệ", "OK");
+                UpdateStatus("❌ Lỗi: userId không hợp lệ");
+                await DisplayAlertAsync("❌ Lỗi", "ID người dùng không hợp lệ", "OK");
                 return;
             }
 
@@ -88,68 +187,92 @@ public partial class AudioPlayerPage : ContentPage
 
             if (!response.IsSuccessStatusCode)
             {
-                UpdateStatus("Lỗi tải audio");
+                UpdateStatus("❌ Lỗi tải audio");
                 var errText = await response.Content.ReadAsStringAsync();
                 System.Diagnostics.Debug.WriteLine($"QR Start error: {errText}");
-                await DisplayAlertAsync("Lỗi", "Không thể tải audio. Vui lòng thử lại.", "OK");
+                await DisplayAlertAsync("❌ Lỗi", $"Không thể tải audio. Code: {(int)response.StatusCode}", "OK");
                 return;
             }
 
             var result = await response.Content.ReadFromJsonAsync<QrStartResponse>();
-            
+
             if (result?.Content == null)
             {
-                UpdateStatus("Không có audio");
-                await DisplayAlertAsync("Thông báo", "Audio chưa được cung cấp cho điểm này.", "OK");
+                UpdateStatus("📭 Không có audio");
+                await DisplayAlertAsync("📢 Thông báo", "Audio chưa được cung cấp cho điểm này.", "OK");
                 return;
             }
 
-            // Lưu sessionId để kết thúc sau
             _sessionId = result.Session?.Id ?? Guid.Empty;
-
             PoiNameLabel.Text = result.Content.PoiName ?? "Điểm tham quan";
             PoiCodeLabel.Text = result.Content.PoiCode ?? "";
 
             var audioPath = result.Content.AudioPath;
             if (string.IsNullOrEmpty(audioPath))
             {
-                UpdateStatus("Chưa có audio");
-                PlayingIcon.Text = "📝";
-                await DisplayAlertAsync("Thông báo", "Audio chưa được cung cấp. Vui lòng liên hệ quản trị viên.", "OK");
+                UpdateStatus("📭 Chưa có audio");
+                PlayingIcon.Text = "❌";
+                await DisplayAlertAsync("📢 Thông báo", "Audio chưa được cung cấp. Vui lòng liên hệ quản trị viên.", "OK");
                 return;
             }
 
-            // Resolve audio URL
-            var audioUrl = ResolveAudioUrl(audioPath);
-            System.Diagnostics.Debug.WriteLine($"Loading audio from: {audioUrl}");
-            
-            // Set media source with error handling
+            _currentAudioUrl = ResolveAudioUrl(audioPath);
+            System.Diagnostics.Debug.WriteLine($"Loading audio from: {_currentAudioUrl}");
+
+            UpdateStatus("⏳ Đang tải audio...");
+
+            var localFilePath = await DownloadAudioToLocalAsync(_currentAudioUrl, _downloadCts.Token);
+
+            if (string.IsNullOrEmpty(localFilePath))
+            {
+                UpdateStatus("❌ Lỗi tải audio");
+                await DisplayAlertAsync("❌ Lỗi", "Không thể tải file audio. Kiểm tra kết nối mạng.", "OK");
+                return;
+            }
+
+            _currentAudioFilePath = localFilePath;
+
+            StopPlayback();
+
             try
             {
-                MediaPlayer.Source = MediaSource.FromUri(audioUrl);
-                UpdateStatus("Sẵn sàng phát");
+                _audioPlayer = _audioManager.CreatePlayer(_currentAudioFilePath);
+                _audioPlayer.PlaybackEnded += OnPlaybackEnded;
+
+                var total = TimeSpan.FromSeconds(_audioPlayer.Duration);
+                DurationLabel.Text = $"0:00 / {total:mm\\:ss}";
+                ProgressSlider.Maximum = 100;
+                ProgressSlider.Value = 0;
+                ProgressSlider.IsEnabled = true;
+
+                UpdateStatus("✅ Sẵn sàng - nhấn Phát để nghe");
                 SetControlsEnabled(true);
+                PlayingIcon.Text = "🎧";
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"MediaPlayer source error: {ex.Message}");
-                UpdateStatus("Lỗi định dạng audio");
-                await DisplayAlertAsync("Lỗi", $"Không thể tải file audio: {ex.Message}", "OK");
+                System.Diagnostics.Debug.WriteLine($"Audio player error: {ex.Message}");
+                UpdateStatus("❌ Lỗi tải audio");
+                await DisplayAlertAsync("❌ Lỗi", $"Không thể phát audio: {ex.Message}", "OK");
             }
+        }
+        catch (OperationCanceledException)
+        {
+            UpdateStatus("⏹️ Đã hủy");
         }
         catch (HttpRequestException ex)
         {
-            UpdateStatus("Lỗi kết nối");
+            UpdateStatus("❌ Lỗi kết nối");
             PlayingIcon.Text = "❌";
             System.Diagnostics.Debug.WriteLine($"HTTP error: {ex.Message}");
-            await DisplayAlertAsync("Lỗi kết nối", $"Không thể kết nối server: {ex.Message}", "OK");
+            await DisplayAlertAsync("❌ Lỗi kết nối", $"Không thể kết nối server: {ex.Message}", "OK");
         }
         catch (Exception ex)
         {
-            UpdateStatus("Lỗi");
+            UpdateStatus("❌ Lỗi");
             PlayingIcon.Text = "❌";
             System.Diagnostics.Debug.WriteLine($"Audio load error: {ex.Message}");
-            await DisplayAlertAsync("Lỗi", $"Đã xảy ra lỗi: {ex.Message}", "OK");
+            await DisplayAlertAsync("❌ Lỗi", $"Đã xảy ra lỗi: {ex.Message}", "OK");
         }
     }
 
@@ -183,12 +306,6 @@ public partial class AudioPlayerPage : ContentPage
             return;
 
         _sessionEnded = true;
-
-        // Cộng thêm thời gian đang phát dở (nếu có)
-        if (_isPlaying && _playStartedAt != DateTime.MinValue)
-            _totalPlayedSeconds += (int)(DateTime.UtcNow - _playStartedAt).TotalSeconds;
-
-        // Record listening duration for visit tracking
         TrackingService.RecordListeningEnd(_totalPlayedSeconds);
 
         try
@@ -197,41 +314,73 @@ public partial class AudioPlayerPage : ContentPage
                 $"sessions/{_sessionId}/end",
                 new { DurationSeconds = _totalPlayedSeconds });
         }
-        catch { /* silent — không block UI */ }
+        catch { }
 
         _sessionId = Guid.Empty;
+    }
+
+    private void OnPlaybackEnded(object? sender, EventArgs e)
+    {
+        _isPlaying = false;
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            PlayPauseButton.Text = "▶️ Phát";
+            UpdateStatus("🎉 Đã phát xong!");
+            PlayingIcon.Text = "✅";
+            _progressTimer?.Stop();
+            ProgressSlider.Value = 0;
+        });
+    }
+
+    private void StopPlayback()
+    {
+        _progressTimer?.Stop();
+        if (_audioPlayer != null)
+        {
+            try
+            {
+                _audioPlayer.PlaybackEnded -= OnPlaybackEnded;
+                _audioPlayer.Stop();
+                _audioPlayer.Dispose();
+            }
+            catch { }
+            _audioPlayer = null;
+        }
     }
 
     private void OnPlayPauseClicked(object? sender, EventArgs e)
     {
         try
         {
+            if (_audioPlayer == null)
+            {
+                UpdateStatus("❌ Chưa có audio");
+                return;
+            }
+
             if (_isPlaying)
             {
-                // Tạm dừng — cộng dồn thời gian
-                if (_playStartedAt != DateTime.MinValue)
-                    _totalPlayedSeconds += (int)(DateTime.UtcNow - _playStartedAt).TotalSeconds;
-
-                MediaPlayer?.Pause();
-                PlayPauseButton.Text = "▶ Phát";
-                UpdateStatus("Đã tạm dừng");
-                PlayingIcon.Text = "🎵";
+                _audioPlayer.Pause();
+                _progressTimer?.Stop();
                 _isPlaying = false;
+                PlayPauseButton.Text = "▶️ Phát";
+                UpdateStatus("⏸️ Đã tạm dừng");
+                PlayingIcon.Text = "⏸️";
             }
             else
             {
-                _playStartedAt = DateTime.UtcNow;
-                MediaPlayer?.Play();
-                PlayPauseButton.Text = "⏸ Tạm dừng";
-                UpdateStatus("Đang phát...");
-                PlayingIcon.Text = "🔊";
+                _audioPlayer.Play();
+                _progressTimer?.Start();
                 _isPlaying = true;
+                PlayPauseButton.Text = "⏸️ Tạm dừng";
+                UpdateStatus("🎵 Đang phát...");
+                PlayingIcon.Text = "🎵";
             }
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Play/Pause error: {ex.Message}");
-            UpdateStatus("Lỗi phát audio");
+            UpdateStatus("❌ Lỗi phát audio");
         }
     }
 
@@ -239,14 +388,14 @@ public partial class AudioPlayerPage : ContentPage
     {
         try
         {
-            if (_isPlaying && _playStartedAt != DateTime.MinValue)
-                _totalPlayedSeconds += (int)(DateTime.UtcNow - _playStartedAt).TotalSeconds;
-
+            StopPlayback();
             _isPlaying = false;
-            MediaPlayer?.Stop();
-            PlayPauseButton.Text = "▶ Phát";
-            UpdateStatus("Đã dừng");
-            PlayingIcon.Text = "🎵";
+            PlayPauseButton.Text = "▶️ Phát";
+            UpdateStatus("⏹️ Đã dừng");
+            PlayingIcon.Text = "🎧";
+            ProgressSlider.Value = 0;
+            DurationLabel.Text = "0:00 / 0:00";
+            _totalPlayedSeconds = 0;
         }
         catch (Exception ex)
         {
@@ -256,37 +405,18 @@ public partial class AudioPlayerPage : ContentPage
         await EndSessionAsync();
     }
 
-    private async void OnMediaEnded(object? sender, EventArgs e)
-    {
-        try
-        {
-            if (_playStartedAt != DateTime.MinValue)
-                _totalPlayedSeconds += (int)(DateTime.UtcNow - _playStartedAt).TotalSeconds;
-
-            _isPlaying = false;
-            PlayPauseButton.Text = "▶ Phát lại";
-            UpdateStatus("Đã phát xong ✅");
-            PlayingIcon.Text = "✅";
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"Media ended error: {ex.Message}");
-        }
-
-        await EndSessionAsync();
-    }
-
     protected override async void OnDisappearing()
     {
         base.OnDisappearing();
-        try
+
+        _downloadCts?.Cancel();
+
+        if (_isPlaying && _audioPlayer != null)
         {
-            if (_isPlaying && _playStartedAt != DateTime.MinValue)
-                _totalPlayedSeconds += (int)(DateTime.UtcNow - _playStartedAt).TotalSeconds;
-            _isPlaying = false;
-            MediaPlayer?.Stop();
+            _totalPlayedSeconds += (int)_audioPlayer.CurrentPosition;
         }
-        catch { /* ignore */ }
+
+        StopPlayback();
         await EndSessionAsync();
     }
 
@@ -297,22 +427,30 @@ public partial class AudioPlayerPage : ContentPage
         BtnVi.TextColor = Colors.White;
         BtnEn.BackgroundColor = Color.FromArgb("#FBCFE8");
         BtnEn.TextColor = Color.FromArgb("#9D174D");
-        try { MediaPlayer?.Stop(); } catch { }
-        _isPlaying = false;
-        _loadRequested = false; // reset để cho phép load lại
+        _loadRequested = false;
+        _currentAudioUrl = string.Empty;
+        _currentAudioFilePath = string.Empty;
         await LoadAudioAsync();
     }
 
     private async void OnLanguageEnClicked(object? sender, EventArgs e)
     {
+        if (!FeatureGate.IsPremium)
+        {
+            await DisplayAlertAsync("💎 Premium",
+                "🔒 Audio tiếng Anh là tính năng Premium.\n\n" +
+                "Vui lòng nâng cấp tài khoản để sử dụng.", "OK");
+            return;
+        }
+
         _currentLanguage = "en";
         BtnEn.BackgroundColor = Color.FromArgb("#EC4899");
         BtnEn.TextColor = Colors.White;
         BtnVi.BackgroundColor = Color.FromArgb("#FBCFE8");
         BtnVi.TextColor = Color.FromArgb("#9D174D");
-        try { MediaPlayer?.Stop(); } catch { }
-        _isPlaying = false;
-        _loadRequested = false; // reset để cho phép load lại
+        _loadRequested = false;
+        _currentAudioUrl = string.Empty;
+        _currentAudioFilePath = string.Empty;
         await LoadAudioAsync();
     }
 }

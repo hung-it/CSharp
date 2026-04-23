@@ -8,6 +8,28 @@ public static class AppConfig
     public const string DefaultExternalRef = "demo";
     public const string DefaultPreferredLanguage = "vi";
 
+    // Current user session (set after login)
+    private static string? _currentUserId;
+    private static bool _isLoggedIn = false;
+
+    public static bool IsLoggedIn => _isLoggedIn;
+    public static string? CurrentUserId => _currentUserId;
+
+    public static void SetLoggedInUser(string userId)
+    {
+        _currentUserId = userId;
+        _isLoggedIn = true;
+        System.Diagnostics.Debug.WriteLine($"AppConfig: User logged in as {_currentUserId}");
+    }
+
+    public static void ClearUserSession()
+    {
+        _currentUserId = null;
+        _isLoggedIn = false;
+        FeatureGate.Clear();
+        System.Diagnostics.Debug.WriteLine("AppConfig: User session cleared");
+    }
+
     // Android emulator cannot call host machine through localhost.
     private const string AndroidEmulatorApiBaseUrl = "http://10.0.2.2:5140/api/v1/";
     private const string LocalApiBaseUrl = "http://localhost:5140/api/v1/";
@@ -36,51 +58,87 @@ public static class AppConfig
 
     public static async Task<string> ResolveDefaultUserIdAsync(HttpClient? client = null, CancellationToken cancellationToken = default)
     {
+        // If already logged in via explicit login, return that user ID
+        if (_isLoggedIn && !string.IsNullOrEmpty(_currentUserId))
+        {
+            return _currentUserId;
+        }
+
+        // Try to restore from SecureStorage first
+        try
+        {
+            var storedId = await SecureStorage.GetAsync("user_id");
+            if (!string.IsNullOrEmpty(storedId) && Guid.TryParse(storedId, out _))
+            {
+                _currentUserId = storedId;
+                _isLoggedIn = true;
+                System.Diagnostics.Debug.WriteLine($"AppConfig: Restored session for user {_currentUserId}");
+                return storedId;
+            }
+        }
+        catch { }
+
+        // Load from SecureStorage for username/role
+        string? storedUsername = null;
+        string? storedPassword = null;
+        try
+        {
+            storedUsername = await SecureStorage.GetAsync("username");
+            storedPassword = await SecureStorage.GetAsync("password");
+        }
+        catch { }
+
         var ownsClient = client is null;
         client ??= CreateHttpClient();
 
         try
         {
-            // First try: resolve existing demo user with password
-            var response = await client.PostAsJsonAsync("users/resolve", new
+            // Try stored credentials if available
+            if (!string.IsNullOrEmpty(storedUsername))
+            {
+                var response = await client.PostAsJsonAsync("users/resolve", new
+                {
+                    Username = storedUsername,
+                    PreferredLanguage = DefaultPreferredLanguage,
+                    Password = string.IsNullOrEmpty(storedPassword) ? null : storedPassword
+                }, cancellationToken);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadFromJsonAsync<LoginResult>(cancellationToken: cancellationToken);
+                    if (result?.Success == true)
+                    {
+                        _currentUserId = result.Id.ToString();
+                        _isLoggedIn = true;
+                        return result.Id.ToString();
+                    }
+                }
+            }
+
+            // Fallback: resolve demo user
+            var demoResponse = await client.PostAsJsonAsync("users/resolve", new
             {
                 Username = DefaultExternalRef,
                 PreferredLanguage = DefaultPreferredLanguage,
                 Password = "1"
             }, cancellationToken);
 
-            if (response.IsSuccessStatusCode)
+            if (demoResponse.IsSuccessStatusCode)
             {
-                var result = await response.Content.ReadFromJsonAsync<LoginResult>(cancellationToken: cancellationToken);
-                if (result?.Success == true)
+                var demoResult = await demoResponse.Content.ReadFromJsonAsync<LoginResult>(cancellationToken: cancellationToken);
+                if (demoResult?.Success == true)
                 {
-                    return result.Id.ToString();
+                    _currentUserId = demoResult.Id.ToString();
+                    _isLoggedIn = false; // Auto-resolved, not explicitly logged in
+                    return demoResult.Id.ToString();
                 }
             }
 
-            // Second try: create new anonymous user (no password required)
-            var anonUsername = $"anon_{Guid.NewGuid():N}".Substring(0, 20);
-            var createResponse = await client.PostAsJsonAsync("users/resolve", new
-            {
-                Username = anonUsername,
-                PreferredLanguage = DefaultPreferredLanguage
-            }, cancellationToken);
-
-            if (createResponse.IsSuccessStatusCode)
-            {
-                var createResult = await createResponse.Content.ReadFromJsonAsync<LoginResult>(cancellationToken: cancellationToken);
-                if (createResult?.Success == true)
-                {
-                    return createResult.Id.ToString();
-                }
-            }
-
-            // Fallback: return a fixed anonymous ID for offline mode
+            // Last resort: anonymous ID
             return "00000000-0000-0000-0000-000000000001";
         }
         catch
         {
-            // Fallback for offline mode
             return "00000000-0000-0000-0000-000000000001";
         }
         finally
