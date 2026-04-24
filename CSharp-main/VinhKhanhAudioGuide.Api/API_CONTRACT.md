@@ -20,22 +20,54 @@ OpenAPI:
 
 ## 2. Users
 
-### Resolve/Create user by externalRef
+### Register new account
+- POST /api/v1/users/register
+- Request:
+```json
+{
+  "username": "myusername",
+  "password": "mypassword",
+  "preferredLanguage": "vi"
+}
+```
+- Validation: username >= 3 chars, password >= 4 chars, no duplicate username
+- Response 201:
+```json
+{
+  "success": true,
+  "id": "guid",
+  "username": "myusername",
+  "role": "EndUser",
+  "preferredLanguage": "vi",
+  "createdAtUtc": "2026-04-24T00:00:00Z",
+  "plan": "Basic",
+  "message": "Đăng ký thành công! Vui lòng liên hệ quản trị viên để kích hoạt gói Premium."
+}
+```
+- Response 400:
+```json
+{ "success": false, "message": "Tên đăng nhập đã được sử dụng." }
+```
+
+### Login / Resolve user
 - POST /api/v1/users/resolve
 - Request:
 ```json
 {
-  "externalRef": "USER_WEB_001",
-  "preferredLanguage": "vi"
+  "username": "myusername",
+  "preferredLanguage": "vi",
+  "password": "mypassword"
 }
 ```
 - Response 200:
 ```json
 {
+  "success": true,
   "id": "guid",
-  "externalRef": "USER_WEB_001",
+  "username": "myusername",
+  "role": "EndUser",
   "preferredLanguage": "vi",
-  "createdAtUtc": "2026-04-02T10:00:00Z"
+  "plan": "Basic"
 }
 ```
 
@@ -44,23 +76,6 @@ OpenAPI:
 
 ### Search/List users (admin)
 - GET /api/v1/users?search=USER_WEB&limit=20
-
-### Seed demo users (admin)
-- POST /api/v1/users/demo-seed
-- Response 200:
-```json
-{
-  "createdCount": 4,
-  "users": [
-    {
-      "id": "guid",
-      "externalRef": "DEMO_ADMIN_01",
-      "preferredLanguage": "vi",
-      "createdAtUtc": "2026-04-02T10:00:00Z"
-    }
-  ]
-}
-```
 
 ## 2.1 Feature Segments
 

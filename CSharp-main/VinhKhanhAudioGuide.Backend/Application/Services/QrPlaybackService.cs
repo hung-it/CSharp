@@ -46,11 +46,26 @@ public sealed class QrPlaybackService(
 
         EnsureLocalAudioFileIfApplicable(asset.FilePath);
 
+        var audioPath = asset.FilePath ?? string.Empty;
+
+        if (audioPath.StartsWith("http://") || audioPath.StartsWith("https://"))
+        {
+            var slashMedia = audioPath.IndexOf("/media/");
+            audioPath = slashMedia >= 0
+                ? audioPath[(slashMedia + 1)..]
+                : audioPath;
+        }
+
+        if (audioPath.StartsWith("/media/"))
+            audioPath = audioPath["/media/".Length..];
+        else if (audioPath.StartsWith("/audio/"))
+            audioPath = audioPath["/audio/".Length..];
+
         return new QrPlaybackContent(
             poi.Id,
             poi.Code,
             poi.Name,
-            asset.FilePath,
+            audioPath,
             asset.IsTextToSpeech);
     }
 
@@ -128,9 +143,11 @@ public sealed class QrPlaybackService(
 
         // Convert path based on runtime environment
         string fullPath;
-        if (filePath.StartsWith("/audio/") || filePath.StartsWith("\\audio\\"))
+        if (filePath.StartsWith("/media/audio/", StringComparison.Ordinal) ||
+            filePath.StartsWith("\\media\\audio\\", StringComparison.OrdinalIgnoreCase) ||
+            filePath.StartsWith("/audio/", StringComparison.Ordinal) ||
+            filePath.StartsWith("\\audio\\", StringComparison.OrdinalIgnoreCase))
         {
-            // Relative to uploads folder
             var basePath = Path.Combine(AppContext.BaseDirectory, "Data", "uploads");
             var relativePath = filePath.TrimStart('/').Replace("/", Path.DirectorySeparatorChar.ToString());
             fullPath = Path.Combine(basePath, relativePath);

@@ -70,4 +70,16 @@ public interface IListeningSessionService
     Task<int> GetListeningCountForPoiAsync(
         Guid poiId,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Get count of active (ongoing, not ended) sessions per POI.
+    /// </summary>
+    Task<Dictionary<Guid, int>> GetActiveSessionCountsByPoiAsync(
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Get total active session count across all POIs.
+    /// </summary>
+    Task<int> GetTotalActiveSessionCountAsync(
+        CancellationToken cancellationToken = default);
 }

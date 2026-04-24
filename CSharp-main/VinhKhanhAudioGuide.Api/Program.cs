@@ -101,7 +101,62 @@ api.MapGet("/health", () => Results.Ok(new
     utc = DateTime.UtcNow
 }));
 
+api.MapPost("/admin/cleanup-sessions", async (
+    AudioGuideDbContext dbContext,
+    CancellationToken cancellationToken) =>
+{
+    var orphaned = await dbContext.ListeningSessions
+        .Where(s => s.EndedAtUtc == null)
+        .ToListAsync(cancellationToken);
+
+    foreach (var session in orphaned)
+    {
+        session.EndedAtUtc = session.StartedAtUtc.AddSeconds(30);
+        session.DurationSeconds = 30;
+    }
+
+    await dbContext.SaveChangesAsync(cancellationToken);
+
+    return Results.Ok(new { cleaned = orphaned.Count });
+});
+
+api.MapPost("/admin/cleanup-anon-users", async (
+    AudioGuideDbContext dbContext,
+    CancellationToken cancellationToken) =>
+{
+    var anonUsers = await dbContext.Users
+        .Where(u => string.IsNullOrWhiteSpace(u.Username))
+        .ToListAsync(cancellationToken);
+
+    var anonUserIds = anonUsers.Select(u => u.Id).ToList();
+
+    if (anonUserIds.Count == 0)
+    {
+        return Results.Ok(new { deletedUsers = 0, deletedSessions = 0, deletedSubscriptions = 0 });
+    }
+
+    var sessionsDeleted = await dbContext.ListeningSessions
+        .Where(s => anonUserIds.Contains(s.UserId))
+        .ExecuteDeleteAsync(cancellationToken);
+
+    var subsDeleted = await dbContext.Subscriptions
+        .Where(s => anonUserIds.Contains(s.UserId))
+        .ExecuteDeleteAsync(cancellationToken);
+
+    var usersDeleted = await dbContext.Users
+        .Where(u => anonUserIds.Contains(u.Id))
+        .ExecuteDeleteAsync(cancellationToken);
+
+    return Results.Ok(new
+    {
+        deletedUsers = anonUsers.Count,
+        deletedSessions = sessionsDeleted,
+        deletedSubscriptions = subsDeleted
+    });
+});
+
 api.MapPost("/users/resolve", async (
+    HttpContext httpContext,
     [FromBody] ResolveUserRequest request,
     AudioGuideDbContext dbContext,
     ISubscriptionService subscriptionService,
@@ -165,12 +220,20 @@ api.MapPost("/users/resolve", async (
         }
         else if (!string.IsNullOrWhiteSpace(user.PasswordHash))
         {
-            // User has password but none provided
-            return Results.Ok(new
+            // Only require password when the caller is NOT already authenticated.
+            // If the request includes an X-User-Id header (admin/session is valid),
+            // skip the password check and allow lookup.
+            var hasValidSession = httpContext.Request.Headers.TryGetValue("X-User-Id", out var callerId)
+                && Guid.TryParse(callerId.ToString(), out _);
+
+            if (!hasValidSession)
             {
-                success = false,
-                message = "Vui lòng nhập mật khẩu."
-            });
+                return Results.Ok(new
+                {
+                    success = false,
+                    message = "Vui lòng nhập mật khẩu."
+                });
+            }
         }
     }
 
@@ -198,6 +261,108 @@ api.MapPost("/users/resolve", async (
         user.PreferredLanguage,
         user.CreatedAtUtc,
         plan = planTier
+    });
+});
+
+api.MapPost("/users/anonymous", async (
+    AudioGuideDbContext dbContext,
+    ISubscriptionService subscriptionService,
+    CancellationToken cancellationToken) =>
+{
+    var tempUsername = $"Guest_{Guid.NewGuid():N}";
+    var tempPassword = Guid.NewGuid().ToString();
+
+    var user = new User
+    {
+        Username = tempUsername,
+        ExternalRef = $"ANON_{Guid.NewGuid():N}",
+        PasswordHash = HashPassword(tempPassword),
+        Role = UserRole.EndUser,
+        PreferredLanguage = "vi",
+        CreatedAtUtc = DateTime.UtcNow
+    };
+
+    dbContext.Users.Add(user);
+    await dbContext.SaveChangesAsync(cancellationToken);
+
+    var planTier = "Basic";
+    try
+    {
+        var subscription = await subscriptionService.GetActiveSubscriptionAsync(user.Id, cancellationToken);
+        if (subscription != null)
+        {
+            planTier = subscription.PlanTier.ToString();
+        }
+    }
+    catch { }
+
+    return Results.Ok(new
+    {
+        success = true,
+        id = user.Id,
+        username = user.Username,
+        password = tempPassword,
+        role = user.Role.ToString(),
+        preferredLanguage = user.PreferredLanguage,
+        createdAtUtc = user.CreatedAtUtc,
+        plan = planTier
+    });
+});
+
+api.MapPost("/users/register", async (
+    [FromBody] RegisterRequest request,
+    AudioGuideDbContext dbContext,
+    CancellationToken cancellationToken) =>
+{
+    if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
+    {
+        return Results.BadRequest(new { success = false, message = "Username và mật khẩu không được để trống." });
+    }
+
+    var username = request.Username.Trim();
+
+    if (username.Length < 3)
+    {
+        return Results.BadRequest(new { success = false, message = "Tên đăng nhập phải có ít nhất 3 ký tự." });
+    }
+
+    if (request.Password.Length < 4)
+    {
+        return Results.BadRequest(new { success = false, message = "Mật khẩu phải có ít nhất 4 ký tự." });
+    }
+
+    // Check duplicate username
+    var existing = await dbContext.Users.FirstOrDefaultAsync(
+        x => x.Username == username, cancellationToken);
+
+    if (existing != null)
+    {
+        return Results.BadRequest(new { success = false, message = "Tên đăng nhập đã được sử dụng." });
+    }
+
+    var user = new User
+    {
+        Username = username,
+        ExternalRef = $"REG_{Guid.NewGuid():N}",
+        PasswordHash = HashPassword(request.Password),
+        PreferredLanguage = string.IsNullOrWhiteSpace(request.PreferredLanguage) ? "vi" : request.PreferredLanguage,
+        Role = UserRole.EndUser,
+        CreatedAtUtc = DateTime.UtcNow
+    };
+
+    dbContext.Users.Add(user);
+    await dbContext.SaveChangesAsync(cancellationToken);
+
+    return Results.Created($"/api/v1/users/{user.Id}", new
+    {
+        success = true,
+        id = user.Id,
+        user.Username,
+        role = user.Role.ToString(),
+        preferredLanguage = user.PreferredLanguage,
+        createdAtUtc = user.CreatedAtUtc,
+        plan = "Basic",
+        message = "Đăng ký thành công! Vui lòng liên hệ quản trị viên để kích hoạt gói Premium."
     });
 });
 
@@ -548,67 +713,6 @@ api.MapDelete("/users/{userId:guid}", async (
 
     await dbContext.SaveChangesAsync(cancellationToken);
     return Results.NoContent();
-});
-
-api.MapPost("/users/demo-seed", async (
-    AudioGuideDbContext dbContext,
-    CancellationToken cancellationToken) =>
-{
-    var demoUsers = new[]
-    {
-        (ExternalRef: "ADMIN_USER", PreferredLanguage: "vi", Role: UserRole.Admin),
-        (ExternalRef: "SHOP_MANAGER_01", PreferredLanguage: "vi", Role: UserRole.ShopManager),
-        (ExternalRef: "SHOP_MANAGER_02", PreferredLanguage: "vi", Role: UserRole.ShopManager),
-        (ExternalRef: "SHOP_MANAGER_03", PreferredLanguage: "vi", Role: UserRole.ShopManager),
-    };
-
-    var createdCount = 0;
-    foreach (var (externalRef, preferredLanguage, role) in demoUsers)
-    {
-        var exists = await dbContext.Users.AnyAsync(x => x.ExternalRef == externalRef, cancellationToken);
-        if (exists)
-        {
-            var user = await dbContext.Users.FirstOrDefaultAsync(x => x.ExternalRef == externalRef, cancellationToken);
-            if (user is not null && user.Role != role)
-            {
-                user.Role = role;
-            }
-            continue;
-        }
-
-        dbContext.Users.Add(new User
-        {
-            ExternalRef = externalRef,
-            PreferredLanguage = preferredLanguage,
-            Role = role
-        });
-
-        createdCount++;
-    }
-
-    if (createdCount > 0)
-    {
-        await dbContext.SaveChangesAsync(cancellationToken);
-    }
-
-    var users = await dbContext.Users
-        .AsNoTracking()
-        .Where(x => x.ExternalRef == "ADMIN_USER" || x.ExternalRef.StartsWith("SHOP_MANAGER_"))
-        .OrderBy(x => x.ExternalRef)
-        .Select(x => new
-        {
-            x.Id,
-            x.ExternalRef,
-            role = x.Role.ToString(),
-            x.PreferredLanguage
-        })
-        .ToListAsync(cancellationToken);
-
-    return Results.Ok(new
-    {
-        createdCount,
-        users
-    });
 });
 
 api.MapPost("/admin/reset-and-seed", async (
@@ -1406,6 +1510,7 @@ api.MapGet("/sessions", async (
             x.Id,
             x.UserId,
             userExternalRef = x.User != null ? x.User.ExternalRef : null,
+            userName = x.User != null ? x.User.Username : null,
             x.PoiId,
             poiName = x.Poi != null ? x.Poi.Name : null,
             x.StartedAtUtc,
@@ -1437,6 +1542,16 @@ api.MapGet("/sessions/users/{userId:guid}", async (
 {
     var sessions = await sessionService.GetSessionsByUserAsync(userId, startDate, endDate, cancellationToken);
     return Results.Ok(sessions.Select(MapListeningSession));
+});
+
+api.MapGet("/sessions/active", async (
+    IListeningSessionService sessionService,
+    CancellationToken cancellationToken) =>
+{
+    var countsByPoi = await sessionService.GetActiveSessionCountsByPoiAsync(cancellationToken);
+    var total = await sessionService.GetTotalActiveSessionCountAsync(cancellationToken);
+    var byPoi = countsByPoi.Select(kv => new { poiId = kv.Key, activeCount = kv.Value }).ToList();
+    return Results.Ok(new { totalActive = total, byPoi });
 });
 
 api.MapPost("/qr/start", async (
@@ -2366,6 +2481,11 @@ public sealed record ResolveUserRequest(
     // Alias for backward compatibility with mobile app
     public string? ExternalRef => Username;
 }
+
+public sealed record RegisterRequest(
+    string Username,
+    string Password,
+    string PreferredLanguage = "vi");
 
 public sealed record ChangePasswordRequest(
     string Username,

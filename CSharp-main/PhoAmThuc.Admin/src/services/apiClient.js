@@ -32,10 +32,11 @@ export function buildQuery(params = {}) {
 }
 
 async function apiRequest(path, method, options = {}) {
-  const userId = options.userId || getUserId();
+  const { headers: requestHeaders, ...rest } = options;
+  const userId = rest.userId || getUserId();
   const headers = {
     Accept: 'application/json',
-    ...options.headers,
+    ...requestHeaders,
   };
 
   if (userId) {
@@ -45,7 +46,7 @@ async function apiRequest(path, method, options = {}) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     method,
     headers,
-    ...options,
+    ...rest,
   });
 
   if (!response.ok) {
@@ -96,9 +97,17 @@ export function apiPostWithUser(path, body, userId, options = {}) {
   });
 }
 
-export function apiPostForm(path, formData, options = {}) {
+export function apiPostForm(path, formData, userId, options = {}) {
+  if (typeof userId === 'object') {
+    options = userId;
+    userId = null;
+  }
+  const { headers: extraHeaders, ...rest } = options;
+  const mergedHeaders = { ...extraHeaders };
+  delete mergedHeaders['Content-Type'];
   return apiRequest(path, 'POST', {
-    ...options,
+    ...rest,
+    headers: mergedHeaders,
     body: formData,
   });
 }

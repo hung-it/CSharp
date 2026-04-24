@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { apiGet, buildQuery } from '../services/apiClient';
+import { apiGet, apiPost, buildQuery } from '../services/apiClient';
 
 export default function UsageHistoryPage() {
   const [search, setSearch] = useState('');
@@ -9,6 +9,7 @@ export default function UsageHistoryPage() {
   const [error, setError] = useState('');
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   const [isLoadingSessions, setIsLoadingSessions] = useState(false);
+  const [cleanupMessage, setCleanupMessage] = useState('');
 
   const handleSearchUsers = useCallback(async (targetSearch = '') => {
     setIsLoadingUsers(true);
@@ -16,7 +17,9 @@ export default function UsageHistoryPage() {
 
     try {
       const userData = await apiGet(`/users${buildQuery({ search: targetSearch, limit: 20 })}`);
-      const safeUsers = Array.isArray(userData) ? userData : [];
+      const safeUsers = (Array.isArray(userData) ? userData : []).filter(
+        (u) => !u.role || (u.role !== 'Admin' && u.role !== 'ShopManager')
+      );
       setUsers(safeUsers);
       setSelectedUserId(safeUsers[0]?.id || '');
     } catch (loadError) {
@@ -44,6 +47,25 @@ export default function UsageHistoryPage() {
     }
   }, []);
 
+  const handleCleanupAnonUsers = async () => {
+    const confirmed = window.confirm('Xóa tất cả user ảo (không có username)? Thao tác này cũng xóa sessions và subscriptions liên quan.');
+    if (!confirmed) return;
+
+    setError('');
+    setCleanupMessage('');
+    setIsLoadingUsers(true);
+    try {
+      const result = await apiPost('/admin/cleanup-anon-users', {});
+      const msg = `Đã xóa ${result.deletedUsers} user ảo, ${result.deletedSessions} sessions, ${result.deletedSubscriptions} subscriptions.`;
+      setCleanupMessage(msg);
+      await handleSearchUsers('');
+    } catch (cleanupError) {
+      setError(cleanupError.message || 'Không thể dọn dẹp user ảo.');
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  };
+
   useEffect(() => {
     handleSearchUsers('').catch(() => undefined);
   }, [handleSearchUsers]);
@@ -56,6 +78,15 @@ export default function UsageHistoryPage() {
 
     handleLoadSessions(selectedUserId).catch(() => undefined);
   }, [selectedUserId, handleLoadSessions]);
+
+  const formatDateTime = (utcValue) => {
+    if (!utcValue) return '-';
+    const d = new Date(utcValue);
+    const offset = 7 * 60;
+    const local = new Date(d.getTime() + offset * 60 * 1000);
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${pad(local.getUTCDate())}/${pad(local.getUTCMonth() + 1)}/${local.getUTCFullYear()} ${pad(local.getUTCHours())}:${pad(local.getUTCMinutes())}`;
+  };
 
   return (
     <div className='space-y-6 max-w-7xl mx-auto'>
@@ -98,18 +129,33 @@ export default function UsageHistoryPage() {
           </button>
         </div>
 
-        <select
-          className='w-full rounded-xl border border-pink-100 bg-pink-50/60 px-3 py-2'
-          value={selectedUserId}
-          onChange={(event) => setSelectedUserId(event.target.value)}
-        >
-          <option value=''>Chọn user</option>
-          {users.map((user) => (
-            <option key={user.id} value={user.id}>
-              {user.username || user.externalRef} - Tạo lúc: {new Date(user.createdAtUtc).toLocaleString()}
-            </option>
-          ))}
-        </select>
+        <div className='flex items-center justify-between'>
+          <select
+            className='flex-1 rounded-xl border border-pink-100 bg-pink-50/60 px-3 py-2'
+            value={selectedUserId}
+            onChange={(event) => setSelectedUserId(event.target.value)}
+          >
+            <option value=''>Chọn user</option>
+            {users.map((user) => (
+              <option key={user.id} value={user.id}>
+                {user.username || user.externalRef} - Tạo lúc: {formatDateTime(user.createdAtUtc)}
+              </option>
+            ))}
+          </select>
+          <button
+            className='ml-3 rounded-xl border border-rose-200 text-rose-700 font-semibold px-4 py-2 bg-rose-50/70 text-sm'
+            onClick={handleCleanupAnonUsers}
+            disabled={isLoadingUsers}
+          >
+            Dọn dẹp user ảo
+          </button>
+        </div>
+
+        {cleanupMessage && (
+          <div className='rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700'>
+            {cleanupMessage}
+          </div>
+        )}
       </div>
 
       <div className='bg-white rounded-2xl border border-pink-100 p-5 shadow-sm'>
@@ -126,8 +172,8 @@ export default function UsageHistoryPage() {
           <tbody>
             {sessions.map((session) => (
               <tr key={session.id} className='border-b border-pink-50'>
-                <td className='py-2'>{new Date(session.startedAtUtc).toLocaleString()}</td>
-                <td className='py-2'>{session.username || session.userId}</td>
+                <td className='py-2'>{formatDateTime(session.startedAtUtc)}</td>
+                <td className='py-2'>{session.userName || session.username || session.userExternalRef || session.userId}</td>
                 <td className='py-2'>{session.poiName || session.poiId}</td>
                 <td className='py-2 text-right'>{session.durationSeconds || 0}s</td>
                 <td className='py-2 text-right'>{session.triggerSource}</td>

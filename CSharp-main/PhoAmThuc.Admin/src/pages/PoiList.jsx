@@ -365,9 +365,9 @@ export default function PoiList() {
 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-5 rounded-2xl shadow-sm border border-pink-100">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Quản lý Điểm POI</h1>
+          <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-linear-to-r from-pink-600 to-purple-500">Quản lý Điểm POI</h1>
           {isShopManager && ownerInfo?.hasPois && (
-            <div className='mt-2 text-sm text-gray-600'>
+            <div className='mt-2 text-sm text-pink-400/90'>
               <Building2 size={14} className="inline mr-1" />
               Bạn đang quản lý <strong>{ownerInfo.totalCount}</strong> cửa hàng (POIs)
             </div>
@@ -387,7 +387,7 @@ export default function PoiList() {
               </button>
             </div>
           )}
-          <p className='text-sm text-gray-400 mt-1'>Thiết lập tọa độ, bán kính và nội dung cho các điểm thuyết minh</p>
+          <p className='text-sm text-pink-400/90 mt-1'>Thiết lập tọa độ, bán kính và nội dung cho các điểm thuyết minh</p>
         </div>
         {isAdmin && (
         <button

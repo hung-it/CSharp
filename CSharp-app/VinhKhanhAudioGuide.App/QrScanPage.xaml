@@ -1,116 +1,68 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:zxing="clr-namespace:ZXing.Net.Maui.Controls;assembly=ZXing.Net.Maui.Controls"
              x:Class="VinhKhanhAudioGuide.App.QrScanPage"
-             Title="Quét QR Code"
-             BackgroundColor="#000000">
+             BackgroundColor="Black"
+             Title="📷 Quét QR Code">
 
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+        <!-- Camera view -->
+        <zxing:CameraBarcodeReaderView
+            x:Name="BarcodeReader"
+            BarcodesDetected="OnBarcodesDetected"
+            HorizontalOptions="Fill"
+            VerticalOptions="Fill" />
 
-        <!-- Header -->
-        <Frame Grid.Row="0" BackgroundColor="#FF69B4" CornerRadius="0" Padding="16" HasShadow="False">
-            <StackLayout>
-                <Label Text="📷 Quét QR Code" FontSize="22" FontAttributes="Bold" TextColor="White" 
-                       HorizontalOptions="Center"/>
-            </StackLayout>
-        </Frame>
+        <!-- Overlay khung ngắm -->
+        <Grid HorizontalOptions="Fill" VerticalOptions="Fill">
 
-        <!-- Camera Preview Area -->
-        <Frame Grid.Row="1" BackgroundColor="#1A1A1A" CornerRadius="0" Padding="0" HasShadow="False">
-            <Grid>
-                <!-- Placeholder for camera -->
-                <StackLayout VerticalOptions="Center" HorizontalOptions="Center">
-                    <Label Text="📷" FontSize="80" HorizontalOptions="Center"/>
-                    <Label Text="Camera đang khởi tạo..." FontSize="16" TextColor="#999" 
-                           HorizontalOptions="Center" Margin="0,16,0,0"/>
-                </StackLayout>
+            <!-- 4 góc khung ngắm -->
+            <BoxView Color="#EC4899" WidthRequest="40" HeightRequest="4"
+                     HorizontalOptions="Center" VerticalOptions="Center"
+                     TranslationX="-78" TranslationY="-78" />
+            <BoxView Color="#EC4899" WidthRequest="4" HeightRequest="40"
+                     HorizontalOptions="Center" VerticalOptions="Center"
+                     TranslationX="-78" TranslationY="-60" />
 
-                <!-- Scanning Frame Overlay -->
-                <Frame WidthRequest="250" HeightRequest="250" 
-                       BackgroundColor="Transparent" 
-                       BorderColor="#FF69B4" 
-                       CornerRadius="20" 
-                       HorizontalOptions="Center" 
-                       VerticalOptions="Center"
-                       IsVisible="True">
-                    <Frame BorderColor="#FF69B4" BorderWidth="3" CornerRadius="20" BackgroundColor="Transparent">
-                        <StackLayout>
-                            <!-- Corner decorations -->
-                            <Grid HeightRequest="50">
-                                <BoxView BackgroundColor="#FF69B4" WidthRequest="50" HeightRequest="5" 
-                                         HorizontalOptions="Start" VerticalOptions="Start"/>
-                                <BoxView BackgroundColor="#FF69B4" WidthRequest="5" HeightRequest="50" 
-                                         HorizontalOptions="Start" VerticalOptions="Start"/>
-                                <BoxView BackgroundColor="#FF69B4" WidthRequest="50" HeightRequest="5" 
-                                         HorizontalOptions="End" VerticalOptions="Start"/>
-                                <BoxView BackgroundColor="#FF69B4" WidthRequest="5" HeightRequest="50" 
-                                         HorizontalOptions="End" VerticalOptions="Start"/>
-                                <BoxView BackgroundColor="#FF69B4" WidthRequest="50" HeightRequest="5" 
-                                         HorizontalOptions="Start" VerticalOptions="End"/>
-                                <BoxView BackgroundColor="#FF69B4" WidthRequest="5" HeightRequest="50" 
-                                         HorizontalOptions="Start" VerticalOptions="End"/>
-                                <BoxView BackgroundColor="#FF69B4" WidthRequest="50" HeightRequest="5" 
-                                         HorizontalOptions="End" VerticalOptions="End"/>
-                                <BoxView BackgroundColor="#FF69B4" WidthRequest="5" HeightRequest="50" 
-                                         HorizontalOptions="End" VerticalOptions="End"/>
-                            </Grid>
-                        </StackLayout>
-                    </Frame>
-                </Frame>
+            <BoxView Color="#EC4899" WidthRequest="40" HeightRequest="4"
+                     HorizontalOptions="Center" VerticalOptions="Center"
+                     TranslationX="78" TranslationY="-78" />
+            <BoxView Color="#EC4899" WidthRequest="4" HeightRequest="40"
+                     HorizontalOptions="Center" VerticalOptions="Center"
+                     TranslationX="78" TranslationY="-60" />
 
-                <!-- Scanning Animation -->
-                <BoxView x:Name="ScanLine" WidthRequest="230" HeightRequest="3" 
-                         BackgroundColor="#00FF00" Opacity="0.8"
-                         HorizontalOptions="Center" VerticalOptions="Center"
-                         IsVisible="True"/>
-            </Grid>
-        </Frame>
+            <BoxView Color="#EC4899" WidthRequest="40" HeightRequest="4"
+                     HorizontalOptions="Center" VerticalOptions="Center"
+                     TranslationX="-78" TranslationY="78" />
+            <BoxView Color="#EC4899" WidthRequest="4" HeightRequest="40"
+                     HorizontalOptions="Center" VerticalOptions="Center"
+                     TranslationX="-78" TranslationY="60" />
 
-        <!-- Bottom Section -->
-        <Frame Grid.Row="2" BackgroundColor="#1A1A1A" CornerRadius="20" Margin="0" Padding="20" HasShadow="False">
-            <StackLayout>
-                <!-- Instructions -->
-                <StackLayout Orientation="Horizontal" HorizontalOptions="Center">
-                    <Label Text="📷" FontSize="20"/>
-                    <Label Text="Hướng camera vào mã QR tại điểm tham quan" 
-                           FontSize="14" TextColor="#CCCCCC" 
-                           VerticalOptions="Center" Margin="8,0,0,0"/>
-                </StackLayout>
+            <BoxView Color="#EC4899" WidthRequest="40" HeightRequest="4"
+                     HorizontalOptions="Center" VerticalOptions="Center"
+                     TranslationX="78" TranslationY="78" />
+            <BoxView Color="#EC4899" WidthRequest="4" HeightRequest="40"
+                     HorizontalOptions="Center" VerticalOptions="Center"
+                     TranslationX="78" TranslationY="60" />
 
-                <!-- Status -->
-                <Label x:Name="StatusLabel" Text="⏳ Đang quét..." 
-                       FontSize="16" TextColor="#FF69B4" 
-                       HorizontalOptions="Center" Margin="0,12,0,0"/>
+            <!-- Hướng dẫn -->
+            <Label Text="📷 Hướng camera vào mã QR tại điểm tham quan"
+                   TextColor="White" FontSize="14" HorizontalTextAlignment="Center"
+                   HorizontalOptions="Center" VerticalOptions="End"
+                   Margin="20,0,20,60"
+                   BackgroundColor="#80000000" Padding="12,8" />
 
-                <!-- Loading -->
-                <ActivityIndicator x:Name="LoadingIndicator" 
-                                   Color="#FF69B4" HorizontalOptions="Center"
-                                   IsRunning="True" IsVisible="True" Margin="0,8,0,0"/>
-
-                <!-- Buttons -->
-                <Grid Margin="0,16,0,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <Button Grid.Column="0" Text="❌ Đóng" 
-                            BackgroundColor="#333333" TextColor="White" 
-                            CornerRadius="20" Margin="0,0,8,0"
-                            Clicked="CloseButton_Clicked"/>
-                    <Button Grid.Column="1" Text="🔔 Thủ công" 
-                            BackgroundColor="#FF69B4" TextColor="White" 
-                            CornerRadius="20" Margin="8,0,0,0"
-                            Clicked="ManualButton_Clicked"/>
-                </Grid>
-            </StackLayout>
-        </Frame>
-
+            <!-- Nút đóng -->
+            <Button Text="❌ Đóng"
+                    BackgroundColor="#80000000"
+                    TextColor="White"
+                    CornerRadius="20"
+                    WidthRequest="100" HeightRequest="40"
+                    HorizontalOptions="End" VerticalOptions="Start"
+                    Margin="0,50,16,0"
+                    Clicked="OnCloseClicked" />
+        </Grid>
     </Grid>
 
 </ContentPage>

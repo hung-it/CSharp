@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BarChart3, Flame, MapPinned, Timer, Eye, Users, TrendingUp } from 'lucide-react';
+import { BarChart3, Flame, MapPinned, Timer, Eye, Users, TrendingUp, Radio } from 'lucide-react';
 import { apiGet, apiGetWithUser, buildQuery } from '../services/apiClient';
 import { useUser } from '../contexts/UserContext.jsx';
-import { Circle, MapContainer, Marker, Popup, Polyline, TileLayer } from 'react-leaflet';
+import { Circle, MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
 import L from 'leaflet';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
@@ -36,9 +36,7 @@ export default function DashboardPage() {
   });
   const [dailyStats, setDailyStats] = useState([]);
   const [heatmap, setHeatmap] = useState([]);
-  const [anonymousRef, setAnonymousRef] = useState('demo-route-01');
-  const [routePoints, setRoutePoints] = useState([]);
-  const [isLoadingRoute, setIsLoadingRoute] = useState(false);
+  const [liveSessions, setLiveSessions] = useState({ totalActive: 0, byPoi: [] });
 
   useEffect(() => {
     let active = true;
@@ -71,7 +69,7 @@ export default function DashboardPage() {
           [listeningData, visitData, usageData, heatmapData, dailyData] = await Promise.all([
             apiGet('/analytics/top?limit=5'),
             apiGet('/analytics/visits/top?limit=5'),
-            apiGet(`/analytics/usage?days=7`),
+            apiGet(`/analytics/summary?days=7`),
             apiGet(`/analytics/heatmap${buildQuery({
               startDate: start.toISOString(),
               endDate: now.toISOString(),
@@ -84,7 +82,7 @@ export default function DashboardPage() {
           [listeningData, visitData, usageData, heatmapData, dailyData] = await Promise.all([
             apiGet(`/analytics/top?limit=5&managerId=${currentUser.id}`),
             apiGet(`/analytics/visits/top?limit=5&managerId=${currentUser.id}`),
-            apiGet(`/analytics/usage?days=7&managerId=${currentUser.id}`),
+            apiGet(`/analytics/summary?days=7&managerId=${currentUser.id}`),
             apiGet(`/analytics/heatmap${buildQuery({
               startDate: start.toISOString(),
               endDate: now.toISOString(),
@@ -101,11 +99,11 @@ export default function DashboardPage() {
         setTopPoisByVisit(Array.isArray(visitData) ? visitData : []);
         setUsage({
           totalVisits: usageData?.totalVisits || 0,
-          totalListens: usageData?.totalListens || 0,
+          totalListens: usageData?.totalListenings || 0,
           totalListenDuration: usageData?.totalListenDurationSeconds || 0,
           uniqueVisitors: usageData?.uniqueVisitors || 0,
           activeCells: Array.isArray(heatmapData) ? heatmapData.length : 0,
-          days: usageData?.days || 7
+          days: 7
         });
         setDailyStats(Array.isArray(dailyData) ? dailyData : []);
         setHeatmap(Array.isArray(heatmapData) ? heatmapData : []);
@@ -120,33 +118,25 @@ export default function DashboardPage() {
 
     loadDashboard();
 
-    return () => { active = false; };
-  }, [isAdmin, isShopManager, currentUser?.id]);
-
-  async function handleLoadRoute() {
-    const ref = anonymousRef.trim();
-    if (!ref) return;
-
-    setIsLoadingRoute(true);
-    setError('');
-
-    try {
-      const routeData = await apiGet(`/routes/anonymous/${encodeURIComponent(ref)}`);
-      setRoutePoints(Array.isArray(routeData) ? routeData : []);
-    } catch (loadError) {
-      setError(loadError.message || 'Không thể tải tuyến ẩn danh.');
-    } finally {
-      setIsLoadingRoute(false);
+    // Poll live session counts every 5 seconds
+    let pollInterval;
+    if (isAdmin || isShopManager) {
+      async function pollLiveSessions() {
+        try {
+          const data = await apiGet('/sessions/active');
+          if (active) setLiveSessions(data || { totalActive: 0, byPoi: [] });
+        } catch { /* silent */ }
+      }
+      pollLiveSessions();
+      pollInterval = setInterval(pollLiveSessions, 5000);
     }
-  }
+
+    return () => { active = false; if (pollInterval) clearInterval(pollInterval); };
+  }, [isAdmin, isShopManager, currentUser?.id]);
 
   const mapCenter = pois.length > 0
     ? [pois[0].latitude, pois[0].longitude]
     : [10.758, 106.69];
-
-  const routePath = routePoints
-    .map((point) => [point.latitude, point.longitude])
-    .filter((point) => Number.isFinite(point[0]) && Number.isFinite(point[1]));
 
   const quickActions = [
     { label: 'Quản lý POI', path: '/pois', roles: ['Admin', 'ShopManager'] },
@@ -167,6 +157,11 @@ export default function DashboardPage() {
       longitude: cell.longitudeBucket ?? cell.cellLongitude,
     }))
     .filter((cell) => Number.isFinite(cell.latitude) && Number.isFinite(cell.longitude));
+
+  const liveCountByPoi = new Map(
+    (liveSessions.byPoi || []).map(p => [p.poiId, p.activeCount])
+  );
+  const totalLive = liveSessions.totalActive || 0;
 
   const formatDuration = (seconds) => {
     if (!seconds) return '0s';
@@ -234,6 +229,14 @@ export default function DashboardPage() {
             value={isLoading ? '...' : `${usage.days} ngày`}
             subtitle='7 ngày gần nhất'
             onClick={() => navigate('/analytics')}
+          />
+          <MetricCard
+            icon={<Radio size={20} />}
+            title='Đang nghe'
+            value={totalLive}
+            subtitle={totalLive > 0 ? 'du khách' : 'hiện không có ai'}
+            onClick={() => navigate('/analytics')}
+            highlight={totalLive > 0}
           />
         </div>
       )}
@@ -337,19 +340,26 @@ export default function DashboardPage() {
               <h2 className='font-semibold text-pink-700'>Heatmap nổi bật</h2>
             </div>
             <div className='p-4 space-y-2'>
-              {heatmapPoints.slice(0, 8).map((cell, index) => (
-                <div
-                  key={`${cell.latitude}-${cell.longitude}-${index}`}
-                  className='flex items-center justify-between rounded-lg border border-pink-100 px-3 py-2'
-                >
-                  <span className='text-sm text-gray-700'>
-                    Lat {cell.latitude.toFixed(4)} / Lng {cell.longitude.toFixed(4)}
-                  </span>
-                  <span className='text-xs font-semibold text-pink-700 bg-pink-100 px-2 py-1 rounded'>
-                    {cell.pointCount} points
-                  </span>
-                </div>
-              ))}
+              {heatmapPoints.slice(0, 8).map((cell, index) => {
+                const nearestPoi = pois.find((poi) => {
+                  const latDiff = Math.abs(poi.latitude - cell.latitude);
+                  const lngDiff = Math.abs(poi.longitude - cell.longitude);
+                  return latDiff < 0.01 && lngDiff < 0.01;
+                });
+                return (
+                  <div
+                    key={`${cell.latitude}-${cell.longitude}-${index}`}
+                    className='flex items-center justify-between rounded-lg border border-pink-100 px-3 py-2'
+                  >
+                    <span className='text-sm text-gray-700'>
+                      {nearestPoi ? nearestPoi.name : `Lat ${cell.latitude.toFixed(4)} / Lng ${cell.longitude.toFixed(4)}`}
+                    </span>
+                    <span className='text-xs font-semibold text-pink-700 bg-pink-100 px-2 py-1 rounded'>
+                      {cell.pointCount} điểm
+                    </span>
+                  </div>
+                );
+              })}
               {!isLoading && heatmap.length === 0 && (
                 <div className='text-sm text-gray-500'>Chưa có dữ liệu heatmap.</div>
               )}
@@ -359,28 +369,10 @@ export default function DashboardPage() {
       </div>
 
       <div className='bg-white rounded-2xl shadow-sm border border-pink-100 overflow-hidden'>
-        <div className='px-5 py-4 border-b border-pink-100 bg-pink-50/60 flex flex-wrap items-center gap-3 justify-between'>
+        <div className='px-5 py-4 border-b border-pink-100 bg-pink-50/60'>
           <h2 className='font-semibold text-pink-700'>
-            {isAdmin ? 'Bản đồ POI + Heatmap + Route' : 'Bản đồ POI của bạn'}
+            {isAdmin ? 'Bản đồ POI + Heatmap' : 'Bản đồ POI của bạn'}
           </h2>
-          {isAdmin && (
-          <div className='flex flex-wrap items-center gap-2'>
-            <input
-              className='rounded-lg border border-pink-100 px-3 py-1.5 text-sm'
-              value={anonymousRef}
-              onChange={(event) => setAnonymousRef(event.target.value)}
-              placeholder='anonymousRef để vẽ route'
-            />
-            <button
-              type='button'
-              onClick={handleLoadRoute}
-              disabled={isLoadingRoute}
-              className='rounded-lg border border-pink-200 bg-pink-50 px-3 py-1.5 text-sm font-medium text-pink-700 disabled:opacity-60'
-            >
-              {isLoadingRoute ? 'Đang tải route...' : 'Tải route ẩn danh'}
-            </button>
-          </div>
-          )}
         </div>
 
         <div className='h-115'>
@@ -390,7 +382,9 @@ export default function DashboardPage() {
               url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
             />
 
-            {pois.map((poi) => (
+            {pois.map((poi) => {
+              const live = liveCountByPoi.get(poi.id) || 0;
+              return (
               <Marker key={poi.id} position={[poi.latitude, poi.longitude]}>
                 <Popup>
                   <div className='space-y-1 text-sm'>
@@ -398,6 +392,9 @@ export default function DashboardPage() {
                     <div>Mã: {poi.code}</div>
                     <div>Ưu tiên: {poi.priority ?? 0}</div>
                     <div>Radius: {poi.triggerRadiusMeters}m</div>
+                    {live > 0 && (
+                      <div className='text-green-600 font-semibold'>🎧 Đang nghe: {live}</div>
+                    )}
                     {poi.mapLink && (
                       <a href={poi.mapLink} target='_blank' rel='noreferrer'>
                         Mở map link
@@ -406,29 +403,52 @@ export default function DashboardPage() {
                   </div>
                 </Popup>
               </Marker>
-            ))}
+              );
+            })}
 
-            {isAdmin && heatmapPoints.map((cell, index) => (
+            {isAdmin && heatmapPoints.map((cell, index) => {
+              const maxCount = Math.max(...heatmapPoints.map(p => p.pointCount), 1);
+              const intensity = cell.pointCount / maxCount; // 0..1
+              // Color scale: light pink → deep rose
+              const r = Math.round(251 + (243 - 251) * intensity);
+              const g = Math.round(113 + (63 - 113) * intensity);
+              const b = Math.round(133 + (94 - 133) * intensity);
+              const fillOpacity = 0.15 + 0.45 * intensity;
+              return (
               <Circle
                 key={`${cell.latitude}-${cell.longitude}-${index}`}
                 center={[cell.latitude, cell.longitude]}
-                radius={40 + cell.pointCount * 8}
+                radius={40 + cell.pointCount * 10}
                 pathOptions={{
-                  color: '#f43f5e',
-                  fillColor: '#fb7185',
-                  fillOpacity: 0.2,
+                  color: `rgb(${r},${g},${b})`,
+                  fillColor: `rgb(${r},${g},${b})`,
+                  fillOpacity,
                   weight: 1,
                 }}
               />
-            ))}
+              );
+            })}
 
-            {isAdmin && routePath.length > 1 && (
-              <Polyline
-                positions={routePath}
-                pathOptions={{ color: '#2563eb', weight: 4, opacity: 0.8 }}
-              />
-            )}
           </MapContainer>
+
+          {isAdmin && heatmapPoints.length > 0 && (
+            <div className='px-4 py-2 flex items-center gap-3 text-xs text-gray-500 border-t border-pink-100'>
+              <span>Heatmap:</span>
+              <div className='flex items-center gap-1'>
+                <div className='w-4 h-3 rounded' style={{ backgroundColor: 'rgba(251,113,133,0.15)', border: '1px solid rgba(251,113,133,0.3)' }} />
+                <span>Ít</span>
+              </div>
+              <div className='flex items-center gap-1'>
+                <div className='w-4 h-3 rounded' style={{ backgroundColor: 'rgba(230,75,130,0.40)' }} />
+                <span>Trung bình</span>
+              </div>
+              <div className='flex items-center gap-1'>
+                <div className='w-4 h-3 rounded' style={{ backgroundColor: 'rgba(190,24,93,0.70)' }} />
+                <span>Nhiều</span>
+              </div>
+              <span className='ml-auto'>Điểm nóng nhất: {Math.max(...heatmapPoints.map(p => p.pointCount))} lượt</span>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -447,16 +467,16 @@ function QuickAction({ label, onClick }) {
   );
 }
 
-function MetricCard({ icon, title, value, subtitle, onClick }) {
+function MetricCard({ icon, title, value, subtitle, onClick, highlight }) {
   return (
     <button
       type='button'
       onClick={onClick}
-      className='bg-white rounded-xl border border-pink-100 p-4 shadow-sm text-left hover:border-pink-300 hover:shadow-md transition'
+      className={`bg-white rounded-xl border p-4 shadow-sm text-left hover:shadow-md transition ${highlight ? 'border-green-400 bg-green-50' : 'border-pink-100 hover:border-pink-300'}`}
     >
-      <div className='flex items-center gap-2 text-pink-600'>{icon}</div>
+      <div className={`flex items-center gap-2 ${highlight ? 'text-green-600' : 'text-pink-600'}`}>{icon}</div>
       <p className='text-sm text-gray-500 mt-2'>{title}</p>
-      <p className='text-2xl font-bold text-gray-800 mt-1'>{value}</p>
+      <p className={`text-2xl font-bold mt-1 ${highlight ? 'text-green-700' : 'text-gray-800'}`}>{value}</p>
       {subtitle && <p className='text-xs text-gray-400 mt-1'>{subtitle}</p>}
     </button>
   );

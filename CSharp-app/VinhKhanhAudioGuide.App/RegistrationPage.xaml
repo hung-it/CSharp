@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="VinhKhanhAudioGuide.App.RegistrationPage"
+             BackgroundColor="#FFFBF5"
+             Title="Đăng ký">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="20">
+
+            <!-- Header -->
+            <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
+                <Border BackgroundColor="#FCE7F3" StrokeThickness="0" StrokeShape="RoundRectangle 40"
+                       WidthRequest="80" HeightRequest="80">
+                    <Label Text="PK" FontSize="32" FontAttributes="Bold" TextColor="#EC4899"
+                           HorizontalOptions="Center" VerticalOptions="Center" />
+                </Border>
+                <Label Text="Tạo tài khoản mới" FontSize="24" FontAttributes="Bold"
+                       TextColor="#EC4899" HorizontalOptions="Center" />
+                <Label Text="Đăng ký để trải nghiệm đầy đủ tính năng" FontSize="13"
+                       TextColor="#6B7280" HorizontalOptions="Center" />
+            </VerticalStackLayout>
+
+            <!-- Form -->
+            <Border BackgroundColor="White" StrokeThickness="0"
+                    StrokeShape="RoundRectangle 16" Padding="20">
+                <VerticalStackLayout Spacing="16">
+
+                    <!-- Username -->
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="Tên đăng nhập" FontSize="13" FontAttributes="Bold"
+                               TextColor="#374151" />
+                        <Entry x:Name="UsernameEntry" Placeholder="Nhập tên đăng nhập (ít nhất 3 ký tự)"
+                               FontSize="15" BackgroundColor="#F9FAFB"
+                               TextColor="#1F2937" />
+                    </VerticalStackLayout>
+
+                    <!-- Password -->
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="Mật khẩu" FontSize="13" FontAttributes="Bold"
+                               TextColor="#374151" />
+                        <Entry x:Name="PasswordEntry" Placeholder="Nhập mật khẩu (ít nhất 4 ký tự)"
+                               FontSize="15" BackgroundColor="#F9FAFB"
+                               TextColor="#1F2937" IsPassword="True" />
+                    </VerticalStackLayout>
+
+                    <!-- Confirm Password -->
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="Xác nhận mật khẩu" FontSize="13" FontAttributes="Bold"
+                               TextColor="#374151" />
+                        <Entry x:Name="ConfirmPasswordEntry" Placeholder="Nhập lại mật khẩu"
+                               FontSize="15" BackgroundColor="#F9FAFB"
+                               TextColor="#1F2937" IsPassword="True" />
+                    </VerticalStackLayout>
+
+                    <!-- Status Message -->
+                    <Label x:Name="StatusLabel" FontSize="12"
+                           IsVisible="False" />
+
+                    <!-- Loading -->
+                    <ActivityIndicator x:Name="LoadingIndicator" IsRunning="False"
+                                       Color="#EC4899" HorizontalOptions="Center"
+                                       IsVisible="False" />
+
+                    <!-- Register Button -->
+                    <Button x:Name="RegisterBtn" Text="Đăng ký" BackgroundColor="#EC4899"
+                            TextColor="White" FontSize="15" FontAttributes="Bold"
+                            CornerRadius="12" HeightRequest="48"
+                            Clicked="OnRegisterClicked" />
+
+                    <!-- Back to Login -->
+                    <HorizontalStackLayout Spacing="4" HorizontalOptions="Center">
+                        <Label Text="Đã có tài khoản?" FontSize="13"
+                               TextColor="#6B7280" />
+                        <Label Text=" Đăng nhập" FontSize="13" FontAttributes="Bold"
+                               TextColor="#EC4899">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnBackToLoginTapped" />
+                            </Label.GestureRecognizers>
+                        </Label>
+                    </HorizontalStackLayout>
+
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Info Card -->
+            <Border BackgroundColor="#F0FDF4" StrokeThickness="0"
+                    StrokeShape="RoundRectangle 12" Padding="16">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Sau khi đăng ký" FontSize="14" FontAttributes="Bold"
+                           TextColor="#065F46" />
+                    <Label Text="1. Tài khoản sẽ được tạo với gói Basic (miễn phí)."
+                           FontSize="12" TextColor="#047857" />
+                    <Label Text="2. Liên hệ quản trị viên để kích hoạt gói Premium."
+                           FontSize="12" TextColor="#047857" />
+                    <Label Text="3. Gói Basic cho phép truy cập 12 POIs cơ bản."
+                           FontSize="12" TextColor="#047857" />
+                    <Label Text="4. Gói Premium mở khóa tất cả POIs và tính năng nâng cao."
+                           FontSize="12" TextColor="#047857" />
+                </VerticalStackLayout>
+            </Border>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

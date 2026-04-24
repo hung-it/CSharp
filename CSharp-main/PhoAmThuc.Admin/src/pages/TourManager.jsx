@@ -9,12 +9,12 @@ export default function TourManager() {
   const [error, setError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
-  const [newTour, setNewTour] = useState({ code: '', name: '', description: '' });
-  const [newStop, setNewStop] = useState({ poiId: '', sequence: 1, nextStopHint: '' });
+  const [newTour, setNewTour] = useState({ name: '', description: '' });
+  const [newStop, setNewStop] = useState({ poiId: '', sequence: 1, description: '' });
 
   const [editTour, setEditTour] = useState({ name: '', description: '' });
   const [editingStopId, setEditingStopId] = useState('');
-  const [editStop, setEditStop] = useState({ poiId: '', sequence: 1, nextStopHint: '' });
+  const [editStop, setEditStop] = useState({ poiId: '', sequence: 1, description: '' });
 
   useEffect(() => {
     let active = true;
@@ -103,7 +103,6 @@ export default function TourManager() {
 
     try {
       const created = await apiPost('/tours', {
-        code: newTour.code.trim(),
         name: newTour.name.trim(),
         description: newTour.description.trim() || null,
       });
@@ -113,7 +112,7 @@ export default function TourManager() {
       if (safeTour?.id) {
         setSelectedTourId(safeTour.id);
       }
-      setNewTour({ code: '', name: '', description: '' });
+      setNewTour({ name: '', description: '' });
     } catch (createError) {
       setError(createError.message || 'Tạo tour thất bại.');
     } finally {
@@ -185,10 +184,10 @@ export default function TourManager() {
       await apiPost(`/tours/${selectedTourId}/stops`, {
         poiId: newStop.poiId,
         sequence: Number(newStop.sequence),
-        nextStopHint: newStop.nextStopHint.trim() || null,
+        description: newStop.description.trim() || null,
       });
       await reloadStops();
-      setNewStop((prev) => ({ ...prev, nextStopHint: '' }));
+      setNewStop((prev) => ({ ...prev, description: '' }));
     } catch (addStopError) {
       setError(addStopError.message || 'Thêm điểm dừng thất bại.');
     } finally {
@@ -201,7 +200,7 @@ export default function TourManager() {
     setEditStop({
       poiId: stop.poiId || '',
       sequence: stop.sequence,
-      nextStopHint: stop.nextStopHint || ''
+      description: stop.description || ''
     });
   }
 
@@ -218,7 +217,7 @@ export default function TourManager() {
       await apiPatch(`/tours/${selectedTourId}/stops/${editingStopId}`, {
         poiId: editStop.poiId,
         sequence: Number(editStop.sequence),
-        nextStopHint: editStop.nextStopHint.trim() || null,
+        description: editStop.description.trim() || null,
       });
       setEditingStopId('');
       await reloadStops();
@@ -272,14 +271,7 @@ export default function TourManager() {
         </div>
       )}
 
-      <form className='bg-white rounded-2xl border border-pink-100 p-5 shadow-sm grid grid-cols-1 md:grid-cols-4 gap-3' onSubmit={handleCreateTour}>
-        <input
-          className='rounded-xl border border-pink-100 px-3 py-2'
-          placeholder='Code'
-          value={newTour.code}
-          onChange={(event) => setNewTour((prev) => ({ ...prev, code: event.target.value }))}
-          required
-        />
+      <form className='bg-white rounded-2xl border border-pink-100 p-5 shadow-sm grid grid-cols-1 md:grid-cols-3 gap-3' onSubmit={handleCreateTour}>
         <input
           className='rounded-xl border border-pink-100 px-3 py-2'
           placeholder='Tên tour'
@@ -381,9 +373,9 @@ export default function TourManager() {
           />
           <input
             className='rounded-xl border border-pink-100 px-3 py-2'
-            placeholder='Gợi ý điểm tiếp theo'
-            value={newStop.nextStopHint}
-            onChange={(event) => setNewStop((prev) => ({ ...prev, nextStopHint: event.target.value }))}
+            placeholder='Mô tả stop'
+            value={newStop.description}
+            onChange={(event) => setNewStop((prev) => ({ ...prev, description: event.target.value }))}
           />
           <button
             type='submit'
@@ -400,7 +392,7 @@ export default function TourManager() {
             <tr className='text-gray-500 border-b border-pink-100'>
               <th className='text-left py-2'>Thứ tự</th>
               <th className='text-left py-2'>POI</th>
-              <th className='text-left py-2'>Gợi ý</th>
+              <th className='text-left py-2'>Mô tả stop</th>
               <th className='text-right py-2'>Thao tác</th>
             </tr>
           </thead>
@@ -435,15 +427,15 @@ export default function TourManager() {
                       />
                       <input
                         className='rounded-lg border border-pink-100 px-2 py-1'
-                        value={editStop.nextStopHint}
+                        value={editStop.description}
                         onChange={(event) =>
-                          setEditStop((prev) => ({ ...prev, nextStopHint: event.target.value }))
+                          setEditStop((prev) => ({ ...prev, description: event.target.value }))
                         }
-                        placeholder='Gợi ý điểm tiếp theo'
+                        placeholder='Mô tả stop'
                       />
                     </form>
                   ) : (
-                    stop.nextStopHint || '-'
+                    stop.description || '-'
                   )}
                 </td>
                 <td className='py-2 text-right'>

@@ -1,220 +1,176 @@
-using System;
+using System.Net.Http.Json;
 
-namespace VinhKhanhAudioGuide.App
+namespace VinhKhanhAudioGuide.App;
+
+public static class AppConfig
 {
-    /// <summary>
-    /// Static configuration class for app settings and state
-    /// </summary>
-    public static class AppConfig
+    // Demo user username - must match backend seed data
+    public const string DefaultExternalRef = "demo";
+    public const string DefaultPreferredLanguage = "vi";
+
+    // Current user session (set after login)
+    private static string? _currentUserId;
+    private static bool _isLoggedIn = false;
+
+    public static bool IsLoggedIn => _isLoggedIn;
+    public static string? CurrentUserId => _currentUserId;
+
+    public static void SetLoggedInUser(string userId)
     {
-        // App Info
-        public const string AppVersion = "1.0.0";
-        public const string AppName = "Phố Ăn Vĩnh Khách Audio Guide";
-        public const string AppId = "com.phoananhvinhkhach.audioguide";
-
-        // API Configuration
-        public const string ApiBaseUrl = "https://api.phoananhvinhkhach.vn";
-        public const string ApiVersion = "v1";
-        public const int ApiTimeout = 30000;
-
-        // Storage Keys
-        private const string KEY_LANGUAGE = "app_language";
-        private const string KEY_LOGGED_IN = "user_logged_in";
-        private const string KEY_USER_NAME = "user_name";
-        private const string KEY_USER_ID = "user_id";
-        private const string KEY_AUTH_TOKEN = "auth_token";
-        private const string KEY_PLAN_TYPE = "plan_type";
-        private const string KEY_AUTO_PLAY = "auto_play_audio";
-        private const string KEY_GPS_SENSITIVITY = "gps_sensitivity";
-        private const string KEY_VOLUME = "audio_volume";
-        private const string KEY_TTS_ENABLED = "tts_enabled";
-        private const string KEY_OFFLINE_MODE = "offline_mode";
-        private const string KEY_VISITED_COUNT = "visited_count";
-        private const string KEY_LISTEN_COUNT = "listen_count";
-        private const string KEY_LISTENED_MINUTES = "listened_minutes";
-        private const string KEY_NEARBY_POIS = "nearby_pois";
-
-        // User State
-        private static bool _isLoggedIn = false;
-        public static bool IsLoggedIn
-        {
-            get => _isLoggedIn;
-            set => _isLoggedIn = value;
-        }
-
-        private static string _userName = null;
-        public static string UserName
-        {
-            get => _userName;
-            set => _userName = value;
-        }
-
-        private static string _userId = null;
-        public static string UserId
-        {
-            get => _userId;
-            set => _userId = value;
-        }
-
-        private static string _authToken = null;
-        public static string AuthToken
-        {
-            get => _authToken;
-            set => _authToken = value;
-        }
-
-        private static string _planType = "free";
-        public static string PlanType
-        {
-            get => _planType;
-            set => _planType = value;
-        }
-
-        // Settings
-        private static string _currentLanguage = "vi";
-        public static string CurrentLanguage
-        {
-            get => _currentLanguage;
-            set => _currentLanguage = value;
-        }
-
-        private static bool _autoPlayAudio = true;
-        public static bool AutoPlayAudio
-        {
-            get => _autoPlayAudio;
-            set => _autoPlayAudio = value;
-        }
-
-        private static int _gpsSensitivity = 3;
-        public static int GpsSensitivity
-        {
-            get => _gpsSensitivity;
-            set => _gpsSensitivity = value;
-        }
-
-        private static int _volume = 80;
-        public static int Volume
-        {
-            get => _volume;
-            set => _volume = value;
-        }
-
-        private static bool _enableTts = false;
-        public static bool EnableTts
-        {
-            get => _enableTts;
-            set => _enableTts = value;
-        }
-
-        private static bool _offlineMode = false;
-        public static bool OfflineMode
-        {
-            get => _offlineMode;
-            set => _offlineMode = value;
-        }
-
-        // Stats
-        private static int _visitedCount = 0;
-        public static int VisitedCount
-        {
-            get => _visitedCount;
-            set => _visitedCount = value;
-        }
-
-        private static int _listenCount = 0;
-        public static int ListenCount
-        {
-            get => _listenCount;
-            set => _listenCount = value;
-        }
-
-        private static int _listenedMinutes = 0;
-        public static int ListenedMinutes
-        {
-            get => _listenedMinutes;
-            set => _listenedMinutes = value;
-        }
-
-        // Nearby POIs
-        private static System.Collections.Generic.List<PoiItem> _nearbyPois = new System.Collections.Generic.List<PoiItem>();
-        public static System.Collections.Generic.List<PoiItem> NearbyPois
-        {
-            get => _nearbyPois;
-            set => _nearbyPois = value ?? new System.Collections.Generic.List<PoiItem>();
-        }
-
-        // Initialize default values
-        static AppConfig()
-        {
-            InitializeDefaults();
-        }
-
-        private static void InitializeDefaults()
-        {
-            // Set default values
-            _currentLanguage = "vi";
-            _autoPlayAudio = true;
-            _gpsSensitivity = 3;
-            _volume = 80;
-            _enableTts = false;
-            _offlineMode = false;
-            _planType = "free";
-        }
-
-        /// <summary>
-        /// Reset all settings to defaults
-        /// </summary>
-        public static void ResetToDefaults()
-        {
-            InitializeDefaults();
-        }
-
-        /// <summary>
-        /// Clear user session
-        /// </summary>
-        public static void ClearSession()
-        {
-            _isLoggedIn = false;
-            _userName = null;
-            _userId = null;
-            _authToken = null;
-            _planType = "free";
-        }
-
-        /// <summary>
-        /// Get full API URL for endpoint
-        /// </summary>
-        public static string GetApiUrl(string endpoint)
-        {
-            return $"{ApiBaseUrl}/{ApiVersion}/{endpoint.TrimStart('/')}";
-        }
-
-        /// <summary>
-        /// Get localized string based on current language
-        /// </summary>
-        public static string GetString(string vietnamese, string english)
-        {
-            return _currentLanguage == "vi" ? vietnamese : english;
-        }
+        _currentUserId = userId;
+        _isLoggedIn = true;
+        System.Diagnostics.Debug.WriteLine($"AppConfig: User logged in as {_currentUserId}");
     }
 
-    /// <summary>
-    /// POI Item class for nearby locations
-    /// </summary>
-    public class PoiItem
+    public static void ClearUserSession()
     {
-        public string Id { get; set; }
-        public string Name { get; set; }
-        public string Category { get; set; }
-        public string District { get; set; }
-        public double Rating { get; set; }
-        public double Distance { get; set; }
-        public int Popularity { get; set; }
-        public string Description { get; set; }
-        public string ImageUrl { get; set; }
-        public string AudioUrlVi { get; set; }
-        public string AudioUrlEn { get; set; }
-        public double Latitude { get; set; }
-        public double Longitude { get; set; }
+        _currentUserId = null;
+        _isLoggedIn = false;
+        FeatureGate.Clear();
+        System.Diagnostics.Debug.WriteLine("AppConfig: User session cleared");
     }
+
+    // Android emulator cannot call host machine through localhost.
+    private const string AndroidEmulatorApiBaseUrl = "http://10.0.2.2:5140/api/v1/";
+    private const string LocalApiBaseUrl = "http://localhost:5140/api/v1/";
+
+    private const string AndroidEmulatorFrontendBaseUrl = "http://10.0.2.2:5173";
+    private const string LocalFrontendBaseUrl = "http://localhost:5173";
+
+    public static string ApiBaseUrl => DeviceInfo.Current.Platform == DevicePlatform.Android
+        ? AndroidEmulatorApiBaseUrl
+        : LocalApiBaseUrl;
+
+    public static string FrontendBaseUrl => DeviceInfo.Current.Platform == DevicePlatform.Android
+        ? AndroidEmulatorFrontendBaseUrl
+        : LocalFrontendBaseUrl;
+
+    // Backend serves static files at /media path (see Program.cs: app.UseStaticFiles with RequestPath = "/media")
+    public static string MediaBaseUrl => ApiBaseUrl.Replace("/api/v1/", "/media/").TrimEnd('/');
+
+    public static HttpClient CreateHttpClient()
+    {
+        return new HttpClient
+        {
+            BaseAddress = new Uri(ApiBaseUrl)
+        };
+    }
+
+    public static async Task<string> ResolveDefaultUserIdAsync(HttpClient? client = null, CancellationToken cancellationToken = default)
+    {
+        // If already logged in via explicit login, return that user ID
+        if (_isLoggedIn && !string.IsNullOrEmpty(_currentUserId))
+        {
+            return _currentUserId;
+        }
+
+        // Try to restore from SecureStorage first
+        try
+        {
+            var storedId = await SecureStorage.GetAsync("user_id");
+            if (!string.IsNullOrEmpty(storedId) && Guid.TryParse(storedId, out _))
+            {
+                _currentUserId = storedId;
+                _isLoggedIn = true;
+                var storedPlan = await SecureStorage.GetAsync("plan");
+                FeatureGate.SetPlan(storedPlan ?? "Basic");
+                System.Diagnostics.Debug.WriteLine($"AppConfig: Restored session for user {_currentUserId}");
+                return storedId;
+            }
+        }
+        catch { }
+
+        // Try stored credentials if available (username only, no password needed)
+        string? storedUsername = null;
+        string? storedUserId = null;
+        try
+        {
+            storedUsername = await SecureStorage.GetAsync("username");
+            storedUserId = await SecureStorage.GetAsync("user_id");
+        }
+        catch { }
+
+        var ownsClient = client is null;
+        client ??= CreateHttpClient();
+
+        try
+        {
+            // Try stored credentials if available (no password for restore).
+            // Send X-User-Id header so backend accepts session without password check.
+            if (!string.IsNullOrEmpty(storedUsername))
+            {
+                using var request = new HttpRequestMessage(HttpMethod.Post, "users/resolve");
+                request.Content = JsonContent.Create(new
+                {
+                    username = storedUsername,
+                    preferredLanguage = DefaultPreferredLanguage
+                });
+                if (!string.IsNullOrEmpty(storedUserId))
+                {
+                    request.Headers.TryAddWithoutValidation("X-User-Id", storedUserId);
+                }
+                var response = await client.SendAsync(request, cancellationToken);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadFromJsonAsync<LoginResult>(cancellationToken: cancellationToken);
+                    if (result?.Success == true)
+                    {
+                        _currentUserId = result.Id.ToString();
+                        _isLoggedIn = true;
+                        FeatureGate.SetPlan(result.Plan ?? "Basic");
+                        return result.Id.ToString();
+                    }
+                }
+            }
+
+            // No stored credentials — attempt demo user resolution (creates account on demand).
+            // Only fall back to the anonymous placeholder if the network call itself fails.
+            try
+            {
+                var demoResponse = await client.PostAsJsonAsync("users/resolve", new
+                {
+                    Username = "demo",
+                    PreferredLanguage = DefaultPreferredLanguage,
+                    Password = "1"
+                }, cancellationToken);
+
+                if (demoResponse.IsSuccessStatusCode)
+                {
+                    var demoResult = await demoResponse.Content.ReadFromJsonAsync<LoginResult>(cancellationToken: cancellationToken);
+                    if (demoResult?.Success == true)
+                    {
+                        _currentUserId = demoResult.Id.ToString();
+                        _isLoggedIn = true;
+                        FeatureGate.SetPlan(demoResult.Plan ?? "Basic");
+                        return _currentUserId;
+                    }
+                }
+            }
+            catch { }
+
+            return "00000000-0000-0000-0000-000000000001";
+        }
+        catch
+        {
+            return "00000000-0000-0000-0000-000000000001";
+        }
+        finally
+        {
+            if (ownsClient)
+            {
+                client.Dispose();
+            }
+        }
+    }
+}
+
+public class LoginResult
+{
+    public bool Success { get; set; }
+    public string? Message { get; set; }
+    public Guid Id { get; set; }
+    public string? Username { get; set; }
+    public string? Role { get; set; }
+    public string? Plan { get; set; }
 }

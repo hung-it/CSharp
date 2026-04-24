@@ -43,6 +43,21 @@ export default function TranslationManager() {
     loadOwnerPois();
   }, [isShopManager, currentUser?.id]);
 
+  // Load all POIs for Admin
+  useEffect(() => {
+    async function loadAllPois() {
+      if (isAdmin) {
+        try {
+          const poiData = await apiGet('/pois');
+          setPois(Array.isArray(poiData) ? poiData : []);
+        } catch {
+          setPois([]);
+        }
+      }
+    }
+    loadAllPois();
+  }, [isAdmin]);
+
   // Build allowed POI IDs for filtering
   const allowedPoiIds = useMemo(() => {
     if (isAdmin) return null;
@@ -224,12 +239,12 @@ export default function TranslationManager() {
       {/* Header */}
       <div className='flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-5 rounded-2xl shadow-sm border border-pink-100'>
         <div>
-          <h1 className='text-2xl font-bold text-gray-800 flex items-center gap-2'>
+          <h1 className='text-2xl font-bold text-transparent bg-clip-text bg-linear-to-r from-pink-600 to-purple-500 flex items-center gap-2'>
             <Languages size={24} className="text-pink-500" />
             Quản lý bản dịch
           </h1>
           {isShopManager && pois.length > 0 && (
-            <p className='text-sm text-gray-500 mt-1'>
+            <p className='text-sm text-pink-400/90 mt-1'>
               Đang quản lý bản dịch cho {pois.length} điểm POI
             </p>
           )}
@@ -297,17 +312,18 @@ export default function TranslationManager() {
           </div>
 
           {/* Content Key (read-only) */}
-          <div className='mb-4'>
-            <label className='text-sm font-medium text-gray-700'>
-              Content Key
-              <input
-                className='mt-1 w-full rounded-lg border border-pink-100 px-3 py-2 text-sm bg-gray-50 text-gray-600'
-                value={contentKey}
-                readOnly
-                placeholder='poi.xxx.name hoặc poi.xxx.description'
-              />
-            </label>
-          </div>
+          {showForm && contentKey && (
+            <div className='mb-4'>
+              <label className='text-sm font-medium text-gray-700'>
+                Content Key
+                <input
+                  className='mt-1 w-full rounded-lg border border-pink-100 px-3 py-2 text-sm bg-gray-50 text-gray-600'
+                  value={contentKey}
+                  readOnly
+                />
+              </label>
+            </div>
+          )}
 
           <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mb-4'>
             <label className='text-sm font-medium text-gray-700'>
@@ -363,7 +379,10 @@ export default function TranslationManager() {
 
       {/* Filter */}
       <div className='bg-white rounded-2xl border border-pink-100 p-5 shadow-sm'>
-        <h2 className='font-semibold text-gray-700 mb-3'>Bộ lọc</h2>
+        <h2 className='font-semibold text-pink-700 mb-3 flex items-center gap-2'>
+          <Search size={16} />
+          Bộ lọc
+        </h2>
         <div className='grid grid-cols-1 md:grid-cols-3 gap-3'>
           <div className='relative'>
             <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />

@@ -1,0 +1,10 @@
+<api type="debug" assembly-name="VinhKhanhAudioGuide.App" mvid="c97285e278bb4480a028bb010f964391">
+  <java-to-managed>
+    <entry java-name="crc64c077f5ad988bd033/MainActivity" managed-name="VinhKhanhAudioGuide.App.MainActivity, VinhKhanhAudioGuide.App" managed-type-token-id="33554480" />
+    <entry java-name="crc64c077f5ad988bd033/MainApplication" managed-name="VinhKhanhAudioGuide.App.MainApplication, VinhKhanhAudioGuide.App" managed-type-token-id="33554481" />
+  </java-to-managed>
+  <managed-to-java>
+    <entry java-name="crc64c077f5ad988bd033/MainActivity" managed-name="VinhKhanhAudioGuide.App.MainActivity, VinhKhanhAudioGuide.App" managed-type-token-id="33554480" />
+    <entry java-name="crc64c077f5ad988bd033/MainApplication" managed-name="VinhKhanhAudioGuide.App.MainApplication, VinhKhanhAudioGuide.App" managed-type-token-id="33554481" />
+  </managed-to-java>
+</api>

@@ -154,4 +154,30 @@ public sealed class ListeningSessionService(AudioGuideDbContext dbContext) : ILi
             .Where(s => s.PoiId == poiId && s.DurationSeconds.HasValue)
             .CountAsync(cancellationToken);
     }
+
+    /// <summary>
+    /// Get count of active (ongoing, not ended) sessions per POI.
+    /// </summary>
+    public async Task<Dictionary<Guid, int>> GetActiveSessionCountsByPoiAsync(
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _dbContext.ListeningSessions
+            .Where(s => s.EndedAtUtc == null)
+            .GroupBy(s => s.PoiId)
+            .Select(g => new { PoiId = g.Key, Count = g.Count() })
+            .ToListAsync(cancellationToken);
+
+        return result.ToDictionary(x => x.PoiId, x => x.Count);
+    }
+
+    /// <summary>
+    /// Get total active session count across all POIs.
+    /// </summary>
+    public async Task<int> GetTotalActiveSessionCountAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.ListeningSessions
+            .Where(s => s.EndedAtUtc == null)
+            .CountAsync(cancellationToken);
+    }
 }

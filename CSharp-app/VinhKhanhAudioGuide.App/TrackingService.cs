@@ -20,23 +20,10 @@ public static class TrackingService
     {
         try
         {
-            var response = await _httpClient.PostAsJsonAsync("users/resolve", new
-            {
-                Username = AppConfig.DefaultExternalRef,  // Changed from ExternalRef to Username
-                PreferredLanguage = AppConfig.DefaultPreferredLanguage
-            });
-
-            if (response.IsSuccessStatusCode)
-            {
-                var result = await response.Content.ReadFromJsonAsync<ResolveResult>();
-                if (result?.Success == true)
-                {
-                    return result.Id.ToString();
-                }
-            }
+            return await AppConfig.ResolveDefaultUserIdAsync(_httpClient);
         }
         catch { /* Silent */ }
-        
+
         return _anonymousRef;
     }
 

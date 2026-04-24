@@ -6,6 +6,9 @@
     xmlns:local="clr-namespace:VinhKhanhAudioGuide.App"
     Title="Phố Ăn Vĩnh Khách">
 
+    <ShellContent Route="login" ContentTemplate="{DataTemplate local:LoginPage}" />
+    <ShellContent Route="register" ContentTemplate="{DataTemplate local:RegistrationPage}" />
+
     <TabBar>
         <Tab Title="Trang chủ" Route="home">
             <ShellContent ContentTemplate="{DataTemplate local:MainPage}" />

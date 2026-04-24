@@ -55,17 +55,6 @@ public sealed class DataSeeder(
         await EnsureUserAsync("owner1", UserRole.ShopManager, "vi", "1", cancellationToken);
         await EnsureUserAsync("owner2", UserRole.ShopManager, "vi", "1", cancellationToken);
         await EnsureUserAsync("owner3", UserRole.ShopManager, "vi", "1", cancellationToken);
-
-        // End users - password = "1" for both
-        var demo = await EnsureUserAsync("demo", UserRole.EndUser, "vi", "1", cancellationToken);
-        var premium = await EnsureUserAsync("premium", UserRole.EndUser, "vi", "1", cancellationToken);
-
-        // Subscriptions
-        if (!await _dbContext.Subscriptions.AnyAsync(s => s.UserId == demo.Id, cancellationToken))
-            await _subscriptionService.ActivateSubscriptionAsync(demo.Id, PlanTier.Basic, 1m, cancellationToken);
-
-        if (!await _dbContext.Subscriptions.AnyAsync(s => s.UserId == premium.Id, cancellationToken))
-            await _subscriptionService.ActivateSubscriptionAsync(premium.Id, PlanTier.PremiumSegmented, 10m, cancellationToken);
     }
 
     private async Task<User> EnsureUserAsync(string username, UserRole role, string language, string? password, CancellationToken ct)
@@ -155,8 +144,8 @@ public sealed class DataSeeder(
             await _dbContext.SaveChangesAsync(cancellationToken);
 
             // Audio files (2 languages: Vietnamese and English only)
-            await _poiService.AssignAudioAsync(poi.Id, "vi", $"/audio/{code}-vi.mp3", 45, false, cancellationToken);
-            await _poiService.AssignAudioAsync(poi.Id, "en", $"/audio/{code}-en.mp3", 50, false, cancellationToken);
+            await _poiService.AssignAudioAsync(poi.Id, "vi", $"/media/audio/{code}-vi.mp3", 45, false, cancellationToken);
+            await _poiService.AssignAudioAsync(poi.Id, "en", $"/media/audio/{code}-en.mp3", 50, false, cancellationToken);
 
             // Translations (Vietnamese and English only)
             await AddTranslationAsync(poi.Id, "vi", "name", name, cancellationToken);

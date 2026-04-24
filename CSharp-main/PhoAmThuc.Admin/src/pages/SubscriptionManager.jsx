@@ -48,7 +48,10 @@ export default function SubscriptionManager() {
       setFeatureSegments(safeSegments);
       setSegmentCode(safeSegments[0]?.code || '');
       setSubscriptions(Array.isArray(subscriptionList) ? subscriptionList : []);
-      setDemoUsers(Array.isArray(userList) ? userList : []);
+      const regularUsers = (Array.isArray(userList) ? userList : []).filter(
+        (u) => !u.role || (u.role !== 'Admin' && u.role !== 'ShopManager')
+      );
+      setDemoUsers(regularUsers);
     } catch (loadError) {
       setError(loadError.message || 'Không thể tải dữ liệu khởi tạo.');
     } finally {
@@ -58,18 +61,30 @@ export default function SubscriptionManager() {
 
   async function handleResolveUser(event) {
     event.preventDefault();
+    if (!username.trim()) {
+      return;
+    }
     setError('');
     setIsLoading(true);
 
     try {
-      const user = await apiPost('/users/resolve', {
+      const response = await apiPost('/users/resolve', {
         username: username.trim(),
         preferredLanguage: 'vi',
       });
-      setResolvedUser(user);
+
+      if (!response?.success) {
+        setError(response?.message || 'Không thể resolve user.');
+        setResolvedUser(null);
+        setHasAccessResult(null);
+        return;
+      }
+
+      setResolvedUser(response);
       setHasAccessResult(null);
     } catch (resolveError) {
       setError(resolveError.message || 'Không thể resolve user.');
+      setResolvedUser(null);
     } finally {
       setIsLoading(false);
     }
@@ -189,25 +204,6 @@ export default function SubscriptionManager() {
     }
   }
 
-  async function handleSeedDemoUsers() {
-    setError('');
-    setIsLoading(true);
-    try {
-      const result = await apiPost('/users/demo-seed', {});
-      const users = await apiGet(`/users${buildQuery({ limit: 50 })}`);
-      const safeUsers = Array.isArray(users) ? users : [];
-      setDemoUsers(safeUsers);
-      if (safeUsers.length > 0) {
-        const seeded = Array.isArray(result?.users) ? result.users : [];
-        setUsername((seeded[0]?.username || safeUsers[0].username));
-      }
-    } catch (seedError) {
-      setError(seedError.message || 'Không thể tạo user demo.');
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
   async function handleRefreshSubscriptions() {
     setError('');
     setIsLoading(true);
@@ -220,6 +216,15 @@ export default function SubscriptionManager() {
       setIsLoading(false);
     }
   }
+
+  const formatDateTime = (utcValue) => {
+    if (!utcValue) return '-';
+    const d = new Date(utcValue);
+    const offset = 7 * 60;
+    const local = new Date(d.getTime() + offset * 60 * 1000);
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${pad(local.getUTCDate())}/${pad(local.getUTCMonth() + 1)}/${local.getUTCFullYear()} ${pad(local.getUTCHours())}:${pad(local.getUTCMinutes())}`;
+  };
 
   return (
     <div className='space-y-6 max-w-7xl mx-auto'>
@@ -239,53 +244,57 @@ export default function SubscriptionManager() {
       )}
 
       <div className='bg-white rounded-2xl border border-pink-100 p-5 shadow-sm space-y-3'>
-        <div className='text-sm text-gray-600'>User demo để test nhanh (không dùng chuỗi timestamp rối mắt):</div>
-        <div className='grid grid-cols-1 md:grid-cols-3 gap-3'>
-          <button
-            type='button'
-            className='rounded-xl border border-pink-200 text-pink-700 font-semibold px-4 py-2 bg-pink-50/70'
-            onClick={handleSeedDemoUsers}
-            disabled={isLoading}
-          >
-            Tạo/Nạp user demo
-          </button>
+        <div className='flex items-center gap-3'>
           <select
-            className='rounded-xl border border-pink-100 px-3 py-2 md:col-span-2'
+            className='flex-1 rounded-xl border border-pink-100 px-3 py-2'
             value={username}
             onChange={(event) => setUsername(event.target.value)}
           >
-            <option value=''>Chọn user demo</option>
+            <option value=''>Chọn user</option>
             {demoUsers.map((user) => (
               <option key={user.id} value={user.username}>
                 {user.username}
               </option>
             ))}
           </select>
+          <button
+            className='rounded-xl border border-pink-200 text-pink-700 font-semibold px-4 py-2 bg-pink-50/70'
+            onClick={async () => {
+              const users = await apiGet(`/users${buildQuery({ limit: 50 })}`);
+              const safeUsers = (Array.isArray(users) ? users : []).filter(
+                (u) => !u.role || (u.role !== 'Admin' && u.role !== 'ShopManager')
+              );
+              setDemoUsers(safeUsers);
+            }}
+            disabled={isLoading}
+          >
+            {isLoading ? 'Đang tải...' : 'Tải danh sách user'}
+          </button>
         </div>
       </div>
 
-      <form
-        className='bg-white rounded-2xl border border-pink-100 p-5 shadow-sm grid grid-cols-1 md:grid-cols-3 gap-3'
-        onSubmit={handleResolveUser}
-      >
+      <div className='bg-white rounded-2xl border border-pink-100 p-5 shadow-sm grid grid-cols-1 md:grid-cols-3 gap-3'>
         <input
           className='rounded-xl border border-pink-100 px-3 py-2'
           placeholder='Tên đăng nhập'
           value={username}
           onChange={(event) => setUsername(event.target.value)}
-          required
         />
         <div className='rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800'>
           Date trong danh sách thuê bao lấy từ thời điểm hệ thống tạo gói (ActivatedAtUtc).
         </div>
         <button
-          type='submit'
-          disabled={isLoading}
+          type='button'
+          disabled={isLoading || !username.trim()}
           className='rounded-xl bg-linear-to-r from-pink-500 to-rose-500 text-white font-semibold px-4 py-2 disabled:opacity-60'
+          onClick={async (event) => {
+            event.preventDefault();
+            await handleResolveUser(event);
+          }}
         >
           {isLoading ? 'Đang xử lý...' : 'Tìm hoặc tạo user'}
         </button>
-      </form>
+      </div>
 
       {resolvedUser && (
         <div className='bg-white rounded-2xl border border-pink-100 p-5 shadow-sm space-y-3'>
@@ -312,7 +321,7 @@ export default function SubscriptionManager() {
             </label>
             <button
               type='submit'
-              disabled={isLoading}
+              disabled={isLoading || !resolvedUser?.id}
               className='rounded-xl border border-pink-200 text-pink-700 font-semibold px-4 py-2 bg-pink-50/70 disabled:opacity-60 md:col-span-2'
             >
               Tạo subscription
@@ -336,7 +345,7 @@ export default function SubscriptionManager() {
               type='button'
               className='rounded-xl border border-pink-200 text-pink-700 font-semibold px-4 py-2 bg-pink-50/70 disabled:opacity-60'
               onClick={handleCheckAccess}
-              disabled={isLoading || !segmentCode}
+              disabled={isLoading || !segmentCode || !resolvedUser?.id}
             >
               Kiểm tra quyền truy cập
             </button>
@@ -391,7 +400,7 @@ export default function SubscriptionManager() {
                   )}
                 </td>
                 <td className='py-2 text-right'>
-                  {item.activatedAtUtc ? new Date(item.activatedAtUtc).toLocaleString() : '-'}
+                  {formatDateTime(item.activatedAtUtc)}
                 </td>
                 <td className='py-2 text-right'>
                   {editingSubscriptionId === item.id ? (

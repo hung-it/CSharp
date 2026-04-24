@@ -18,13 +18,13 @@ export default function AudioManager() {
   const [form, setForm] = useState({
     languageCode: 'vi',
     filePath: '/audio/sample-vi.mp3',
-    durationSeconds: 90,
+    durationSeconds: 0,
     isTextToSpeech: false,
   });
   const [editForm, setEditForm] = useState({
     languageCode: 'vi',
     filePath: '',
-    durationSeconds: 60,
+    durationSeconds: 0,
     isTextToSpeech: false,
   });
 
@@ -140,7 +140,7 @@ export default function AudioManager() {
     setEditForm({
       languageCode: audio.languageCode || 'vi',
       filePath: audio.filePath || '',
-      durationSeconds: audio.durationSeconds || 60,
+      durationSeconds: audio.durationSeconds || 0,
       isTextToSpeech: Boolean(audio.isTextToSpeech),
     });
   }
@@ -157,8 +157,15 @@ export default function AudioManager() {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      const uploaded = await apiPostForm('/uploads/audio', formData);
-      setForm((prev) => ({ ...prev, filePath: uploaded?.filePath || '' }));
+      const uploaded = await apiPostForm('/uploads/audio', formData, currentUser?.id);
+      const newFilePath = uploaded?.filePath || '';
+
+      const duration = await getAudioDuration(file);
+      setForm((prev) => ({
+        ...prev,
+        filePath: newFilePath,
+        durationSeconds: duration,
+      }));
     } catch (uploadError) {
       setError(uploadError.message || 'Upload audio thất bại.');
     } finally {
@@ -179,8 +186,15 @@ export default function AudioManager() {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      const uploaded = await apiPostForm('/uploads/audio', formData);
-      setEditForm((prev) => ({ ...prev, filePath: uploaded?.filePath || '' }));
+      const uploaded = await apiPostForm('/uploads/audio', formData, currentUser?.id);
+      const newFilePath = uploaded?.filePath || '';
+
+      const duration = await getAudioDuration(file);
+      setEditForm((prev) => ({
+        ...prev,
+        filePath: newFilePath,
+        durationSeconds: duration,
+      }));
     } catch (uploadError) {
       setError(uploadError.message || 'Upload audio thất bại.');
     } finally {
@@ -189,12 +203,28 @@ export default function AudioManager() {
     }
   }
 
+  function getAudioDuration(file) {
+    return new Promise((resolve) => {
+      const audio = new Audio();
+      audio.preload = 'metadata';
+      audio.onloadedmetadata = () => {
+        URL.revokeObjectURL(audio.src);
+        resolve(Math.ceil(audio.duration));
+      };
+      audio.onerror = () => {
+        URL.revokeObjectURL(audio.src);
+        resolve(0);
+      };
+      audio.src = URL.createObjectURL(file);
+    });
+  }
+
   function cancelEditAudio() {
     setEditingAudioId('');
     setEditForm({
       languageCode: 'vi',
       filePath: '',
-      durationSeconds: 60,
+      durationSeconds: 0,
       isTextToSpeech: false,
     });
   }
@@ -286,13 +316,14 @@ export default function AudioManager() {
         </label>
 
         <form className='grid grid-cols-1 md:grid-cols-5 gap-3' onSubmit={handleAssignAudio}>
-          <input
+          <select
             className='rounded-xl border border-pink-100 px-3 py-2'
-            placeholder='Ngôn ngữ (vi/en)'
             value={form.languageCode}
             onChange={(event) => setForm((prev) => ({ ...prev, languageCode: event.target.value }))}
-            required
-          />
+          >
+            <option value='vi'>Tiếng Việt (vi)</option>
+            <option value='en'>English (en)</option>
+          </select>
           <div className='md:col-span-2 rounded-xl border border-pink-100 px-3 py-2 bg-pink-50/40'>
             <div className='text-xs text-gray-500'>File audio đã chọn</div>
             <div className='text-sm text-gray-700 truncate'>
@@ -309,15 +340,12 @@ export default function AudioManager() {
               />
             </label>
           </div>
-          <input
-            type='number'
-            min='1'
-            className='rounded-xl border border-pink-100 px-3 py-2'
-            placeholder='Thời lượng (giây)'
-            value={form.durationSeconds}
-            onChange={(event) => setForm((prev) => ({ ...prev, durationSeconds: event.target.value }))}
-            required
-          />
+          <div className='rounded-xl border border-pink-100 px-3 py-2 bg-pink-50/40 flex flex-col justify-center'>
+            <div className='text-xs text-gray-500'>Thời lượng</div>
+            <div className='text-sm font-medium text-gray-700'>
+              {form.durationSeconds > 0 ? `${form.durationSeconds}s` : '-'}
+            </div>
+          </div>
           <button
             type='submit'
             className='rounded-xl bg-linear-to-r from-pink-500 to-rose-500 text-white font-semibold px-4 py-2 disabled:opacity-60'
@@ -356,13 +384,16 @@ export default function AudioManager() {
               <tr key={audio.id} className='border-b border-pink-50'>
                 <td className='py-2'>
                   {editingAudioId === audio.id ? (
-                    <input
+                    <select
                       className='w-full rounded-lg border border-pink-100 px-2 py-1'
                       value={editForm.languageCode}
                       onChange={(event) =>
                         setEditForm((prev) => ({ ...prev, languageCode: event.target.value }))
                       }
-                    />
+                    >
+                      <option value='vi'>vi</option>
+                      <option value='en'>en</option>
+                    </select>
                   ) : (
                     audio.languageCode
                   )}
@@ -388,15 +419,9 @@ export default function AudioManager() {
                 </td>
                 <td className='py-2 text-right'>
                   {editingAudioId === audio.id ? (
-                    <input
-                      type='number'
-                      min='1'
-                      className='w-24 rounded-lg border border-pink-100 px-2 py-1 text-right'
-                      value={editForm.durationSeconds}
-                      onChange={(event) =>
-                        setEditForm((prev) => ({ ...prev, durationSeconds: event.target.value }))
-                      }
-                    />
+                    <div className='text-right font-medium text-gray-700'>
+                      {editForm.durationSeconds > 0 ? `${editForm.durationSeconds}s` : '-'}
+                    </div>
                   ) : (
                     `${audio.durationSeconds}s`
                   )}
