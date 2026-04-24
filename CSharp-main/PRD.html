@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PRD - PhoAmThuc (Vinh Khanh Audio Guide)</title>
+    <title>PRD — PhoAmThuc (Vinh Khanh Audio Guide)</title>
     <style>
         :root {
             --primary: #0f4c5c;
@@ -461,16 +461,17 @@
     </nav>
 
     <header class="hero">
-        <h1>PRD - PhoAmThuc (Vinh Khanh Audio Guide)</h1>
-        <p class="subtitle">Tài liệu Product Requirements cho đồ án: hệ thống quản trị nội dung audio guide ẩm thực với
-            backend API, dashboard admin và các luồng analytics vận hành.</p>
+        <h1>PRD — PhoAmThuc (Vinh Khanh Audio Guide)</h1>
+        <p class="subtitle">Product Requirements Document cho đồ án: hệ thống audio guide ẩm thực tự động với Backend API (ASP.NET Core), Admin Web (React) và Mobile App (.NET MAUI). Bao gồm quản lý POI/audio/tour/QR, session tracking, analytics, subscription Basic/Premium, và đa ngôn ngữ.</p>
         <div class="badges">
             <span class="badge">ASP.NET Core Minimal API</span>
             <span class="badge">EF Core + SQLite</span>
             <span class="badge">React + Vite Admin</span>
-            <span class="badge">POI / Audio / Tour</span>
+            <span class="badge">.NET MAUI Mobile App</span>
+            <span class="badge">Leaflet Maps</span>
             <span class="badge">Session + Analytics</span>
-            <span class="badge">QR + Geofence + Route</span>
+            <span class="badge">QR Playback + Geofence</span>
+            <span class="badge">Subscription Basic/Premium</span>
         </div>
     </header>
 
@@ -482,8 +483,7 @@
                 <h2>Tổng quan sản phẩm</h2>
             </div>
         </div>
-        <p class="lead">Sản phẩm giải quyết bài toán quản trị và phân phối nội dung audio theo điểm đến (POI), đồng thời
-            cung cấp dữ liệu đo lường để tối ưu trải nghiệm tham quan ẩm thực.</p>
+        <p class="lead">Hệ thống audio guide ẩm thực tự động dành cho khu vực Phố Cổ Vĩnh Khách (Vĩnh Hội, Khánh Hội, Xóm Chiếu). Hệ thống gồm Backend API quản lý nội dung và theo dõi analytics, Admin Web (React) để quản trị nội dung, và Mobile App (MAUI .NET) để người dùng trải nghiệm nghe audio guide qua bản đồ, danh sách POI hoặc quét mã QR.</p>
 
         <div class="stats-row">
             <div class="stat-card">
@@ -491,20 +491,20 @@
                 <div class="label">Nhóm API chính</div>
             </div>
             <div class="stat-card">
-                <div class="value">8</div>
-                <div class="label">Màn hình Admin</div>
-            </div>
-            <div class="stat-card">
-                <div class="value">23</div>
-                <div class="label">Functional Requirements</div>
-            </div>
-            <div class="stat-card">
                 <div class="value">9</div>
-                <div class="label">Non-functional Requirements</div>
+                <div class="label">Trang Admin Web</div>
+            </div>
+            <div class="stat-card">
+                <div class="value">12</div>
+                <div class="label">POI seed sẵn</div>
             </div>
             <div class="stat-card">
                 <div class="value">3</div>
-                <div class="label">Milestone triển khai</div>
+                <div class="label">Tour có sẵn</div>
+            </div>
+            <div class="stat-card">
+                <div class="value">3</div>
+                <div class="label">Vai trò hệ thống</div>
             </div>
             <div class="stat-card">
                 <div class="value">Local</div>
@@ -515,20 +515,24 @@
         <div class="card-grid" style="margin-top:1rem;">
             <article class="card">
                 <h3>Bài toán</h3>
-                <p>Thông tin ẩm thực phân tán, khó cập nhật, không đo được mức độ sử dụng nội dung theo điểm tham quan.</p>
+                <p>Thông tin ẩm thực phân tán, khó cập nhật, không đo được mức độ sử dụng nội dung theo điểm tham quan. Người dùng không có cách thuận tiện để nghe audio guide tại mỗi điểm.</p>
             </article>
             <article class="card">
-                <h3>Tầm nhìn</h3>
-                <p>Xây dựng nền tảng audio guide có thể quản trị tập trung, phát nội dung linh hoạt qua QR/GPS và có dữ
-                    liệu analytics để vận hành.</p>
+                <h3>Giải pháp</h3>
+                <p>Nền tảng tập trung: Admin quản lý POI/audio/tour/QR, Backend track session và analytics, Mobile App phát audio qua bản đồ hoặc QR với subscription Basic/Premium.</p>
             </article>
             <article class="card">
-                <h3>Đối tượng</h3>
+                <h3>Kiến trúc 3 lớp</h3>
                 <ul>
-                    <li>Admin vận hành nội dung.</li>
-                    <li>Người dùng cuối (qua mobile app tích hợp API).</li>
+                    <li><strong>Backend API</strong>: ASP.NET Core Minimal API + EF Core + SQLite</li>
+                    <li><strong>Admin Web</strong>: React 19 + Vite + TailwindCSS</li>
+                    <li><strong>Mobile App</strong>: .NET MAUI (Android/iOS/Windows)</li>
                 </ul>
             </article>
+        </div>
+
+        <div class="highlight info" style="margin-top:1rem;">
+            <strong>Seed data thực tế:</strong> 12 POIs (3 quận), 3 tours, audio tiếng Việt + Anh cho mỗi POI, 4 tài khoản mặc định (admin/owner1/owner2/owner3), 4 feature segments.
         </div>
     </section>
 
@@ -545,40 +549,44 @@
             <article class="card">
                 <h3>In Scope (MVP hiện tại)</h3>
                 <ul>
-                    <li>CRUD POI (priority, imageUrl, mapLink).</li>
-                    <li>CRUD audio theo POI + upload multipart.</li>
-                    <li>Tour và reorder điểm dừng.</li>
-                    <li>Translation đa ngôn ngữ + fallback.</li>
-                    <li>Resolve user, activate subscription, segment access.</li>
-                    <li>Session tracking + analytics top/usage/heatmap.</li>
-                    <li>QR playback và anonymous route tracking.</li>
-                    <li>Dashboard bản đồ cho admin.</li>
+                    <li>Backend API đầy đủ: Users, Subscriptions, POI, Audio, Tours, Sessions, Analytics, QR, Geofence, Route, Translations</li>
+                    <li>Admin Web 9 trang: Dashboard, Analytics, POI, Audio, Translation, Tour, QR, Usage History, Subscription</li>
+                    <li>Mobile App (MAUI): MainPage, Map, POI List, POI Detail, Audio Player, Tour, QR Scan, Login/Register, Settings</li>
+                    <li>CRUD POI/audio/tour/translation/QR + upload audio multipart</li>
+                    <li>Session tracking + analytics (top POI, usage, heatmap, live sessions)</li>
+                    <li>QR playback + anonymous route tracking + geofence auto-play</li>
+                    <li>Subscription Basic/Premium + segment-based access control</li>
+                    <li>Đa ngôn ngữ: tiếng Việt + tiếng Anh cho audio & translation</li>
+                    <li>Đăng ký/đăng nhập user + feature gating</li>
+                    <li>Dashboard bản đồ Leaflet cho admin (marker + heatmap + route polyline)</li>
+                    <li>Shop Manager: quản POIs/audio/QR của riêng mình</li>
                 </ul>
             </article>
             <article class="card">
                 <h3>Out of Scope (đợt đồ án này)</h3>
                 <ul>
-                    <li>Thanh toán thật (payment gateway).</li>
-                    <li>AuthN/AuthZ production-grade hoàn chỉnh.</li>
-                    <li>ShopManager module.</li>
-                    <li>SQL Server large-data mode.</li>
-                    <li>Kiến trúc multi-tenant nâng cao.</li>
+                    <li>JWT authentication đầy đủ (production-grade)</li>
+                    <li>Object storage thật cho media files (dùng local filesystem)</li>
+                    <li>Versioned migration strategy (EF Core auto-migrate)</li>
+                    <li>Observability: tracing, metrics, centralized logging</li>
+                    <li>Payment gateway thật cho subscription</li>
+                    <li>Multi-language audio ngoài tiếng Việt + Anh</li>
+                    <li>Push notifications</li>
                 </ul>
             </article>
             <article class="card">
                 <h3>Tech Stack chính</h3>
                 <ul>
-                    <li>Backend: .NET 10, ASP.NET Core, EF Core 10, SQLite.</li>
-                    <li>Frontend: React 19, Vite 5, React Router.</li>
-                    <li>Map & QR: Leaflet, react-leaflet, qrcode.react.</li>
-                    <li>Test: xUnit + EF InMemory/SQLite.</li>
+                    <li><strong>Backend</strong>: .NET 10, ASP.NET Core Minimal API, EF Core 10, SQLite</li>
+                    <li><strong>Admin Web</strong>: React 19, Vite 5, TailwindCSS, React Router 6, Leaflet</li>
+                    <li><strong>Mobile</strong>: .NET MAUI, CommunityToolkit.Mvvm, Plugin.Maui.Audio, ZXing.Net.MAUI</li>
+                    <li><strong>Test</strong>: xUnit + EF Core InMemory</li>
                 </ul>
             </article>
         </div>
 
         <div class="highlight info">
-            <strong>Ghi chú phạm vi:</strong> Repo hiện tại tập trung backend và web admin; mobile app MAUI được xem là
-            client tiêu thụ API ở ngoài phạm vi codebase này.
+            <strong>Phạm vi đầy đủ:</strong> Repository bao gồm cả Backend API, Admin Web, và Mobile App (MAUI). Tất cả 3 thành phần đều hoạt động, có seed data, sẵn sàng demo.
         </div>
     </section>
 
@@ -605,37 +613,52 @@
                     <tr>
                         <td>FR-01..03</td>
                         <td>User & Access</td>
-                        <td>Resolve user theo externalRef, activate subscription, kiểm tra access theo segment.</td>
+                        <td>Đăng ký tài khoản, resolve user để đăng nhập, phân quyền theo vai trò (Admin/ShopManager/EndUser).</td>
                     </tr>
                     <tr>
-                        <td>FR-04..07</td>
+                        <td>FR-04..06</td>
+                        <td>Subscription</td>
+                        <td>Activate subscription (Basic/Premium), kiểm tra access theo segment, admin CRUD subscription.</td>
+                    </tr>
+                    <tr>
+                        <td>FR-07..10</td>
                         <td>POI</td>
-                        <td>CRUD POI, code unique, có metadata mở rộng (district, priority, imageUrl, mapLink).</td>
+                        <td>CRUD POI, code unique, metadata (district, priority, imageUrl, mapLink, triggerRadius). ShopManager chỉ quản POIs của mình.</td>
                     </tr>
                     <tr>
-                        <td>FR-08..10</td>
+                        <td>FR-11..14</td>
                         <td>Audio</td>
-                        <td>CRUD audio theo POI, upload multipart, trả filePath/relativePath cho frontend.</td>
+                        <td>Upload multipart mp3, gán audio theo POI và ngôn ngữ (vi/en), xóa audio.</td>
                     </tr>
                     <tr>
-                        <td>FR-11..13</td>
+                        <td>FR-15..18</td>
                         <td>Tour</td>
-                        <td>CRUD tour, thêm stop, reorder theo sequence.</td>
+                        <td>CRUD tour, thêm stop, reorder stop theo sequence, hiển thị điểm dừng.</td>
                     </tr>
                     <tr>
-                        <td>FR-14..17</td>
-                        <td>Session & Analytics</td>
-                        <td>Ghi nhận start/end session, usage theo ngày, top POI, heatmap theo thời gian.</td>
+                        <td>FR-19..21</td>
+                        <td>QR & Playback</td>
+                        <td>Quét QR → parse payload → kiểm tra subscription → trả audio URL + tạo session. Tạo + download + in QR PNG, export CSV payload.</td>
                     </tr>
                     <tr>
-                        <td>FR-18..20</td>
-                        <td>QR & Route</td>
-                        <td>Xử lý payload QR, ghi route theo anonymousRef, trả route để render polyline.</td>
+                        <td>FR-22..24</td>
+                        <td>Session & Visit</td>
+                        <td>Ghi nhận start/end listening session, visit session (với GPS, trigger source), cập nhật audio stats cho visit.</td>
                     </tr>
                     <tr>
-                        <td>FR-21..23</td>
-                        <td>Translation & Sync</td>
-                        <td>CRUD translation, fallback language, snapshot sync nội dung.</td>
+                        <td>FR-25..28</td>
+                        <td>Analytics</td>
+                        <td>Top POIs theo lượt nghe, usage stats theo ngày, heatmap GPS, live active sessions, biểu đồ chi tiết.</td>
+                    </tr>
+                    <tr>
+                        <td>FR-29..31</td>
+                        <td>Geofence & Route</td>
+                        <td>Đánh giá vùng phủ POI theo GPS, ghi điểm GPS anonymous, lấy route để render polyline trên bản đồ.</td>
+                    </tr>
+                    <tr>
+                        <td>FR-32..34</td>
+                        <td>Translation</td>
+                        <td>CRUD translation theo key + ngôn ngữ, fallback language, sync snapshot nội dung.</td>
                     </tr>
                 </tbody>
             </table>
@@ -646,23 +669,26 @@
             <article class="card">
                 <h3>Hiệu năng</h3>
                 <ul>
-                    <li>Endpoint đọc phổ biến < 500ms (local demo).</li>
-                    <li>Dashboard tải tổng quan < 2 giây với dữ liệu demo.</li>
+                    <li>Endpoint đọc phổ biến &lt; 500ms (local demo)</li>
+                    <li>Dashboard tải tổng quan &lt; 2 giây với seed data</li>
+                    <li>Audio streaming từ local filesystem</li>
                 </ul>
             </article>
             <article class="card">
                 <h3>Độ tin cậy</h3>
                 <ul>
-                    <li>Có health endpoint để smoke test.</li>
-                    <li>Seed idempotent, restart không nhân bản dữ liệu.</li>
+                    <li>Health endpoint để smoke test</li>
+                    <li>Seed idempotent, restart không nhân bản dữ liệu</li>
+                    <li>Auto-migration khi schema thay đổi</li>
                 </ul>
             </article>
             <article class="card">
                 <h3>Bảo trì & bảo mật</h3>
                 <ul>
-                    <li>Logic nghiệp vụ tập trung ở service layer.</li>
-                    <li>Validate input và giới hạn loại file upload hợp lệ.</li>
-                    <li>Có lộ trình bổ sung auth production.</li>
+                    <li>Logic nghiệp vụ tập trung ở service layer (Clean Architecture)</li>
+                    <li>Validate input + giới hạn loại file upload (.mp3, .wav, .ogg)</li>
+                    <li>Password hash SHA-256 với salt</li>
+                    <li>X-User-Id header để xác thực API requests</li>
                 </ul>
             </article>
         </div>
@@ -679,35 +705,46 @@
 
         <div class="card-grid">
             <article class="card">
-                <h3>Luồng người dùng nghe nội dung</h3>
+                <h3>Luồng người dùng nghe audio</h3>
                 <div class="flow">
                     <span class="flow-step">/users/resolve</span>
                     <span class="flow-arrow">→</span>
-                    <span class="flow-step alt">/subscriptions/access</span>
+                    <span class="flow-step alt">/qr/start</span>
                     <span class="flow-arrow">→</span>
-                    <span class="flow-step">/pois + /audios</span>
+                    <span class="flow-step">/media/audio/*</span>
                     <span class="flow-arrow">→</span>
-                    <span class="flow-step success">/sessions/start-end</span>
+                    <span class="flow-step success">/sessions/end</span>
                 </div>
-                <p style="margin-top:0.6rem;">Dữ liệu session sau khi kết thúc sẽ được tổng hợp lên analytics để phục vụ
-                    dashboard admin.</p>
+                <p style="margin-top:0.6rem;">Người dùng bấm nghe (từ POI detail, list, hoặc map). App resolve user → gọi qr/start → tải audio về cache → phát. Khi kết thúc gọi sessions/end để ghi duration. Dữ liệu tổng hợp lên analytics dashboard.</p>
             </article>
             <article class="card">
                 <h3>Luồng QR playback</h3>
                 <ol>
-                    <li>Admin tạo QR payload theo chuẩn <code>QR:POI_CODE</code>.</li>
-                    <li>App quét QR và gọi <code>POST /api/v1/qr/start</code>.</li>
-                    <li>Backend parse payload, xác định POI, chuẩn bị dữ liệu phát.</li>
+                    <li>Admin tạo QR payload theo chuẩn <code>vk://poi/{POI_CODE}</code> (QR Manager)</li>
+                    <li>App quét QR → gọi <code>POST /api/v1/qr/start</code></li>
+                    <li>Backend parse payload, kiểm tra subscription, tạo ListeningSession, trả audio URL</li>
+                    <li>App phát audio và ghi nhận duration</li>
                 </ol>
             </article>
             <article class="card">
-                <h3>Luồng admin vận hành nội dung</h3>
+                <h3>Luồng admin quản lý nội dung</h3>
                 <ol>
-                    <li>Tạo/cập nhật POI.</li>
-                    <li>Upload audio và gán ngôn ngữ.</li>
-                    <li>Tạo tour và sắp xếp stop.</li>
-                    <li>Cập nhật translation.</li>
-                    <li>Quan sát dashboard để tối ưu.</li>
+                    <li>Admin/ShopManager đăng nhập (admin/1, owner1/1...)</li>
+                    <li>Tạo/cập nhật POI (với tọa độ, hình ảnh, map link)</li>
+                    <li>Upload audio mp3 → gán cho POI theo ngôn ngữ (vi/en)</li>
+                    <li>Cập nhật translation (bản dịch name, description)</li>
+                    <li>Tạo tour và sắp xếp thứ tự stops</li>
+                    <li>Tạo QR codes → tải PNG / in tem QR</li>
+                    <li>Quan sát Dashboard và Analytics để tối ưu nội dung</li>
+                </ol>
+            </article>
+            <article class="card">
+                <h3>Luồng Shop Manager</h3>
+                <ol>
+                    <li>ShopManager đăng nhập với tài khoản owner1/owner2/owner3</li>
+                    <li>Chỉ thấy và quản lý POIs có ManagerUserId = mình (4 POIs mỗi người)</li>
+                    <li>Upload audio, tạo QR cho POIs của mình</li>
+                    <li>Xem analytics chi tiết cho POIs của mình</li>
                 </ol>
             </article>
         </div>
@@ -725,33 +762,43 @@
                 <tbody>
                     <tr>
                         <td>UC-01 Quản trị POI</td>
-                        <td>Admin</td>
-                        <td>POI hiển thị đúng trên danh sách và dashboard.</td>
+                        <td>Admin, ShopManager</td>
+                        <td>POI hiển thị đúng trên danh sách, map và dashboard. ShopManager chỉ thấy POIs của mình.</td>
                     </tr>
                     <tr>
                         <td>UC-02 Upload/Gán audio</td>
+                        <td>Admin, ShopManager</td>
+                        <td>Audio truy cập được qua media URL và liên kết đúng POI theo ngôn ngữ.</td>
+                    </tr>
+                    <tr>
+                        <td>UC-03 Tạo tour/reorder stops</td>
                         <td>Admin</td>
-                        <td>Audio truy cập được qua media URL và liên kết đúng POI.</td>
+                        <td>Thứ tự tour stop phản ánh chính xác trên API và trong mobile app.</td>
                     </tr>
                     <tr>
-                        <td>UC-03 Tạo tour/reorder</td>
+                        <td>UC-04 Nghe audio (có login)</td>
+                        <td>EndUser</td>
+                        <td>Audio phát đúng POI, session ghi nhận dưới userId của user đã đăng nhập.</td>
+                    </tr>
+                    <tr>
+                        <td>UC-05 Nghe audio (không login)</td>
+                        <td>EndUser</td>
+                        <td>App tự động resolve demo user, audio phát bình thường, session ghi nhận dưới demo.</td>
+                    </tr>
+                    <tr>
+                        <td>UC-06 QR scan</td>
+                        <td>EndUser</td>
+                        <td>Quét QR → parse payload → phát audio đúng POI → ghi session.</td>
+                    </tr>
+                    <tr>
+                        <td>UC-07 Dashboard analytics</td>
+                        <td>Admin, ShopManager</td>
+                        <td>Hiển thị top/usage/heatmap/route/live sessions phục vụ vận hành.</td>
+                    </tr>
+                    <tr>
+                        <td>UC-08 Subscription Basic/Premium</td>
                         <td>Admin</td>
-                        <td>Thứ tự tour stop phản ánh chính xác trên API.</td>
-                    </tr>
-                    <tr>
-                        <td>UC-04 Session start/end</td>
-                        <td>Mobile app</td>
-                        <td>Có dữ liệu đo lường dùng cho analytics.</td>
-                    </tr>
-                    <tr>
-                        <td>UC-05 QR start</td>
-                        <td>Mobile app</td>
-                        <td>Điều hướng đúng POI theo payload.</td>
-                    </tr>
-                    <tr>
-                        <td>UC-06 Dashboard analytics</td>
-                        <td>Admin</td>
-                        <td>Hiển thị top/usage/heatmap/route phục vụ vận hành.</td>
+                        <td>Tạo subscription cho user, user có quyền truy cập tính năng tương ứng.</td>
                     </tr>
                 </tbody>
             </table>
@@ -769,35 +816,39 @@
 
         <div class="timeline">
             <div class="timeline-item">
-                <h4>Milestone 1 - Core API</h4>
-                <p>Hoàn thiện users, subscriptions, POI, audio, tours và cơ chế init/seed database.</p>
+                <h4>Milestone 1 - Nền tảng Backend</h4>
+                <p>Hoàn thiện Users, Subscriptions, POI, Audio, Tours và cơ chế init/seed database. Cơ sở dữ liệu với 12 POIs, 3 Tours, audio mẫu.</p>
             </div>
             <div class="timeline-item">
-                <h4>Milestone 2 - Tracking & Dashboard</h4>
-                <p>Hoàn thiện sessions, analytics, anonymous routes và dashboard quản trị trực quan.</p>
+                <h4>Milestone 2 - Admin Web</h4>
+                <p>Hoàn thiện 9 trang admin: Dashboard với bản đồ Leaflet, Analytics, POI Manager, Audio Manager, Translation Manager, Tour Manager, QR Manager, Usage History, Subscription Manager.</p>
             </div>
             <div class="timeline-item">
-                <h4>Milestone 3 - Vận hành nội dung</h4>
-                <p>Bổ sung translation, content sync, QR manager, rà soát test/build và tài liệu demo bảo vệ.</p>
+                <h4>Milestone 3 - Mobile App (MAUI)</h4>
+                <p>Hoàn thiện app di động: bản đồ, danh sách POI, trình phát audio, tour, quét QR, đăng nhập/đăng ký. Tích hợp GPS, auto-play geofence.</p>
+            </div>
+            <div class="timeline-item">
+                <h4>Milestone 4 - Tracking & Analytics</h4>
+                <p>Hoàn thiện session tracking, visit tracking, geofence, route tracking, analytics dashboard với live sessions, heatmap, top POIs.</p>
             </div>
         </div>
 
         <div class="check-list">
             <div class="check-item">
-                <strong>Mở rộng sau đồ án</strong>
-                Auth đầy đủ (JWT + role/permission), object storage cho media.
+                <strong>Sau đồ án - Auth đầy đủ</strong>
+                JWT + refresh token, role-based permission, secure password storage
             </div>
             <div class="check-item">
-                <strong>Nâng cấp dữ liệu</strong>
-                Chuyển chiến lược migration versioned thay cho patch runtime.
+                <strong>Sau đồ án - Object Storage</strong>
+                S3/Azure Blob cho media files thay vì local filesystem
             </div>
             <div class="check-item">
-                <strong>Quan sát hệ thống</strong>
-                Bổ sung tracing, metrics, centralized logging.
+                <strong>Sau đồ án - Migration Strategy</strong>
+                Chuyển từ auto-migrate sang versioned migration
             </div>
             <div class="check-item">
-                <strong>Business nâng cao</strong>
-                Tích hợp payment gateway thật cho subscription.
+                <strong>Sau đồ án - Payment</strong>
+                Tích hợp payment gateway thật cho subscription
             </div>
         </div>
     </section>
@@ -815,29 +866,32 @@
             <article class="card">
                 <h3>Nghiệm thu chức năng</h3>
                 <ul>
-                    <li>CRUD POI/audio hoạt động đúng.</li>
-                    <li>Upload audio trả URL hợp lệ và truy cập được.</li>
-                    <li>Tour reorder phản ánh đúng sequence.</li>
-                    <li>Session start/end ghi nhận dữ liệu chính xác.</li>
-                    <li>Dashboard hiển thị top/usage/heatmap/route.</li>
+                    <li>CRUD POI/audio/tour/translation hoạt động đúng</li>
+                    <li>Upload audio multipart trả URL hợp lệ và truy cập được</li>
+                    <li>Tour reorder phản ánh đúng sequence</li>
+                    <li>QR Manager tạo/download/print/in QR PNG đúng POI</li>
+                    <li>Session start/end ghi nhận dữ liệu chính xác</li>
+                    <li>Dashboard hiển thị top/usage/heatmap/route/live sessions</li>
+                    <li>Người dùng đăng nhập nghe audio → session ghi đúng userId</li>
+                    <li>Người dùng không đăng nhập → session ghi đúng demo user</li>
                 </ul>
             </article>
             <article class="card">
                 <h3>Nghiệm thu kỹ thuật</h3>
                 <ul>
-                    <li><code>dotnet build PhoAmThuc.sln</code> thành công.</li>
-                    <li><code>dotnet test PhoAmThuc.sln</code> pass.</li>
-                    <li><code>npm run build</code> ở admin thành công.</li>
-                    <li><code>scripts/run-dev.ps1</code> mở backend + frontend ổn định.</li>
+                    <li><code>dotnet build PhoAmThuc.sln</code> thành công (0 errors)</li>
+                    <li><code>dotnet build</code> MAUI app thành công</li>
+                    <li><code>npm run build</code> ở admin thành công</li>
+                    <li><code>scripts/run-dev.ps1</code> mở backend + frontend ổn định</li>
                 </ul>
             </article>
             <article class="card">
                 <h3>KPI demo đề xuất</h3>
                 <ul>
-                    <li>100% nhóm endpoint cốt lõi có thể demo.</li>
-                    <li>Health endpoint duy trì ổn định suốt buổi bảo vệ.</li>
-                    <li>Thời gian start local hệ thống <= 3 phút.</li>
-                    <li>Tỷ lệ test backend pass >= 90% tập test hiện có.</li>
+                    <li>100% nhóm endpoint cốt lõi có thể demo</li>
+                    <li>Health endpoint duy trì ổn định suốt buổi bảo vệ</li>
+                    <li>Thời gian start local hệ thống ≤ 3 phút</li>
+                    <li>Tất cả 12 POIs hiển thị trên map admin và app</li>
                 </ul>
             </article>
         </div>
@@ -863,9 +917,14 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td>Dữ liệu demo thiếu nhất quán</td>
-                        <td>Demo sai lệch, khó thuyết phục</td>
-                        <td>Seed idempotent + script smoke test endpoint</td>
+                        <td>Audio files thiếu trong seed</td>
+                        <td>POI không phát được audio</td>
+                        <td>Seed tạo audio placeholder; admin có thể upload file mới</td>
+                    </tr>
+                    <tr>
+                        <td>Session ghi sai userId</td>
+                        <td>Analytics không chính xác</td>
+                        <td>AppConfig.ResolveDefaultUserIdAsync() đã fix — ưu tiên SecureStorage → X-User-Id header → demo fallback</td>
                     </tr>
                     <tr>
                         <td>Lỗi upload media do cấu hình path</td>
@@ -873,9 +932,9 @@
                         <td>Chuẩn hóa thư mục media + trả relativePath rõ ràng</td>
                     </tr>
                     <tr>
-                        <td>Chưa có auth production đầy đủ</td>
+                        <td>Chưa có JWT authentication đầy đủ</td>
                         <td>Rủi ro khi triển khai thật</td>
-                        <td>Giới hạn phạm vi đồ án, đưa vào roadmap giai đoạn sau</td>
+                        <td>Đã có X-User-Id header; JWT nằm trong roadmap sau đồ án</td>
                     </tr>
                     <tr>
                         <td>SQLite hạn chế tải lớn</td>
@@ -887,19 +946,17 @@
         </div>
 
         <div class="highlight success">
-            <strong>Phụ thuộc chính:</strong> .NET SDK 10+, Node.js 20+, dữ liệu seed nội bộ và môi trường local cho demo.
+            <strong>Tài khoản demo mặc định:</strong> admin/1 (Admin), owner1/1 (ShopManager), owner2/1 (ShopManager), owner3/1 (ShopManager). Audio seed: tiếng Việt + tiếng Anh cho mỗi POI.
         </div>
 
-        <div class="code-block">Tai lieu tham chieu nhanh
-- docs/PRD_DO_AN.md
-- README.md
-- docs/HUONG_DAN_CHAY.md
-- VinhKhanhAudioGuide.Api/API_CONTRACT.md</div>
+        <div class="highlight info" style="margin-top:0.8rem;">
+            <strong>Tài liệu tham khảo:</strong> README.md (chi tiết kỹ thuật), API_CONTRACT.md (đầy đủ API endpoints), HUONG_DAN_CHAY.md (hướng dẫn vận hành)
+        </div>
     </section>
 
     <footer>
-        <p><strong>PhoAmThuc - PRD Presentation</strong></p>
-        <p>Cap nhat tu pham vi do an hien tai • San sang su dung cho bao cao va bao ve</p>
+        <p><strong>PhoAmThuc — Vinh Khanh Audio Guide</strong></p>
+        <p>Backend API (.NET 10) + Admin Web (React 19) + Mobile App (.NET MAUI) • San sang demo va bao ve</p>
     </footer>
 
     <script>
