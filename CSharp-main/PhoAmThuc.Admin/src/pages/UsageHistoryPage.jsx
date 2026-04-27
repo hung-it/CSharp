@@ -18,7 +18,14 @@ export default function UsageHistoryPage() {
     try {
       const userData = await apiGet(`/users${buildQuery({ search: targetSearch, limit: 20 })}`);
       const safeUsers = (Array.isArray(userData) ? userData : []).filter(
-        (u) => !u.role || (u.role !== 'Admin' && u.role !== 'ShopManager')
+        (u) => {
+          const role = (u.role || '').toLowerCase()
+          if (role === 'admin' || role === 'shopmanager') return false
+          const ref = u.externalRef || ''
+          if (ref.startsWith('ADMIN_USER') || ref.startsWith('SHOP_MANAGER_') || ref.startsWith('ANON_')) return false
+          if (!u.username) return false
+          return true
+        }
       );
       setUsers(safeUsers);
       setSelectedUserId(safeUsers[0]?.id || '');
@@ -79,13 +86,28 @@ export default function UsageHistoryPage() {
     handleLoadSessions(selectedUserId).catch(() => undefined);
   }, [selectedUserId, handleLoadSessions]);
 
+  // Filter sessions to exclude admin/ShopManager/Guest users
+  // Sessions API returns userExternalRef and userName directly (no nested User object)
+  const visibleSessions = sessions.filter((s) => {
+    const ref = s.userExternalRef || ''
+    if (ref.startsWith('ADMIN_USER') || ref.startsWith('SHOP_MANAGER_') || ref.startsWith('ANON_')) return false
+    const uname = s.userName || ''
+    if (!uname || uname.startsWith('Guest_')) return false
+    return true
+  })
+
   const formatDateTime = (utcValue) => {
-    if (!utcValue) return '-';
-    const d = new Date(utcValue);
-    const offset = 7 * 60;
-    const local = new Date(d.getTime() + offset * 60 * 1000);
-    const pad = (n) => String(n).padStart(2, '0');
-    return `${pad(local.getUTCDate())}/${pad(local.getUTCMonth() + 1)}/${local.getUTCFullYear()} ${pad(local.getUTCHours())}:${pad(local.getUTCMinutes())}`;
+    if (!utcValue) return '-'
+    try {
+      const d = new Date(utcValue)
+      if (isNaN(d.getTime())) return '-'
+      // Vietnam is UTC+7
+      const vnTime = new Date(d.getTime() + 7 * 60 * 60 * 1000)
+      const pad = (n) => String(n).padStart(2, '0')
+      return `${pad(vnTime.getUTCDate())}/${pad(vnTime.getUTCMonth() + 1)}/${vnTime.getUTCFullYear()} ${pad(vnTime.getUTCHours())}:${pad(vnTime.getUTCMinutes())}`
+    } catch {
+      return '-'
+    }
   };
 
   return (
@@ -170,7 +192,7 @@ export default function UsageHistoryPage() {
             </tr>
           </thead>
           <tbody>
-            {sessions.map((session) => (
+            {visibleSessions.map((session) => (
               <tr key={session.id} className='border-b border-pink-50'>
                 <td className='py-2'>{formatDateTime(session.startedAtUtc)}</td>
                 <td className='py-2'>{session.userName || session.username || session.userExternalRef || session.userId}</td>
@@ -179,7 +201,7 @@ export default function UsageHistoryPage() {
                 <td className='py-2 text-right'>{session.triggerSource}</td>
               </tr>
             ))}
-            {sessions.length === 0 && (
+            {visibleSessions.length === 0 && (
               <tr>
                 <td colSpan={5} className='py-4 text-gray-500'>
                   Chưa có dữ liệu session.

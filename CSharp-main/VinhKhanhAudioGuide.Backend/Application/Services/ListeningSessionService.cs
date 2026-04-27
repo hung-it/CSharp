@@ -157,12 +157,14 @@ public sealed class ListeningSessionService(AudioGuideDbContext dbContext) : ILi
 
     /// <summary>
     /// Get count of active (ongoing, not ended) sessions per POI.
+    /// Only counts sessions started within the last 30 minutes.
     /// </summary>
     public async Task<Dictionary<Guid, int>> GetActiveSessionCountsByPoiAsync(
         CancellationToken cancellationToken = default)
     {
+        var cutoff = DateTime.UtcNow.AddMinutes(-30);
         var result = await _dbContext.ListeningSessions
-            .Where(s => s.EndedAtUtc == null)
+            .Where(s => s.EndedAtUtc == null && s.StartedAtUtc >= cutoff)
             .GroupBy(s => s.PoiId)
             .Select(g => new { PoiId = g.Key, Count = g.Count() })
             .ToListAsync(cancellationToken);
@@ -172,12 +174,14 @@ public sealed class ListeningSessionService(AudioGuideDbContext dbContext) : ILi
 
     /// <summary>
     /// Get total active session count across all POIs.
+    /// Only counts sessions started within the last 30 minutes.
     /// </summary>
     public async Task<int> GetTotalActiveSessionCountAsync(
         CancellationToken cancellationToken = default)
     {
+        var cutoff = DateTime.UtcNow.AddMinutes(-30);
         return await _dbContext.ListeningSessions
-            .Where(s => s.EndedAtUtc == null)
+            .Where(s => s.EndedAtUtc == null && s.StartedAtUtc >= cutoff)
             .CountAsync(cancellationToken);
     }
 }

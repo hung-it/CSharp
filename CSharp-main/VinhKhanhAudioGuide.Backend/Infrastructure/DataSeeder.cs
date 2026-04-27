@@ -26,6 +26,7 @@ public sealed class DataSeeder(
     {
         await EnsureFeatureSegmentsAsync(cancellationToken);
         await SeedUsersAsync(cancellationToken);
+        await SeedSubscriptionsAsync(cancellationToken);
         await SeedPoisWithAudioAndTranslationsAsync(cancellationToken);
         await SeedToursWithStopsAsync(cancellationToken);
         await SeedQRCodesAsync(cancellationToken);
@@ -48,16 +49,16 @@ public sealed class DataSeeder(
     private async Task SeedUsersAsync(CancellationToken cancellationToken)
     {
         // Admin with password "1"
-        await EnsureUserAsync("admin", UserRole.Admin, "vi", "1", cancellationToken);
+        await EnsureUserAsync("admin", UserRole.Admin, "vi", "1", "ADMIN_USER", cancellationToken);
 
         // Shop Owners (Chủ cửa hàng) with password "1"
         // Mỗi owner quản lý 4 POIs (cửa hàng)
-        await EnsureUserAsync("owner1", UserRole.ShopManager, "vi", "1", cancellationToken);
-        await EnsureUserAsync("owner2", UserRole.ShopManager, "vi", "1", cancellationToken);
-        await EnsureUserAsync("owner3", UserRole.ShopManager, "vi", "1", cancellationToken);
+        await EnsureUserAsync("owner1", UserRole.ShopManager, "vi", "1", "SHOP_MANAGER_OWNER1", cancellationToken);
+        await EnsureUserAsync("owner2", UserRole.ShopManager, "vi", "1", "SHOP_MANAGER_OWNER2", cancellationToken);
+        await EnsureUserAsync("owner3", UserRole.ShopManager, "vi", "1", "SHOP_MANAGER_OWNER3", cancellationToken);
     }
 
-    private async Task<User> EnsureUserAsync(string username, UserRole role, string language, string? password, CancellationToken ct)
+    private async Task<User> EnsureUserAsync(string username, UserRole role, string language, string? password, string? externalRef, CancellationToken ct)
     {
         var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Username == username, ct);
         if (user is null)
@@ -65,7 +66,7 @@ public sealed class DataSeeder(
             user = new User
             {
                 Username = username,
-                ExternalRef = $"USER_{Guid.NewGuid():N}",
+                ExternalRef = !string.IsNullOrEmpty(externalRef) ? externalRef : $"USER_{Guid.NewGuid():N}",
                 PreferredLanguage = language,
                 Role = role,
                 PasswordHash = !string.IsNullOrEmpty(password) ? HashPassword(password) : null
@@ -74,6 +75,39 @@ public sealed class DataSeeder(
             await _dbContext.SaveChangesAsync(ct);
         }
         return user;
+    }
+
+    private async Task SeedSubscriptionsAsync(CancellationToken cancellationToken)
+    {
+        if (await _dbContext.Subscriptions.AnyAsync(cancellationToken))
+            return;
+
+        var users = await _dbContext.Users.ToListAsync(cancellationToken);
+        var basicSegment = await _dbContext.FeatureSegments.FirstAsync(s => s.Code == "basic.poi", cancellationToken);
+
+        foreach (var user in users)
+        {
+            // Create Basic subscription for each user
+            _dbContext.Subscriptions.Add(new Subscription
+            {
+                UserId = user.Id,
+                PlanTier = PlanTier.Basic,
+                AmountUsd = 0m,
+                IsActive = true,
+                ActivatedAtUtc = DateTime.UtcNow,
+                ExpiresAtUtc = DateTime.UtcNow.AddYears(10)
+            });
+
+            // Grant basic.poi entitlement
+            _dbContext.UserEntitlements.Add(new UserEntitlement
+            {
+                UserId = user.Id,
+                FeatureSegmentId = basicSegment.Id,
+                GrantedAtUtc = DateTime.UtcNow
+            });
+        }
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
     private static string HashPassword(string password)
@@ -310,14 +344,15 @@ public sealed class DataSeeder(
             if (await _dbContext.ShopQRCodes.AnyAsync(cancellationToken))
                 return;
 
-            var pois = await _dbContext.Pois.ToListAsync(cancellationToken);
+            var pois = await _dbContext.Pois
+                .Where(p => p.ShopId.HasValue)
+                .ToListAsync(cancellationToken);
 
             foreach (var poi in pois)
             {
-                // Create QR code with PoiId (ShopId might not have ShopProfile)
                 _dbContext.ShopQRCodes.Add(new ShopQRCode
                 {
-                    ShopId = poi.Id,  // Use poi.Id as shopId since POIs are self-managed
+                    ShopId = poi.ShopId!.Value,
                     PoiId = poi.Id,
                     QRPayload = $"vk://poi/{poi.Code}",
                     QRImageUrl = $"https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=vk://poi/{poi.Code}"

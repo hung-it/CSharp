@@ -21,18 +21,30 @@ export default function SubscriptionManager() {
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
 
   useEffect(() => {
     loadInitialData().catch(() => undefined);
   }, []);
 
-  const visibleSubscriptions = useMemo(() => {
-    if (!resolvedUser?.id) {
-      return subscriptions;
-    }
+  const isRegisteredUser = (sub) => {
+    const u = sub.User || {}
+    const rawUsername = sub.username || u.username || null
+    const rawRef = sub.userExternalRef || u.externalRef || ''
+    const rawRole = (sub.role || u.role || '').toLowerCase()
+    if (rawRole === 'admin' || rawRole === 'shopmanager') return false
+    if (rawRef.startsWith('ADMIN_USER') || rawRef.startsWith('SHOP_MANAGER_') || rawRef.startsWith('ANON_')) return false
+    if (!rawUsername || rawUsername.startsWith('Guest_')) return false
+    return true
+  }
 
-    return subscriptions.filter((item) => item.userId === resolvedUser.id);
-  }, [subscriptions, resolvedUser]);
+  const visibleSubscriptions = useMemo(() => {
+    const filtered = subscriptions.filter(isRegisteredUser)
+    if (!resolvedUser?.id) {
+      return filtered
+    }
+    return filtered.filter((item) => item.userId === resolvedUser.id)
+  }, [subscriptions, resolvedUser])
 
   async function loadInitialData() {
     setIsLoading(true);
@@ -49,7 +61,14 @@ export default function SubscriptionManager() {
       setSegmentCode(safeSegments[0]?.code || '');
       setSubscriptions(Array.isArray(subscriptionList) ? subscriptionList : []);
       const regularUsers = (Array.isArray(userList) ? userList : []).filter(
-        (u) => !u.role || (u.role !== 'Admin' && u.role !== 'ShopManager')
+        (u) => {
+          const role = (u.role || '').toLowerCase()
+          if (role === 'admin' || role === 'shopmanager') return false
+          const ref = u.externalRef || ''
+          if (ref.startsWith('ADMIN_USER') || ref.startsWith('SHOP_MANAGER_OWNER') || ref.startsWith('ANON_')) return false
+          if (!u.username || u.username.startsWith('Guest_')) return false
+          return true
+        }
       );
       setDemoUsers(regularUsers);
     } catch (loadError) {
@@ -218,13 +237,21 @@ export default function SubscriptionManager() {
   }
 
   const formatDateTime = (utcValue) => {
-    if (!utcValue) return '-';
-    const d = new Date(utcValue);
-    const offset = 7 * 60;
-    const local = new Date(d.getTime() + offset * 60 * 1000);
-    const pad = (n) => String(n).padStart(2, '0');
-    return `${pad(local.getUTCDate())}/${pad(local.getUTCMonth() + 1)}/${local.getUTCFullYear()} ${pad(local.getUTCHours())}:${pad(local.getUTCMinutes())}`;
-  };
+    if (!utcValue) return '-'
+    try {
+      const d = new Date(utcValue)
+      if (isNaN(d.getTime())) return '-'
+      // Format as Vietnam timezone (UTC+7) using local methods since we already adjusted
+      const vnTime = new Date(d.getTime() + 7 * 60 * 60 * 1000)
+      const pad = (n) => String(n).padStart(2, '0')
+      return `${pad(vnTime.getDate())}/${pad(vnTime.getMonth() + 1)}/${vnTime.getFullYear()} ${pad(vnTime.getHours())}:${pad(vnTime.getMinutes())}`
+    } catch {
+      return '-'
+    }
+  }
+
+  // Get activatedAtUtc from subscription item (backend uses ActivatedAtUtc → camelCase activatedAtUtc in JSON)
+  const getActivatedAt = (item) => item?.activatedAtUtc || item?.ActivatedAtUtc || null;
 
   return (
     <div className='space-y-6 max-w-7xl mx-auto'>
@@ -260,15 +287,29 @@ export default function SubscriptionManager() {
           <button
             className='rounded-xl border border-pink-200 text-pink-700 font-semibold px-4 py-2 bg-pink-50/70'
             onClick={async () => {
-              const users = await apiGet(`/users${buildQuery({ limit: 50 })}`);
-              const safeUsers = (Array.isArray(users) ? users : []).filter(
-                (u) => !u.role || (u.role !== 'Admin' && u.role !== 'ShopManager')
-              );
-              setDemoUsers(safeUsers);
+              setIsLoadingUsers(true);
+              try {
+                const users = await apiGet(`/users${buildQuery({ limit: 50 })}`);
+                const safeUsers = (Array.isArray(users) ? users : []).filter(
+                  (u) => {
+                    const role = (u.role || '').toLowerCase()
+                    if (role === 'admin' || role === 'shopmanager') return false
+                    const ref = u.externalRef || ''
+                    if (ref.startsWith('ADMIN_USER') || ref.startsWith('SHOP_MANAGER_') || ref.startsWith('ANON_')) return false
+                    if (!u.username || u.username.startsWith('Guest_')) return false
+                    return true
+                  }
+                );
+                setDemoUsers(safeUsers);
+              } catch (err) {
+                setError(err.message || 'Không thể tải danh sách user');
+              } finally {
+                setIsLoadingUsers(false);
+              }
             }}
-            disabled={isLoading}
+            disabled={isLoadingUsers}
           >
-            {isLoading ? 'Đang tải...' : 'Tải danh sách user'}
+            {isLoadingUsers ? 'Đang tải...' : 'Tải danh sách user'}
           </button>
         </div>
       </div>
@@ -400,7 +441,7 @@ export default function SubscriptionManager() {
                   )}
                 </td>
                 <td className='py-2 text-right'>
-                  {formatDateTime(item.activatedAtUtc)}
+                  {formatDateTime(getActivatedAt(item))}
                 </td>
                 <td className='py-2 text-right'>
                   {editingSubscriptionId === item.id ? (

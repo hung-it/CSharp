@@ -1,0 +1,56 @@
+# Dependencies
+node_modules/
+WebApp/node_modules/
+
+# Build outputs
+**/bin/
+**/obj/
+**/out/
+
+# .NET
+*.dll
+*.exe
+*.pdb
+*.user
+*.suo
+*.cache
+*.log
+
+# Android
+*.apk
+*.aab
+*.keystore
+
+# iOS
+*.app/
+*.ipa
+*.dSYM/
+
+# IDE
+.vs/
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+*.local
+
+# Logs
+*.log
+logs/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Cloudflare
+tool/Cloudflared.exe
+
+# Local files
+PROGRESS.md

@@ -165,5 +165,20 @@ public sealed class AudioGuideDbContext(DbContextOptions<AudioGuideDbContext> op
                 .HasForeignKey(g => g.PoiId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
+
+        modelBuilder.Entity<ShopQRCode>(entity =>
+        {
+            entity.HasOne(q => q.Poi)
+                .WithMany()
+                .HasForeignKey(q => q.PoiId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(q => q.Shop)
+                .WithMany()
+                .HasForeignKey(q => q.ShopId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(x => new { x.ShopId, x.PoiId }).IsUnique();
+        });
     }
 }

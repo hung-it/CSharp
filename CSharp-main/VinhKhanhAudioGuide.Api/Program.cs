@@ -50,6 +50,19 @@ builder.Services.AddCors(options =>
                 return true;
             }
 
+            // Support wildcard patterns like *.trycloudflare.com
+            foreach (var allowed in normalizedAllowedOrigins)
+            {
+                if (allowed.StartsWith("*."))
+                {
+                    var suffix = allowed[1..]; // remove leading *
+                    if (origin.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return true;
+                    }
+                }
+            }
+
             // In local development, allow localhost/127.0.0.1 on any port (e.g. Vite 5173/5174).
             if (builder.Environment.IsDevelopment() && Uri.TryCreate(origin, UriKind.Absolute, out var uri))
             {
@@ -285,14 +298,12 @@ api.MapPost("/users/anonymous", async (
     dbContext.Users.Add(user);
     await dbContext.SaveChangesAsync(cancellationToken);
 
+    // Activate Basic subscription for anonymous user
     var planTier = "Basic";
     try
     {
-        var subscription = await subscriptionService.GetActiveSubscriptionAsync(user.Id, cancellationToken);
-        if (subscription != null)
-        {
-            planTier = subscription.PlanTier.ToString();
-        }
+        var subscription = await subscriptionService.ActivateSubscriptionAsync(user.Id, PlanTier.Basic, 0, cancellationToken);
+        planTier = subscription.PlanTier.ToString();
     }
     catch { }
 
@@ -312,6 +323,7 @@ api.MapPost("/users/anonymous", async (
 api.MapPost("/users/register", async (
     [FromBody] RegisterRequest request,
     AudioGuideDbContext dbContext,
+    ISubscriptionService subscriptionService,
     CancellationToken cancellationToken) =>
 {
     if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
@@ -353,6 +365,16 @@ api.MapPost("/users/register", async (
     dbContext.Users.Add(user);
     await dbContext.SaveChangesAsync(cancellationToken);
 
+    // Auto-create Basic subscription for new user
+    try
+    {
+        await subscriptionService.ActivateSubscriptionAsync(user.Id, PlanTier.Basic, 1, cancellationToken);
+    }
+    catch
+    {
+        // Log but don't fail registration if subscription creation fails
+    }
+
     return Results.Created($"/api/v1/users/{user.Id}", new
     {
         success = true,
@@ -362,7 +384,7 @@ api.MapPost("/users/register", async (
         preferredLanguage = user.PreferredLanguage,
         createdAtUtc = user.CreatedAtUtc,
         plan = "Basic",
-        message = "Đăng ký thành công! Vui lòng liên hệ quản trị viên để kích hoạt gói Premium."
+        message = "Đăng ký thành công!"
     });
 });
 
@@ -715,6 +737,40 @@ api.MapDelete("/users/{userId:guid}", async (
     return Results.NoContent();
 });
 
+api.MapPost("/admin/fix-external-refs", async (
+    AudioGuideDbContext dbContext,
+    CancellationToken cancellationToken) =>
+{
+    // Fix ExternalRef for admin and owner accounts
+    var admin = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == "admin", cancellationToken);
+    if (admin != null && !admin.ExternalRef.StartsWith("ADMIN_USER"))
+    {
+        admin.ExternalRef = "ADMIN_USER";
+    }
+
+    var owner1 = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == "owner1", cancellationToken);
+    if (owner1 != null && !owner1.ExternalRef.StartsWith("SHOP_MANAGER_OWNER"))
+    {
+        owner1.ExternalRef = "SHOP_MANAGER_OWNER1";
+    }
+
+    var owner2 = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == "owner2", cancellationToken);
+    if (owner2 != null && !owner2.ExternalRef.StartsWith("SHOP_MANAGER_OWNER"))
+    {
+        owner2.ExternalRef = "SHOP_MANAGER_OWNER2";
+    }
+
+    var owner3 = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == "owner3", cancellationToken);
+    if (owner3 != null && !owner3.ExternalRef.StartsWith("SHOP_MANAGER_OWNER"))
+    {
+        owner3.ExternalRef = "SHOP_MANAGER_OWNER3";
+    }
+
+    await dbContext.SaveChangesAsync(cancellationToken);
+
+    return Results.Ok(new { message = "External refs updated for admin/owners." });
+});
+
 api.MapPost("/admin/reset-and-seed", async (
     AudioGuideDbContext dbContext,
     CancellationToken cancellationToken) =>
@@ -743,7 +799,7 @@ api.MapPost("/admin/reset-and-seed", async (
 
     var users = await dbContext.Users
         .AsNoTracking()
-        .Where(x => x.ExternalRef == "ADMIN_USER" || x.ExternalRef.StartsWith("SHOP_MANAGER_"))
+        .Where(x => x.ExternalRef == "ADMIN_USER" || x.ExternalRef.StartsWith("SHOP_MANAGER_OWNER"))
         .OrderBy(x => x.ExternalRef)
         .Select(x => new
         {
