@@ -29,7 +29,6 @@ public sealed class DataSeeder(
         await SeedSubscriptionsAsync(cancellationToken);
         await SeedPoisWithAudioAndTranslationsAsync(cancellationToken);
         await SeedToursWithStopsAsync(cancellationToken);
-        await SeedQRCodesAsync(cancellationToken);
     }
 
     private async Task EnsureFeatureSegmentsAsync(CancellationToken cancellationToken)
@@ -335,36 +334,5 @@ public sealed class DataSeeder(
             }
         }
         await _dbContext.SaveChangesAsync(cancellationToken);
-    }
-
-    private async Task SeedQRCodesAsync(CancellationToken cancellationToken)
-    {
-        try
-        {
-            if (await _dbContext.ShopQRCodes.AnyAsync(cancellationToken))
-                return;
-
-            var pois = await _dbContext.Pois
-                .Where(p => p.ShopId.HasValue)
-                .ToListAsync(cancellationToken);
-
-            foreach (var poi in pois)
-            {
-                _dbContext.ShopQRCodes.Add(new ShopQRCode
-                {
-                    ShopId = poi.ShopId!.Value,
-                    PoiId = poi.Id,
-                    QRPayload = $"vk://poi/{poi.Code}",
-                    QRImageUrl = $"https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=vk://poi/{poi.Code}"
-                });
-            }
-
-            await _dbContext.SaveChangesAsync(cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"SeedQRCodesAsync error (non-fatal): {ex.Message}");
-            // Continue without QR codes - not critical
-        }
     }
 }

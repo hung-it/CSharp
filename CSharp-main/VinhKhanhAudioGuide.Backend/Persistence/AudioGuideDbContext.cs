@@ -29,7 +29,6 @@ public sealed class AudioGuideDbContext(DbContextOptions<AudioGuideDbContext> op
     public DbSet<ContentApprovalLog> ContentApprovalLogs => Set<ContentApprovalLog>();
     public DbSet<ShopAudioAsset> ShopAudioAssets => Set<ShopAudioAsset>();
     public DbSet<ShopTTSConfiguration> ShopTTSConfigurations => Set<ShopTTSConfiguration>();
-    public DbSet<ShopQRCode> ShopQRCodes => Set<ShopQRCode>();
     public DbSet<ShopAnalyticsSnapshot> ShopAnalyticsSnapshots => Set<ShopAnalyticsSnapshot>();
     public DbSet<ShopLanguageReadiness> ShopLanguageReadiness => Set<ShopLanguageReadiness>();
 
@@ -164,21 +163,6 @@ public sealed class AudioGuideDbContext(DbContextOptions<AudioGuideDbContext> op
                 .WithMany(p => p.GeofenceEvents)
                 .HasForeignKey(g => g.PoiId)
                 .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<ShopQRCode>(entity =>
-        {
-            entity.HasOne(q => q.Poi)
-                .WithMany()
-                .HasForeignKey(q => q.PoiId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasOne(q => q.Shop)
-                .WithMany()
-                .HasForeignKey(q => q.ShopId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            entity.HasIndex(x => new { x.ShopId, x.PoiId }).IsUnique();
         });
     }
 }

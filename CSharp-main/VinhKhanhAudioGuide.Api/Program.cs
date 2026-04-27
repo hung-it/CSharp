@@ -1610,43 +1610,6 @@ api.MapGet("/sessions/active", async (
     return Results.Ok(new { totalActive = total, byPoi });
 });
 
-api.MapPost("/qr/start", async (
-    [FromBody] StartQrRequest request,
-    IQrPlaybackService qrService,
-    CancellationToken cancellationToken) =>
-{
-    try
-    {
-        var result = await qrService.StartSessionByQrAsync(
-            request.UserId,
-            request.QrPayload,
-            request.LanguageCode,
-            cancellationToken);
-
-        if (result.Content == null)
-        {
-            return Results.BadRequest(new { error = "Không tìm thấy nội dung cho QR này" });
-        }
-
-        return Results.Ok(new
-        {
-            session = result.Session != null ? MapListeningSession(result.Session) : null,
-            content = new
-            {
-                result.Content.PoiId,
-                result.Content.PoiCode,
-                result.Content.PoiName,
-                result.Content.AudioPath,
-                result.Content.IsTextToSpeech
-            }
-        });
-    }
-    catch (Exception ex)
-    {
-        return Results.BadRequest(new { error = ex.Message });
-    }
-});
-
 api.MapGet("/analytics/top", async (
     [FromQuery] int limit,
     [FromQuery] Guid? managerId,
@@ -2499,11 +2462,6 @@ public sealed record StartSessionRequest(
     string TriggerSource = "Manual");
 
 public sealed record EndSessionRequest(int DurationSeconds);
-
-public sealed record StartQrRequest(
-    Guid UserId,
-    string QrPayload,
-    string LanguageCode = "vi");
 
 public sealed record GeofenceEvaluateRequest(
     Guid UserId,

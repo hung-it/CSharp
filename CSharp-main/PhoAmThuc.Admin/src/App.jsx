@@ -11,7 +11,6 @@ import TranslationManager from './pages/TranslationManager.jsx';
 import TourManager from './pages/TourManager.jsx';
 import UsageHistoryPage from './pages/UsageHistoryPage.jsx';
 import SubscriptionManager from './pages/SubscriptionManager.jsx';
-import QrManager from './pages/QrManager.jsx';
 
 function App() {
   return (
@@ -72,14 +71,6 @@ function App() {
               element={
                 <ShopManagerRoute>
                   <TourManager />
-                </ShopManagerRoute>
-              }
-            />
-            <Route
-              path='qr-manager'
-              element={
-                <ShopManagerRoute>
-                  <QrManager />
                 </ShopManagerRoute>
               }
             />

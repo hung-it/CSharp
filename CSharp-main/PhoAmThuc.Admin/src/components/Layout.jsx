@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { MapPin, BarChart3, Music, Languages, Route, History, WalletCards, QrCode, LogOut, TrendingUp } from 'lucide-react';
+import { MapPin, BarChart3, Music, Languages, Route, History, WalletCards, LogOut, TrendingUp } from 'lucide-react';
 import { useUser } from '../contexts/UserContext.jsx';
 
 export default function Layout() {
@@ -15,7 +15,6 @@ export default function Layout() {
     { name: 'Quản lý Audio', icon: <Music size={20} />, path: '/audio', roles: ['Admin', 'ShopManager'] },
     { name: 'Quản lý Bản Dịch', icon: <Languages size={20} />, path: '/translations', roles: ['Admin', 'ShopManager'] },
     { name: 'Quản lý Tour', icon: <Route size={20} />, path: '/tours', roles: ['Admin'] },
-    { name: 'QR Manager', icon: <QrCode size={20} />, path: '/qr-manager', roles: ['Admin', 'ShopManager'] },
     { name: 'Lịch sử sử dụng', icon: <History size={20} />, path: '/usage-history', roles: ['Admin'] },
     { name: 'Subscription 1/10 USD', icon: <WalletCards size={20} />, path: '/subscriptions', roles: ['Admin'] },
   ];

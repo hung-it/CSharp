@@ -16,7 +16,6 @@ public static class ApplicationServiceCollectionExtensions
         services.AddScoped<IAnalyticsService, AnalyticsService>();
         services.AddScoped<IContentTranslationService, ContentTranslationService>();
         services.AddScoped<IRouteTrackingService, RouteTrackingService>();
-        services.AddScoped<IQrPlaybackService, QrPlaybackService>();
         services.AddScoped<IContentSyncService, ContentSyncService>();
         services.AddSingleton<IGeofenceService, GeofenceService>();
         services.AddSingleton<INarrationQueueService, NarrationQueueService>();
@@ -24,7 +23,6 @@ public static class ApplicationServiceCollectionExtensions
         // Shop Management Services
         services.AddScoped<IShopManagementService, ShopManagementService>();
         services.AddScoped<IShopAnalyticsService, ShopAnalyticsService>();
-        services.AddScoped<IShopQRCodeService, ShopQRCodeService>();
         services.AddScoped<IShopAudioService, ShopAudioService>();
         services.AddScoped<IShopAuthorizationService, ShopAuthorizationService>();
         
